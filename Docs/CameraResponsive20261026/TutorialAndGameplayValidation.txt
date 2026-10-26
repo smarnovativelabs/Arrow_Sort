@@ -1,0 +1,21 @@
+Gameplay and first-user tour validation — 2026-10-26
+
+Implemented through the project-targeted Unity CLI.
+- Vehicle camera: orthographic, 90-degree top-down. Slot bounds include additional padding and 40 design pixels of upper clearance.
+- Gameplay remains uniformly fitted; only clamped background borders extend through outer screen space. Header and footer follow safe screen edges.
+- Background-free readable speed control, white fog, shared Home/gameplay settings, stronger reusable URP dragon fire.
+- No banner placement: placeholder stays inactive and DisplayBanner removes any banner.
+- First-user journey: branded loading -> Level 1 introduction -> four-slot and control guidance -> six hands-on vehicle taps -> coin collection -> animated map -> Home tasks -> login credits -> rescue-task credits -> first gift -> daily spin -> profile/name/avatar -> free shop gift -> completion.
+- Existing save step IDs remain intact. New steps use an explicit ordering so Profile precedes Shop. Completed returning players remain complete. Offline players can continue the tour and return to the daily spin later.
+- Normal level completion uses the reward-to-map path for Continue and the secondary exit. Map travel uses the last saved map stop, with an entry walk at page boundaries.
+- Snake meshes and all three vehicle sizes use matching rows from SnakeColorRamp.png; snake texture shading remains active.
+
+Observed in save-isolated Play Mode preview:
+- First-user flow reached Complete with Level 1 rescued, login and rescue task claimed, first gift claimed, real spin recorded, avatar selected, and shop gift collected.
+- Speed toggled 1 -> 2 -> 1; gameplay settings opened while paused and dismissal released pause.
+- Live layout checks: board/tool bounds do not overlap at 360x1000 and 768x1024. Controller remained enabled during resizing.
+- Normal map animations started and arrived for 1 -> 2, 2 -> 3, and 11 -> 12 (new page).
+- 10 snake meshes and 30 vehicle templates: 0 palette-index mismatches.
+- Unity compilation succeeded; final Console: 0 errors, 0 warnings.
+
+No Android/iOS device build, touch-keyboard test, or live rewarded-video playback was run. Reward videos remain optional and dependent on SDK availability. Preview rewards and profile edits did not write to player saves.

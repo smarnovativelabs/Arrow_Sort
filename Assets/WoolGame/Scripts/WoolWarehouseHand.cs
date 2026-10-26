@@ -1,0 +1,7 @@
+using UnityEngine;using UnityEngine.UI;namespace WoolGame{public sealed class WoolWarehouseHand:MaskableGraphic{
+ protected override void OnPopulateMesh(VertexHelper v){v.Clear();var edge=new Color32(111,55,18,255);Capsule(v,new Vector2(59,-145),new Vector2(104,-124),21,edge);Capsule(v,new Vector2(59,-145),new Vector2(104,-124),16,new Color32(255,190,25,255));
+ for(int pass=0;pass<2;pass++){float extra=pass==0?4:0;Color c=pass==0?(Color)edge:Color.white;Oval(v,new Vector2(57,-100),new Vector2(47+extra,39+extra),c);Capsule(v,Vector2.zero,new Vector2(43,-85),16+extra,c);Capsule(v,new Vector2(55,-58),new Vector2(76,-77),16+extra,c);Capsule(v,new Vector2(80,-70),new Vector2(94,-88),15+extra,c);Capsule(v,new Vector2(94,-90),new Vector2(97,-103),14+extra,c);Capsule(v,new Vector2(4,-82),new Vector2(34,-115),17+extra,c);}}
+ void Oval(VertexHelper v,Vector2 center,Vector2 size,Color c){int n=v.currentVertCount;v.AddVert(center,c,Vector2.zero);for(int i=0;i<28;i++){float a=i*Mathf.PI*2/28;v.AddVert(center+new Vector2(Mathf.Cos(a)*size.x,Mathf.Sin(a)*size.y),c,Vector2.zero);}for(int i=0;i<28;i++)v.AddTriangle(n,n+1+i,n+1+(i+1)%28);}
+ void Capsule(VertexHelper v,Vector2 a,Vector2 b,float r,Color c){Oval(v,a,Vector2.one*r,c);Oval(v,b,Vector2.one*r,c);var d=(b-a).normalized;var p=new Vector2(-d.y,d.x)*r;int n=v.currentVertCount;v.AddVert(a-p,c,Vector2.zero);v.AddVert(a+p,c,Vector2.zero);v.AddVert(b+p,c,Vector2.zero);v.AddVert(b-p,c,Vector2.zero);v.AddTriangle(n,n+1,n+2);v.AddTriangle(n,n+2,n+3);}
+}
+}

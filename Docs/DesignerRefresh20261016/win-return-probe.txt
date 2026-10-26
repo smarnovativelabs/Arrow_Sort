@@ -1,0 +1,1 @@
+tailSeen=True head=-1 headHidden=True tailHidden=True phase=Won happy=True

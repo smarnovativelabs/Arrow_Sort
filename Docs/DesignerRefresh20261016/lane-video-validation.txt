@@ -1,0 +1,19 @@
+Vehicle lane and rewarded-video regression checks — 2026-10-20
+
+Changes:
+- Shared parking offset moves vehicles, rail and depots down 1.8 board units; camera bounds use the same offset.
+- Travel lane is 1.6 units below slots. Upward departures go directly to the lane; other directions use the outer perimeter. Final approach is vertical into the reserved slot.
+- Gameplay and presentation suspend while a modal or ad is visible. Failed booster ads return to their offer; reward callbacks alone activate the booster.
+- Dialog labels auto-size, and malformed middle-dot labels are corrected.
+
+Unity Editor validation:
+- 161 selectable routes checked across levels 1,2,3,4,5,7,12,20,50,100. Each final approach has matching X with its slot, and every prior waypoint remains below the slot row.
+- Actual unavailable-ad callback invoked from booster button. VIDEO UNAVAILABLE remained visible with elapsed=0 across separate tool calls while Editor was unpaused.
+- Three consecutive Back -> Watch Video retries returned Remove -> VIDEO UNAVAILABLE, elapsed remained 0.
+- Console returned zero error entries after compilation and final runtime checks.
+- Visually inspected lane-ui-phone.png (720x1280), lane-ui-tablet.png (900x1200), and video-unavailable-ui.png.
+- Tests ran using campaign preview isolation; returned Editor to Edit Mode.
+
+Limits: no device build or live successful ad was tested. Routes were checked for representative levels, not every generated level. UI capture temporarily used ScreenSpaceCamera to include the overlay canvas.
+
+Manual regression: launch a level, release several legal vehicles toward different slots, observe their turns below occupied slots. Open a booster, choose Watch Video with ads unavailable, wait, choose Back, retry, then dismiss the offer. Confirm gameplay resumes only after dismissal and no free booster is granted.

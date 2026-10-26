@@ -1,0 +1,10 @@
+var g=UnityEngine.Object.FindFirstObjectByType<WoolGame.WoolGameController>();g.automatedInput=true;g.LoadLevel(4);g.rig.hud.EndLaunch(); var flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;g.GetType().GetField("paused",flags).SetValue(g,true);var rig=g.rig;var cam=rig.gameCamera;var canvas=rig.hud.GetComponent<UnityEngine.Canvas>();
+var oldMode=canvas.renderMode;var oldCamera=canvas.worldCamera;float oldPlane=canvas.planeDistance;
+System.Func<string,int,int,string> capture=(name,width,height)=>{
+ var rt=UnityEngine.RenderTexture.GetTemporary(width,height,24);var previous=UnityEngine.RenderTexture.active;var oldTarget=cam.targetTexture;
+ var tex=new UnityEngine.Texture2D(width,height,UnityEngine.TextureFormat.RGB24,false);
+ try{cam.targetTexture=rt;canvas.renderMode=UnityEngine.RenderMode.ScreenSpaceCamera;canvas.worldCamera=cam;canvas.planeDistance=1;rig.FitCamera();UnityEngine.Canvas.ForceUpdateCanvases();cam.Render();UnityEngine.RenderTexture.active=rt;tex.ReadPixels(new UnityEngine.Rect(0,0,width,height),0,0);tex.Apply();System.IO.File.WriteAllBytes("Docs/ResponsiveUI20261016/"+name+".png",tex.EncodeToPNG());}
+ finally{cam.targetTexture=oldTarget;canvas.renderMode=oldMode;canvas.worldCamera=oldCamera;canvas.planeDistance=oldPlane;UnityEngine.RenderTexture.active=previous;UnityEngine.RenderTexture.ReleaseTemporary(rt);UnityEngine.Object.DestroyImmediate(tex);rig.FitCamera();}
+ return name;
+};
+rig.hud.CloseMenu();capture("game-1920x1080",1920,1080);capture("game-1366x768",1366,768);capture("game-2560x1440",2560,1440);capture("game-3840x2160",3840,2160);capture("game-1600x1000",1600,1000);capture("game-1080x1920",1080,1920);capture("game-1080x2400",1080,2400);capture("game-768x1024",768,1024);rig.hud.Home(1,720);capture("home-1080x1920",1080,1920);return capture("home-1920x1080",1920,1080);

@@ -107,3 +107,28 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Local cleanup archives and validation outputs
+/LocalCleanupArchive/
+/.reference-tools/
+/Captures/
+/ProfilerCaptures/
+/AgentScripts/
+/work/
+/k_BackUpThisFolder_ButDontShipItWithYourGame/
+/*_BurstDebugInformation_DoNotShip/
+/Docs/Backups/
+/Docs/ExcludedLegacyScripts/
+/Assets/Docs/
+/Assets/Docs.meta
+/Assets/Screenshots/
+/Assets/Screenshots.meta
+/Assets/Temp/
+/Assets/Temp.meta
+*.backup
+*.keystore
+*.jks
+*.p12
+*.pfx
+.env
+.env.*

@@ -1,0 +1,11 @@
+var g=UnityEngine.Object.FindFirstObjectByType<WoolGame.WoolGameController>();
+var rig=g.rig;
+System.Func<string,UnityEngine.Vector3,float,string> detail=(name,center,size)=>{
+ var cam=UnityEngine.Object.Instantiate(rig.gameCamera);cam.enabled=false;cam.rect=new UnityEngine.Rect(0,0,1,1);cam.aspect=1;cam.orthographicSize=size;
+ cam.transform.position=center-cam.transform.forward*25;
+ var rt=UnityEngine.RenderTexture.GetTemporary(640,640,24);var previous=UnityEngine.RenderTexture.active;
+ var tex=new UnityEngine.Texture2D(640,640,UnityEngine.TextureFormat.RGB24,false);
+ try{cam.targetTexture=rt;cam.Render();UnityEngine.RenderTexture.active=rt;tex.ReadPixels(new UnityEngine.Rect(0,0,640,640),0,0);tex.Apply();System.IO.File.WriteAllBytes("Docs/DesignerRefresh20261016/"+name+".png",tex.EncodeToPNG());}
+ finally{cam.targetTexture=null;UnityEngine.RenderTexture.active=previous;UnityEngine.RenderTexture.ReleaseTemporary(rt);UnityEngine.Object.DestroyImmediate(tex);UnityEngine.Object.DestroyImmediate(cam.gameObject);}
+ return name;
+};

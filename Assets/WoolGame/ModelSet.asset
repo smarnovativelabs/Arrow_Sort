@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab3279a612f2ad74c97babc0f20eb880, type: 3}
+  m_Name: ModelSet
+  m_EditorClassIdentifier: Assembly-CSharp::WoolGame.WoolModelSet
+  tailMeshes:
+  - {fileID: 4300000, guid: 36f23daca8618404ba01fc0c0b6444e6, type: 2}
+  - {fileID: 4300000, guid: dca057ce986086441b707a68ae3b2b9a, type: 2}
+  - {fileID: 4300000, guid: f900ae397362dfb41aab439ece2e0e46, type: 2}
+  - {fileID: 4300000, guid: f099cb71994244c49aefc2e3ba29576f, type: 2}
+  - {fileID: 4300000, guid: 4316e43b56401724c847f4393b671d37, type: 2}
+  - {fileID: 4300000, guid: d0dacc8641daefb48ba2be631fc7c7c5, type: 2}
+  - {fileID: 4300000, guid: 75fd6bd4b11b419418f7760e687b6918, type: 2}
+  - {fileID: 4300000, guid: faf62c2cde4641d46a971731df4485d0, type: 2}
+  - {fileID: 4300000, guid: b08862362428968458b840c17a6d89d0, type: 2}
+  - {fileID: 4300000, guid: f8eb7a9e04bcd6e4996bf6f1bfcf2804, type: 2}
+  tailMaterial: {fileID: 2100000, guid: a086871369d7ac840b125f10bdb2cd7f, type: 2}
+  mouthOffset: {x: 0.65, y: 0, z: -0.3}

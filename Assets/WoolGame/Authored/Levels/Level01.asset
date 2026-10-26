@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02f0251463c5642b37e7f21da3da8a, type: 3}
+  m_Name: Level01
+  m_EditorClassIdentifier: Assembly-CSharp::WoolGame.WoolLevelDefinition
+  number: 1
+  difficulty: 0
+  displayName: First Threads
+  chapterName: Sunny Shores
+  layoutStyle: Tutorial
+  difficultyNote: Learn the arrows and match your first three colors.
+  startingGraceSeconds: 3
+  initialHeadProgress: 0.27
+  colorCount: 3
+  initialLegalMoves: 4
+  vehicles:
+  - row: 0
+    column: 1
+    color: 3
+    ammo: 10
+    x: -1.48
+    y: -3.65
+    width: 0.72
+    length: 1.32
+    direction: 0
+    size: 2
+    selected: 0
+  - row: 0
+    column: 2
+    color: 1
+    ammo: 6
+    x: 0
+    y: -3.65
+    width: 0.72
+    length: 1.02
+    direction: 1
+    size: 1
+    selected: 0
+  - row: 0
+    column: 3
+    color: 0
+    ammo: 4
+    x: 1.48
+    y: -3.65
+    width: 0.72
+    length: 0.72
+    direction: 1
+    size: 0
+    selected: 0
+  - row: 1
+    column: 1
+    color: 1
+    ammo: 4
+    x: -1.48
+    y: -5.11
+    width: 0.72
+    length: 0.72
+    direction: 3
+    size: 0
+    selected: 0
+  - row: 1
+    column: 2
+    color: 0
+    ammo: 6
+    x: 0
+    y: -5.11
+    width: 0.72
+    length: 1.02
+    direction: 3
+    size: 1
+    selected: 0
+  - row: 1
+    column: 3
+    color: 3
+    ammo: 10
+    x: 1.48
+    y: -5.11
+    width: 0.72
+    length: 1.32
+    direction: 2
+    size: 2
+    selected: 0
+  yarn: 03000000030000000300000003000000030000000300000003000000030000000300000003000000000000000000000000000000000000000100000001000000010000000100000001000000010000000300000003000000030000000300000003000000030000000300000003000000030000000300000001000000010000000100000001000000000000000000000000000000000000000000000000000000
+  tutorialOrder: 050000000200000001000000000000000300000004000000
+  route:
+  - {x: 0.9700002, y: 8.048, z: 0}
+  - {x: -0.8051, y: 7.531, z: 0}
+  - {x: 1.2416002, y: 6.9294004, z: 0}
+  - {x: -1.0767, y: 6.3090005, z: 0}
+  - {x: 1.2318997, y: 5.6698003, z: 0}
+  - {x: -1.3289, y: 4.7580004, z: 0}
+  - {x: 1.5810999, y: 3.7710001, z: 0}
+  - {x: -1.7071999, y: 2.7370007, z: 0}
+  - {x: 2.1825001, y: 1.2236005, z: 0}
+  - {x: 2.0758, y: 0.87580055, z: 0}
+  openSlots: 4
+  boardRotation: 0
+  boardScale: 1
+  snakeBatchSize: 1
+  advanceSpeed: 0.5
+  windingRate: 5
+  fogAbove: 4.5
+  tutorial: 1
+  evidence: "Six vehicles and tutorial order: supplied video 00:00\u201300:14. Capacity
+    4/8/12 reconstructed from visible counts; timing tunable. Route traces existing
+    canyon texture."

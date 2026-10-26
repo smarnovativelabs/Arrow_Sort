@@ -1,0 +1,61 @@
+{
+  "success": true,
+  "command": "command eval_file",
+  "data": {
+    "command": "eval_file",
+    "parameters": {
+      "file": "Temp/CameraBoundsValidation.cs",
+      "timeout": "20000"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": [
+        {
+          "width": 720,
+          "height": 1600,
+          "frame": "(x:0.00, y:40.00, width:720.00, height:1520.00)",
+          "boardAspect": 0.8709677,
+          "boardSize": 10.0731287,
+          "clipped": 0,
+          "checkedCorners": 440
+        },
+        {
+          "width": 1080,
+          "height": 1920,
+          "frame": "(x:85.26, y:0.00, width:909.47, height:1920.00)",
+          "boardAspect": 0.8709678,
+          "boardSize": 10.0731287,
+          "clipped": 0,
+          "checkedCorners": 440
+        },
+        {
+          "width": 768,
+          "height": 1024,
+          "frame": "(x:141.47, y:0.00, width:485.05, height:1024.00)",
+          "boardAspect": 0.8709678,
+          "boardSize": 10.0731287,
+          "clipped": 0,
+          "checkedCorners": 440
+        },
+        {
+          "width": 1200,
+          "height": 1920,
+          "frame": "(x:145.26, y:0.00, width:909.47, height:1920.00)",
+          "boardAspect": 0.870967746,
+          "boardSize": 10.0731287,
+          "clipped": 0,
+          "checkedCorners": 440
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "C:\\Users\\Muneeb Nazir\\Wool Crush"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

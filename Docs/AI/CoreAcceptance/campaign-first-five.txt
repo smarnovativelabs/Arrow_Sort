@@ -1,0 +1,10 @@
+Level 1 won; elapsed=14.92s, moves=6
+Level 2 won; elapsed=91.37s, moves=28
+Level 3 won; elapsed=71.93s, moves=13
+Level 4 won; elapsed=113.83s, moves=25
+Level 5 won; elapsed=112.10s, moves=29
+Pool/scene identities preserved: True
+Persistent campaign, currency and legacy statistics unchanged: True
+PASS 5 levels completed through live selection; peak concurrent collectors=3
+Active render samples=7748, max batches=60, max tris=237513, max SetPass=21
+Editor frame ms median=16.81, p95=25.46. Editor measurements are not device profiling.

@@ -1,0 +1,2393 @@
+I want you to significantly improve the existing Unity game based on:
+
+1. The provided reference video.
+2. The current Unity project.
+3. The assets already present inside the project, especially the "Art" folder.
+
+The reference video is the PRIMARY SOURCE OF TRUTH for the visual behavior, gameplay flow, animations, UI, tutorial, movement, effects, timing, and first two levels.
+
+Do NOT simplify important gameplay or visual behavior just because a simpler implementation technically works.
+
+The goal is to make the game feel like an actual polished puzzle game rather than a basic prototype.
+
+==================================================
+1. FIRST: INSPECT THE EXISTING PROJECT
+==================================================
+
+Before changing code, creating prefabs, or adding new systems, inspect the current project carefully.
+
+Inspect:
+
+- Existing scenes
+- Existing gameplay scripts
+- Existing managers
+- Existing prefabs
+- Existing UI
+- Existing Canvas
+- Existing cameras
+- Existing animations
+- Existing particle systems
+- Existing materials
+- Existing textures
+- Existing models
+- Existing audio
+- Existing level system
+- Existing vehicle system
+- Existing snake/yarn system
+- Existing slot/spool system
+- Existing dragon system
+- Existing tutorial system
+
+Most importantly, inspect the folder:
+k the scene how it is already everything is placed in scene we use object pooling just active inactive object and vehicles move we have colliders on edges of screen when vehicle that face tat direction hit with that collider we define that when you hit with collider you have to move to this direction and slot is assigned to vehicle at the time he move and left vehicles top most priority is left side slot and right side vehicles has top most priority of right slots if that is not empty than car will move towards the low priority slot 
+Art
+
+and ALL relevant subfolders inside it.
+
+Find and reuse existing:
+
+- Dragon model/prefab
+- Dragon animations
+- Vehicle models
+- Vehicle textures
+- Vehicle materials
+- Snake/yarn assets
+- Spools
+- Environment assets
+- UI assets
+- Particle effects
+- Audio assets
+- Other useful art
+
+Do NOT immediately create placeholder cubes, capsules, primitive cars, or a placeholder dragon if proper art already exists.
+
+Before creating something new, first confirm that a suitable asset does not already exist.
+
+Also understand the existing architecture before rewriting it.
+
+Do not create duplicate systems such as:
+
+GameManager2
+NewGameManager
+NewVehicleController
+VehicleControllerNew
+
+if equivalent systems already exist and can be improved.
+
+Preserve working functionality wherever possible.
+
+==================================================
+2. ANALYZE THE COMPLETE REFERENCE VIDEO
+==================================================
+
+The reference video must be analyzed completely from beginning to end.
+
+EVERY SECOND OF THE VIDEO IS IMPORTANT.
+
+Do NOT:
+
+- Watch only the first few seconds.
+- Skip animations.
+- Only inspect screenshots.
+- Only inspect Level 1.
+- Assume how an interaction works without checking the video.
+
+Carefully analyze approximately frame-by-frame where necessary.
+
+The video contains important information about:
+
+- Level 1
+- Level 2
+- Tutorial
+- UI
+- Vehicle movement
+- Vehicle blocking
+- Vehicle path
+- Slot movement
+- Vehicle turning
+- Spool behavior
+- Yarn collection
+- Snake shrinking
+- Dragon animations
+- UI animations
+- Different animated pictures
+- Success feedback
+- Failure feedback
+- Thumbs-up emoji
+- Particle effects
+- Level-completion sequence
+- Camera
+- Timing
+- Transitions
+
+Record mentally or structurally what happens at each important stage.
+
+For every interaction determine:
+
+1. Initial state
+2. User input
+3. Object reaction
+4. Movement
+5. Animation
+6. Effect
+7. Delay
+8. Next state
+9. UI reaction
+10. Puzzle state change
+
+==================================================
+3. DIFFERENT ELEMENTS HAVE DIFFERENT ANIMATIONS
+==================================================
+
+The video contains multiple images, characters, icons, vehicles, UI elements, and objects that animate differently.
+
+DO NOT apply one generic animation to everything.
+
+For example, if the reference shows:
+
+- One image bouncing
+- Another image floating
+- Another rotating
+- Another pulsing
+- Another scaling
+- Another sliding
+- Another fading
+- Another shaking
+
+then reproduce those behaviors separately.
+
+Do not create one generic:
+
+PulseAnimation()
+
+and use it for everything.
+
+Look carefully at each important visual element.
+
+Possible animations to inspect include:
+
+- Scale pop
+- Bounce
+- Float
+- Rotation
+- Shake
+- Slide
+- Fade
+- Punch scale
+- Overshoot
+- Small tilt
+- Character reaction
+- Vehicle bounce
+- Tutorial hand tap
+- UI transition
+
+Match the reference as closely as reasonably possible.
+
+==================================================
+4. CURRENT SCOPE — KEEP META FEATURES SIMPLE
+==================================================
+
+For the current version, focus on the actual puzzle game.
+
+DO NOT implement:
+
+- Multiplayer
+- Weekly leaderboard
+- Global leaderboard
+- Clubs
+- Guilds
+- Social systems
+- Chat
+- Friend system
+- Seasonal system
+- Autumn event/system
+- Competitive multiplayer
+- Other unnecessary online systems
+
+For the first round, concentrate on:
+
+- Core puzzle gameplay
+- Good first levels
+- Tutorial
+- Vehicles
+- Snake/yarn
+- Spools
+- Dragon
+- UI
+- Animations
+- Puzzle difficulty
+- Effects
+- Level progression
+- Performance
+- Responsive portrait layout
+
+==================================================
+5. DO NOT BUILD THE WHOLE GAME AT RUNTIME
+==================================================
+
+The current implementation creates too many things completely through code at runtime.
+
+This is not desired.
+
+Anything that stays the same between levels should normally be created once in the scene or as a reusable prefab.
+
+DO NOT repeatedly recreate:
+
+- Main Canvas
+- Main HUD
+- Camera
+- Ground
+- Lighting
+- Environment
+- Dragon area
+- Slot area
+- Permanent buttons
+- Coin panel
+- Level display
+- Progress display
+- Settings button
+- Permanent UI
+- Shared backgrounds
+
+These should remain reusable.
+
+Use:
+
+- Scene objects
+- Prefabs
+- Serialized references
+- Activate/deactivate
+- Reset state
+- Object pooling where useful
+
+instead of unnecessary repeated:
+
+Instantiate
+Destroy
+Instantiate
+Destroy
+
+I should also be able to inspect important gameplay objects directly from the Unity Editor.
+
+Do not hide the entire game structure inside runtime-generated GameObjects.
+
+==================================================
+6. PERSISTENT ENVIRONMENT
+==================================================
+
+The main environment remains the same between levels.
+
+Keep permanent objects reusable, including:
+
+- Ground
+- Background
+- Camera
+- Lighting
+- Decorations
+- Dragon area
+- Vehicle destination area
+- Spool/slot area
+- Shared environment pieces
+
+When a new level starts, do NOT destroy and recreate the whole environment.
+
+Only modify level-specific data.
+
+==================================================
+7. PERSISTENT UI
+==================================================
+
+UI that stays the same between levels should also be persistent.
+
+Examples:
+
+- Coin display
+- Level number
+- Progress percentage
+- Settings
+- Main HUD
+- Top bar
+- Tutorial Canvas
+- Win UI
+- Shared buttons
+- Slot-related common UI
+- Common feedback containers
+
+Create them once and reuse them.
+
+When a level changes, update values and states instead of recreating the whole UI hierarchy.
+
+==================================================
+8. LEVEL-SPECIFIC CHANGES
+==================================================
+
+Only data that actually changes between levels should be changed.
+
+Examples:
+
+- Vehicle count
+- Vehicle type
+- Vehicle color
+- Vehicle position
+- Vehicle rotation
+- Vehicle orientation
+- Vehicle movement direction
+- Snake color
+- Snake shape
+- Snake segment count
+- Yarn color
+- Spool color
+- Puzzle arrangement
+- Blocking arrangement
+- Required movement order
+- Tutorial instructions
+- Difficulty
+- Level-specific effects
+
+Do not rebuild the entire scene because a vehicle changed color.
+
+==================================================
+9. LEVEL DATA SYSTEM
+==================================================
+
+Do not hard-code every level inside one huge script.
+
+Create a reusable data-driven level system.
+
+Prefer:
+
+- ScriptableObjects
+
+or another clean serializable level-data solution.
+
+Each level should be able to define things such as:
+
+GENERAL:
+- Level ID
+- Level number
+- Tutorial enabled
+- Difficulty
+- Completion configuration
+
+VEHICLES:
+- Vehicle prefab/type
+- Position
+- Rotation
+- Color
+- Size
+- Orientation
+- Movement direction
+- Slot/destination data
+
+SNAKE/YARN:
+- Color
+- Starting path/layout
+- Segment count
+- Collection configuration
+
+SPOOLS:
+- Color
+- Position
+- Required matching color
+- Collection behavior
+
+PUZZLE:
+- Blocking arrangement
+- Valid movement logic
+- Required decisions
+- Destination availability
+- Win condition
+
+VISUAL:
+- Particle effects
+- Special animations
+- Tutorial configuration
+
+Adding future levels should mainly require creating/editing level data rather than rewriting core gameplay code.
+
+==================================================
+10. THE GAME MUST ACTUALLY FEEL LIKE A PUZZLE
+==================================================
+
+The current gameplay is too easy.
+
+Right now the user can click almost any vehicle and eventually finish the level.
+
+THIS MUST BE FIXED.
+
+This is a puzzle game.
+
+The player should need to look at the board and think:
+
+"Which vehicle should I move first?"
+
+"Which color should go first?"
+
+"What is blocking this vehicle?"
+
+"If I move this one, what will become available next?"
+
+The order of moves should matter.
+
+Create situations where:
+
+- One vehicle blocks another.
+- A vehicle cannot leave because another object is in front of it.
+- Some vehicles should be moved before others.
+- Color choice matters.
+- Spool state matters.
+- Available slots matter.
+- Vehicle orientation matters.
+- Space must sometimes be cleared.
+- The player must observe before tapping.
+
+The gameplay must NOT simply be:
+
+Tap all cars → Level Complete
+
+The puzzle should contain meaningful decision-making.
+
+==================================================
+11. RANDOM CLICKING TEST
+==================================================
+
+Test levels by deliberately clicking vehicles randomly.
+
+If random clicking consistently completes the level easily, the level design is not good enough.
+
+The player should need to observe the puzzle and choose useful moves.
+
+Level 1 can be intentionally easy because it is a tutorial.
+
+Level 2 should already introduce some thinking.
+
+Future levels should become progressively more challenging.
+
+==================================================
+12. VEHICLE COUNT
+==================================================
+
+DO NOT force every level to contain exactly 15 vehicles.
+
+Study the reference video and supplied reference material.
+
+Determine an appropriate vehicle count for each level.
+
+Early levels should normally contain fewer vehicles.
+
+Later levels may gradually increase:
+
+- Vehicle count
+- Number of colors
+- Blocking complexity
+- Orientation complexity
+- Spool complexity
+- Snake length
+- Required movement order
+
+The level system must support a variable number of vehicles.
+
+==================================================
+13. DIFFICULTY PROGRESSION
+==================================================
+
+Difficulty should increase gradually.
+
+Example:
+
+LEVEL 1:
+- Tutorial
+- Very easy
+- Teach tapping/movement
+- Guide correct first action
+- Basic yarn collection
+- Basic completion
+
+LEVEL 2:
+- More than one meaningful choice
+- Basic blocking
+- More than one color if reference shows it
+- Basic move-order decision
+- Player begins thinking before clicking
+
+Later levels:
+- More vehicles
+- More colors
+- More blocked paths
+- More orientations
+- Longer snake/yarn
+- More complex spool order
+- More strategic choices
+
+Do not make the early tutorial unnecessarily frustrating.
+
+==================================================
+14. VEHICLE BLOCKING
+==================================================
+
+When the player selects a vehicle:
+
+1. Determine its intended movement direction.
+2. Check the actual physical path in front of it.
+3. Determine whether another vehicle/object blocks the path.
+4. If blocked, prevent it from passing through.
+5. Play blocked/invalid feedback.
+6. If the reference shows it, move slightly toward the obstacle and return.
+7. If the path is clear, allow movement.
+
+The blocking system must detect partial obstruction.
+
+For example:
+
+If only approximately 10% of another vehicle is physically overlapping the moving vehicle's required path, it should still count as blocked if collision would occur.
+
+Do NOT only check one center ray or the exact center of a row/column.
+
+Use the best appropriate solution, such as:
+
+- Physics.BoxCast
+- Physics.OverlapBox
+- Bounds checks
+- Multiple raycasts
+
+depending on the game architecture.
+
+Do not run expensive checks continuously every frame for every vehicle.
+
+Run them when needed.
+
+==================================================
+15. COMPLETE VEHICLE INTERACTION FLOW
+==================================================
+
+A successful vehicle interaction should follow the reference sequence.
+
+Study this carefully.
+
+Conceptually:
+
+Player selects vehicle
+        ↓
+Check puzzle state
+        ↓
+Check physical path
+        ↓
+Vehicle becomes valid
+        ↓
+Vehicle exits current board position
+        ↓
+Movement effect starts
+        ↓
+Vehicle moves toward destination/slot
+        ↓
+Vehicle enters slot area
+        ↓
+Vehicle aligns correctly
+        ↓
+Arrival feedback plays
+        ↓
+Vehicle turns toward spool
+        ↓
+Spool activates
+        ↓
+Matching yarn begins collecting
+        ↓
+Yarn collection animation plays
+        ↓
+Collection finishes
+        ↓
+Positive effect plays
+        ↓
+Thumbs-up feedback appears
+        ↓
+Puzzle state updates
+        ↓
+Next interaction becomes available
+        ↓
+Check level completion
+
+Do not skip the important intermediate stages.
+
+==================================================
+16. STUDY EXACTLY HOW THE CAR MOVES TO THE SLOT
+==================================================
+
+This is very important.
+
+Analyze exactly how the car moves from its board position to the destination slot.
+
+Check whether it:
+
+- Moves straight
+- Follows multiple points
+- Uses a curve
+- Turns while moving
+- Changes speed
+- Accelerates
+- Decelerates
+- Bounces
+- Tilts
+- Rotates
+- Snaps slightly at the end
+- Smoothly aligns
+- Pauses before turning toward spool
+
+Do NOT replace the sequence with:
+
+transform.position = slot.position;
+
+Use smooth movement matching the reference.
+
+If a path-based approach is needed, create a reusable movement path system.
+
+==================================================
+17. VEHICLE MOVEMENT EFFECT
+==================================================
+
+Observe what effect is playing while the vehicle moves.
+
+Carefully check for:
+
+- Trail
+- Dust
+- Spark
+- Glow
+- Speed lines
+- Motion streak
+- Bounce
+- Tilt
+- Rotation
+- Scale
+- Highlight
+- Particle effect
+
+Determine:
+
+- When it starts
+- Whether it follows the vehicle
+- When it stops
+- Whether an arrival effect then plays
+
+Reproduce the reference behavior.
+
+Do not invent a large visual effect that is not present in the video.
+
+==================================================
+18. VEHICLE ARRIVAL AT SLOT
+==================================================
+
+Study how the vehicle enters its destination slot.
+
+Determine:
+
+- Final position
+- Final orientation
+- Alignment
+- Arrival speed
+- Whether it overshoots
+- Whether it bounces
+- Whether there is an arrival particle
+- Whether there is a small pause
+
+The vehicle should look intentionally parked/aligned.
+
+It should not stop awkwardly at a random angle.
+
+==================================================
+19. VEHICLE TURN TOWARD SPOOL
+==================================================
+
+After reaching the slot, study exactly how the vehicle turns toward the spool.
+
+Inspect:
+
+- Rotation direction
+- Rotation angle
+- Rotation speed
+- Whether movement and rotation overlap
+- Whether the vehicle stops first
+- Whether there is a short pause
+- Whether the turn has easing
+- Whether a bounce occurs after rotation
+
+Possible reference sequence:
+
+Reach slot
+    ↓
+Align
+    ↓
+Short pause
+    ↓
+Smoothly turn toward spool
+    ↓
+Lock final rotation
+    ↓
+Begin yarn collection
+
+Do not apply arbitrary rotation values.
+
+Match the reference behavior.
+
+==================================================
+20. SPOOL BEHAVIOR
+==================================================
+
+Study the spool carefully.
+
+When yarn collection begins, inspect whether the spool:
+
+- Rotates
+- Speeds up
+- Slows down
+- Bounces
+- Scales
+- Glows
+- Shakes
+- Produces particles
+- Changes visually as yarn is collected
+
+Determine:
+
+- When spool animation starts
+- What triggers it
+- How long it runs
+- When it stops
+
+The spool should visually communicate that yarn is being collected.
+
+==================================================
+21. YARN COLLECTION
+==================================================
+
+The yarn collection must be visually animated.
+
+Do NOT simply make the complete yarn disappear instantly.
+
+Study whether:
+
+- Yarn travels toward the spool.
+- Yarn segments shrink.
+- Segments disappear one-by-one.
+- Segments follow a path.
+- Yarn visually wraps around the spool.
+- Snake becomes shorter progressively.
+- Spool visually fills/grows.
+
+Reproduce the closest behavior to the video.
+
+The player should clearly understand:
+
+Correct vehicle reached the spool → spool is collecting matching yarn.
+
+==================================================
+22. SEGMENT-BY-SEGMENT YARN COLLECTION
+==================================================
+
+If the snake/yarn consists of repeated segments, collection should happen progressively.
+
+Example:
+
+Spool activates
+        ↓
+First segment begins moving/shrinking
+        ↓
+Next segment follows
+        ↓
+Next segment follows
+        ↓
+Snake becomes shorter
+        ↓
+Remaining segments update smoothly
+        ↓
+Final segment is collected
+        ↓
+Collection finishes
+
+Do not destroy all segments in a single frame.
+
+Keep the animation smooth but optimized.
+
+==================================================
+23. COLOR MATCHING
+==================================================
+
+Vehicle/yarn/spool colors should be meaningful gameplay elements.
+
+When a vehicle reaches the collection area, validate the current puzzle state.
+
+Correct matching should allow collection.
+
+Incorrect matching should not.
+
+The puzzle logic should clearly understand:
+
+- Vehicle color
+- Yarn color
+- Spool color/state
+- Required order
+- Current puzzle configuration
+
+Do not treat colors as purely cosmetic.
+
+==================================================
+24. THUMBS-UP EMOJI
+==================================================
+
+The thumbs-up emoji/icon shown in the reference is important.
+
+When a successful yarn collection is completed, reproduce the thumbs-up feedback.
+
+Study exactly:
+
+- Where it appears
+- Its size
+- Its starting scale
+- Whether it pops
+- Whether it bounces
+- Whether it moves upward
+- Whether it rotates
+- Whether it fades
+- How long it remains
+- When it disappears
+
+Possible sequence, only if it matches the reference:
+
+Scale 0
+        ↓
+Quick pop
+        ↓
+Small overshoot
+        ↓
+Move slightly upward
+        ↓
+Short hold
+        ↓
+Fade/scale away
+        ↓
+Deactivate
+
+Reuse the thumbs-up object.
+
+Do not instantiate/destroy a new one every time if reuse is possible.
+
+==================================================
+25. SUCCESS FEEDBACK
+==================================================
+
+When the correct yarn is collected, inspect all positive feedback.
+
+This may include:
+
+- Particle burst
+- Glow
+- Vehicle bounce
+- Spool bounce
+- Scale punch
+- Positive audio
+- Thumbs-up
+- Dragon reaction
+- UI animation
+
+Match the actual video rather than adding random unnecessary effects.
+
+==================================================
+26. INVALID / FAILED MOVE FEEDBACK
+==================================================
+
+Study what happens when a move is not valid.
+
+Examples:
+
+- Vehicle blocked
+- Wrong color
+- Wrong order
+- No destination
+- Incompatible spool
+- Invalid puzzle state
+
+Possible feedback may include:
+
+- Small forward movement and return
+- Shake
+- Red flash
+- Spool shake
+- X icon
+- Negative sound
+- Vibration
+- Error effect
+
+Use the behavior shown by the reference.
+
+An invalid move must NOT incorrectly collect yarn or update puzzle progress.
+
+==================================================
+27. INTERACTION STATE MACHINE
+==================================================
+
+Do not handle complex interactions as one immediate command.
+
+Use clear gameplay states.
+
+For example:
+
+Idle
+↓
+VehicleSelected
+↓
+CheckingPath
+↓
+LeavingBoard
+↓
+MovingToSlot
+↓
+Aligning
+↓
+TurningToSpool
+↓
+CollectingYarn
+↓
+SuccessFeedback
+↓
+UpdatingPuzzle
+↓
+Idle
+
+Invalid:
+
+Idle
+↓
+VehicleSelected
+↓
+CheckingMove
+↓
+Invalid
+↓
+FailureFeedback
+↓
+Reset
+↓
+Idle
+
+The exact architecture can differ, but state control should prevent broken overlapping interactions.
+
+==================================================
+28. INPUT CONTROL
+==================================================
+
+Do not allow repeated tapping to break the game during critical animations.
+
+Temporarily prevent conflicting input while appropriate, such as during:
+
+- Vehicle movement
+- Slot alignment
+- Vehicle turning
+- Yarn collection
+- Completion sequence
+
+Do not lock controls longer than necessary.
+
+Restore interaction at the correct moment.
+
+==================================================
+29. DRAGON
+==================================================
+
+Use the existing Dragon from the Art folder.
+
+Do not replace it with a placeholder.
+
+Inspect its existing animations.
+
+Study the reference video for:
+
+- Idle
+- Head movement
+- Body movement
+- Reaction
+- Eating/interaction
+- Celebration
+- Tutorial state
+- Level-completion state
+
+Use existing animations where possible.
+
+Synchronize Dragon reactions with gameplay.
+
+==================================================
+30. DRAGON/YARN INTERACTION
+==================================================
+
+If the Dragon interacts with yarn in the reference, reproduce the timing.
+
+Check:
+
+- When Dragon reacts
+- When yarn starts moving
+- Whether Dragon waits
+- Whether Dragon eats/receives yarn
+- When the reaction animation plays
+- What happens after final collection
+
+Do not let the Dragon animation feel disconnected from the puzzle.
+
+==================================================
+31. LEVEL 1 TUTORIAL
+==================================================
+
+Level 1 must work as an actual tutorial.
+
+Reproduce the tutorial from the video as closely as reasonably possible.
+
+Inspect:
+
+- Initial level layout
+- Which vehicle is highlighted
+- Which vehicle is initially interactable
+- Tutorial hand
+- Hand position
+- Hand movement
+- Hand tap
+- Highlight
+- Vehicle movement
+- Collection
+- Feedback
+- When tutorial restrictions are removed
+
+The player should perform the tutorial action.
+
+Do not automatically complete the tutorial without meaningful player interaction.
+
+==================================================
+32. TUTORIAL HAND
+==================================================
+
+The hand/finger should be animated.
+
+Inspect:
+
+- Starting position
+- Target position
+- Movement
+- Tap animation
+- Scale
+- Loop
+- Timing
+- Disappearance
+
+Do not use a completely static tutorial hand.
+
+==================================================
+33. LEVEL 2
+==================================================
+
+Level 2 should introduce more actual puzzle thinking.
+
+Do not simply duplicate Level 1.
+
+Introduce appropriate complexity based on the reference:
+
+- More vehicles
+- More choices
+- Blocking
+- Color selection
+- Order decisions
+- More meaningful interactions
+
+The player should begin thinking:
+
+"What should I move first?"
+
+==================================================
+34. LEVEL-COMPLETION PARTICLES
+==================================================
+
+Some levels in the reference play particle effects when completed.
+
+Reproduce this.
+
+Example:
+
+Final collection completes
+        ↓
+Puzzle marked complete
+        ↓
+Input stops
+        ↓
+Dragon/final reaction
+        ↓
+Completion particle effect
+        ↓
+UI celebration
+        ↓
+Short delay
+        ↓
+Next-level transition
+
+Do not permanently run the particles.
+
+Play them only when necessary.
+
+Reuse the particle system if appropriate.
+
+==================================================
+35. LEVEL COMPLETION
+==================================================
+
+Do not instantly load the next level as soon as the final puzzle condition becomes true.
+
+Study the reference completion sequence.
+
+Inspect:
+
+- Final yarn collection
+- Final spool animation
+- Dragon reaction
+- Particle effect
+- UI changes
+- Delays
+- Transition
+- Next-level appearance
+
+Allow celebration animations to finish.
+
+==================================================
+36. UI QUALITY
+==================================================
+
+The UI should look polished like the reference.
+
+Study:
+
+- Position
+- Scale
+- Spacing
+- Font
+- Text style
+- Icons
+- Buttons
+- Shadows
+- Panels
+- Corners
+- Progress display
+- Coin display
+- Settings
+- Tutorial elements
+
+Do not use ugly default Unity UI simply because it works.
+
+Reuse existing art where available.
+
+==================================================
+37. SUPPORT ALL PORTRAIT ASPECT RATIOS
+==================================================
+
+This is a HARD REQUIREMENT.
+
+The game must support all common portrait mobile aspect ratios.
+
+Do NOT design specifically for only 1080×1920.
+
+Support portrait ratios such as:
+
+- 9:16
+- 9:18
+- 9:18.5
+- 9:19
+- 9:19.5
+- 9:20
+- 9:21
+- Similar taller/shorter portrait phone screens
+
+Example resolutions include:
+
+720×1280
+1080×1920
+1080×2160
+1080×2280
+1080×2340
+1080×2400
+1170×2532
+1242×2688
+1440×3200
+
+Do not hard-code layout around one resolution.
+
+The game should respond based on aspect ratio.
+
+==================================================
+38. RESPONSIVE UI
+==================================================
+
+Use Canvas Scaler correctly.
+
+Use:
+
+UI Scale Mode:
+Scale With Screen Size
+
+Use a sensible portrait reference resolution.
+
+Use proper anchors.
+
+For example:
+
+Top HUD
+→ Top anchored
+
+Bottom controls
+→ Bottom anchored
+
+Corner buttons
+→ Correct corner anchored
+
+Center popups
+→ Center anchored
+
+Do not manually position every UI element using fixed coordinates intended for one phone.
+
+Important UI should never:
+
+- Leave the screen
+- Get cropped
+- Overlap badly
+- Stretch
+- Become unreadably small
+- Hide important gameplay
+
+==================================================
+39. SAFE AREA
+==================================================
+
+Support Screen.safeArea.
+
+Important UI must stay safe on phones with:
+
+- Notches
+- Dynamic Island
+- Punch-hole cameras
+- Rounded corners
+- Navigation areas
+
+Use a Safe Area container/component if needed.
+
+==================================================
+40. RESPONSIVE 3D ENVIRONMENT
+==================================================
+
+Unlike Canvas UI, do NOT scale the entire 3D world based on screen resolution.
+
+Keep consistent world scale.
+
+Instead adapt camera framing.
+
+Calculate:
+
+float aspect = (float)Screen.width / Screen.height;
+
+Then use actual aspect ratio to keep the important gameplay area visible.
+
+Always keep visible:
+
+- Puzzle board
+- Vehicles
+- Snake/yarn
+- Dragon
+- Slots
+- Spools
+- Relevant effects
+
+No required gameplay object should become unreachable because a tall/short portrait screen cropped it.
+
+==================================================
+41. CAMERA FIT SYSTEM
+==================================================
+
+Create a reusable camera-fitting system.
+
+Do NOT only do:
+
+if portrait:
+    use fixed portrait camera position
+
+because portrait devices themselves have different ratios.
+
+If Orthographic:
+
+Calculate orthographicSize based on:
+
+- Gameplay bounds
+- Screen aspect
+- Required horizontal visibility
+- Required vertical visibility
+- Small safe margin
+
+If Perspective:
+
+Adjust appropriately:
+
+- Camera distance
+- Field of View
+- Position
+
+while preserving the intended visual appearance.
+
+Conceptually:
+
+Calculate gameplay bounds
+        ↓
+Read screen aspect
+        ↓
+Calculate required framing
+        ↓
+Add reasonable margin
+        ↓
+Apply camera setting
+
+Avoid huge unnecessary empty space.
+
+==================================================
+42. TEST MULTIPLE PORTRAIT RATIOS
+==================================================
+
+At minimum verify:
+
+- 9:16
+- Approximately 9:18
+- Approximately 9:19.5
+- Approximately 9:20
+- Very tall portrait, approximately 9:21
+
+For every ratio verify:
+
+- Full puzzle usable
+- Vehicles visible
+- Dragon visible
+- Snake visible
+- Slots visible
+- Spools visible
+- Important effects visible
+- HUD visible
+- Tutorial visible
+- Thumbs-up visible
+- No UI overlap
+- No important object cropping
+
+==================================================
+43. ANIMATION IMPLEMENTATION
+==================================================
+
+Do not automatically put an Animator Controller on every tiny UI object.
+
+For simple animation, use lightweight animation/code/tween-style logic where appropriate.
+
+Examples:
+
+- UI pop
+- UI slide
+- Fade
+- Bounce
+- Thumbs-up
+- Vehicle small feedback
+- Floating icons
+
+Use Animator where genuinely appropriate, such as:
+
+- Dragon skeletal animation
+- Complex model animation
+- Existing authored animation clips
+
+Keep performance in mind.
+
+==================================================
+44. AUDIO
+==================================================
+
+If appropriate audio exists, synchronize it with:
+
+- Tap
+- Vehicle movement
+- Blocked vehicle
+- Slot arrival
+- Spool
+- Yarn collection
+- Positive move
+- Thumbs-up
+- Level completion
+
+Use reusable audio management.
+
+Do not create a new AudioSource unnecessarily for every one-shot effect.
+
+==================================================
+45. PERFORMANCE TARGET
+==================================================
+
+Performance is a HARD REQUIREMENT.
+
+TARGET MINIMUM FRAME RATE:
+
+30 FPS
+
+Target frame time:
+
+Approximately 33.3 ms or lower per frame.
+
+The game should remain stable at approximately 30 FPS or better during normal gameplay on intended mobile hardware.
+
+Do not optimize only the empty scene.
+
+Test under real gameplay load.
+
+==================================================
+46. BATCH BUDGET
+==================================================
+
+Gameplay batches must remain:
+
+UNDER 200 BATCHES.
+
+200 is the maximum target, not the desired normal average.
+
+Prefer significantly lower where practical.
+
+For example:
+
+Good:
+< 100–150
+
+Hard maximum target:
+< 200
+
+Measure batches when the actual gameplay scene contains:
+
+- UI
+- Environment
+- Dragon
+- Vehicles
+- Snake
+- Spools
+- Effects
+
+Also inspect the heavier moments such as:
+
+- Vehicle movement
+- Yarn collection
+- Completion particles
+- Win sequence
+
+==================================================
+47. MINIMIZE TRIS AND VERTICES
+==================================================
+
+Tris and vertices should be as low as reasonably possible without ruining the reference appearance.
+
+Inspect:
+
+- Vehicles
+- Dragon
+- Snake segments
+- Spools
+- Environment
+- Decorations
+
+Do not use high-density geometry where it provides almost no visible improvement on a mobile screen.
+
+Objects appearing very small do not require extremely dense meshes.
+
+Optimize obvious unnecessary geometry.
+
+==================================================
+48. SNAKE/YARN PERFORMANCE
+==================================================
+
+The snake/yarn may contain many segments.
+
+This can become expensive.
+
+Do NOT create a structure such as:
+
+100 segments
+× expensive mesh
+× separate material
+× Animator
+× Rigidbody
+× Update()
+
+unless absolutely required.
+
+Prefer:
+
+- Shared mesh
+- Low-poly segment
+- Shared material
+- GPU instancing where suitable
+- Efficient segment movement
+- Pooling
+- Minimal components
+
+Avoid expensive independent logic on every segment.
+
+==================================================
+49. VEHICLE OPTIMIZATION
+==================================================
+
+Reuse:
+
+- Vehicle meshes
+- Prefabs
+- Materials
+- Textures
+
+Do not duplicate models simply because their colors differ.
+
+Avoid unnecessary unique material instances.
+
+Where suitable use:
+
+MaterialPropertyBlock
+
+or carefully shared materials.
+
+Be aware that:
+
+renderer.material
+
+can create separate material instances.
+
+Do not accidentally create dozens of duplicated materials.
+
+==================================================
+50. MATERIAL / DRAW CALL OPTIMIZATION
+==================================================
+
+Reduce material variation where possible.
+
+Prefer:
+
+- Shared materials
+- Texture atlases
+- Sprite atlases
+- GPU instancing
+- Static batching where appropriate
+- Simple shaders
+
+Do not combine interactive objects blindly.
+
+Only batch/combine objects where it makes sense.
+
+==================================================
+51. SHADERS
+==================================================
+
+Use mobile-friendly shaders.
+
+Avoid unnecessarily expensive:
+
+- Multi-pass shaders
+- Realtime reflections
+- Complex transparent shaders
+- Excessive shader calculations
+- Heavy post-processing
+
+If a simpler shader provides nearly the same appearance, use the simpler one.
+
+==================================================
+52. LIGHTING
+==================================================
+
+Keep lighting attractive but efficient.
+
+Prefer:
+
+- Simple main directional lighting
+- Ambient lighting
+- Baked lighting where useful
+- Minimal realtime lights
+
+Avoid numerous realtime lights affecting multiple objects.
+
+==================================================
+53. SHADOWS
+==================================================
+
+Use shadows carefully.
+
+Optimize:
+
+- Shadow distance
+- Resolution
+- Shadow casters
+- Shadow receivers
+
+Tiny decorative objects and small yarn pieces normally should not need expensive realtime shadows unless they materially improve appearance.
+
+==================================================
+54. PARTICLE OPTIMIZATION
+==================================================
+
+Particles should remain lightweight.
+
+Do not use thousands of particles for tiny feedback.
+
+Use short controlled bursts.
+
+Particle systems should normally:
+
+Activate
+↓
+Play
+↓
+Finish
+↓
+Stop
+↓
+Deactivate/reuse
+
+Do not leave unnecessary particle systems continuously simulating.
+
+==================================================
+55. UI PERFORMANCE
+==================================================
+
+Avoid unnecessary Canvas rebuilds.
+
+Do not frequently rebuild permanent UI.
+
+Avoid excessive use of:
+
+- ContentSizeFitter
+- LayoutGroups
+- Dynamic hierarchy changes
+- Full-screen transparent overlays
+- Constant layout recalculation
+
+Separate frequently changing elements from mostly static UI if beneficial.
+
+==================================================
+56. PHYSICS PERFORMANCE
+==================================================
+
+Do not execute expensive physics queries every frame for every vehicle.
+
+Prefer:
+
+User selects vehicle
+        ↓
+Perform required path check
+        ↓
+Use result
+        ↓
+Check again only when needed
+
+Use simple colliders where possible:
+
+- BoxCollider
+- SphereCollider
+- CapsuleCollider
+
+Avoid expensive MeshCollider where a simple shape works.
+
+==================================================
+57. UPDATE() PERFORMANCE
+==================================================
+
+Avoid unnecessary Update() methods.
+
+Static or event-driven objects do not need to run logic every frame.
+
+Be particularly careful with:
+
+- Every yarn segment
+- Every slot
+- Every UI image
+- Every decorative object
+- Every particle helper
+
+Prefer centralized or event-driven updates where suitable.
+
+==================================================
+58. OBJECT POOLING
+==================================================
+
+Use pooling where frequent reuse makes sense.
+
+Candidates include:
+
+- Thumbs-up feedback
+- Particle bursts
+- Temporary feedback
+- Yarn segments if repeatedly recreated
+- Other frequently spawned objects
+
+Avoid excessive runtime:
+
+Instantiate()
+Destroy()
+
+during normal gameplay.
+
+==================================================
+59. TEXTURE OPTIMIZATION
+==================================================
+
+Review texture sizes.
+
+Do not use huge textures for very small mobile-screen objects unless required.
+
+Optimize:
+
+- Max Size
+- Compression
+- Sprite Atlas
+- Texture Atlas
+- Mip Maps where appropriate
+
+Maintain good visual quality while reducing memory and rendering cost.
+
+==================================================
+60. OVERDRAW
+==================================================
+
+Watch overdraw, especially with portrait mobile UI.
+
+Avoid excessive overlapping transparent elements.
+
+Pay attention to:
+
+- Full-screen transparent images
+- Large transparent particles
+- Multiple overlapping UI layers
+- Transparent environment materials
+
+Use Unity rendering/debugging tools where useful.
+
+==================================================
+61. TARGET 30 FPS
+==================================================
+
+The minimum performance target is:
+
+30 FPS.
+
+Frame-time budget:
+
+approximately 33.3 ms.
+
+Do NOT use 60 FPS as the hard requirement for this project.
+
+If the game runs above 30 FPS, that is good.
+
+However, it must at minimum be designed to maintain a stable 30 FPS target during normal intended gameplay.
+
+Focus on smooth and consistent performance rather than unstable high FPS.
+
+==================================================
+62. PERFORMANCE PROFILING
+==================================================
+
+Use appropriate Unity tools such as:
+
+- Stats window
+- Unity Profiler
+- Frame Debugger
+- Rendering statistics
+
+Profile actual gameplay.
+
+Measure:
+
+- FPS
+- CPU frame time
+- GPU/rendering workload where visible
+- Batches
+- SetPass calls
+- Tris
+- Verts
+- GC allocations
+- Memory where relevant
+
+Do not claim performance based only on editor assumptions.
+
+==================================================
+63. TEST THE HEAVIEST REAL GAMEPLAY STATE
+==================================================
+
+Do not measure performance in an empty scene.
+
+Test while:
+
+- Environment visible
+- UI visible
+- Dragon active
+- Vehicles visible
+- Snake/yarn visible
+- Spools visible
+- Gameplay active
+
+Also test:
+
+- Vehicle moving
+- Vehicle turning
+- Yarn collecting
+- Spool rotating
+- Thumbs-up playing
+- Particle effect playing
+- Level-complete celebration
+
+These are more meaningful performance tests.
+
+==================================================
+64. PERFORMANCE ACCEPTANCE TARGETS
+==================================================
+
+Final targets:
+
+FPS:
+30 FPS minimum target
+
+Frame time:
+Approximately <= 33.3 ms
+
+Batches:
+Less than 200
+
+Tris:
+As low as reasonably possible
+
+Verts:
+As low as reasonably possible
+
+SetPass Calls:
+As low as reasonably possible
+
+GC:
+Avoid recurring per-frame garbage allocations during normal gameplay
+
+==================================================
+65. OPTIMIZATION PRIORITY
+==================================================
+
+If performance does not meet the target, profile first.
+
+Then optimize actual bottlenecks.
+
+Possible optimization order:
+
+1. Remove unnecessary runtime-created objects.
+2. Reduce duplicate materials.
+3. Reduce batches.
+4. Simplify repeated objects.
+5. Optimize snake segments.
+6. Reduce expensive transparency.
+7. Simplify shaders.
+8. Reduce unnecessary realtime shadows.
+9. Reduce particle count.
+10. Reduce mesh complexity.
+11. Optimize physics.
+12. Remove unnecessary Update methods.
+13. Pool repeated temporary objects.
+14. Optimize UI rebuilds.
+15. Optimize texture sizes.
+
+Do NOT blindly remove important reference effects before determining the actual problem.
+
+==================================================
+66. LEVEL RESET
+==================================================
+
+Restarting a level must correctly restore:
+
+- Vehicle positions
+- Vehicle rotations
+- Vehicle active states
+- Vehicle colors
+- Snake/yarn
+- Spools
+- Dragon
+- Tutorial
+- Particles
+- UI
+- Input
+- Puzzle state
+
+No state from the previous attempt should remain accidentally.
+
+==================================================
+67. NEXT-LEVEL TRANSITION
+==================================================
+
+When moving to the next level:
+
+Do NOT recreate the entire permanent environment/UI.
+
+Prefer:
+
+Finish current level
+        ↓
+Play celebration
+        ↓
+Reset reusable gameplay objects
+        ↓
+Load LevelData
+        ↓
+Configure vehicles
+        ↓
+Configure snake
+        ↓
+Configure spools
+        ↓
+Reset Dragon
+        ↓
+Update UI
+        ↓
+Fit camera
+        ↓
+Start next level
+
+==================================================
+68. PRESERVE WORKING FEATURES
+==================================================
+
+Do not unnecessarily break existing systems.
+
+Avoid:
+
+- Randomly renaming assets
+- Breaking prefab references
+- Removing scripts before checking dependencies
+- Deleting assets merely because they appear unused
+- Replacing working architecture with duplicates
+- Breaking existing integrations
+
+Make controlled changes.
+
+After major modifications, check compilation.
+
+==================================================
+69. DO NOT FAKE IMPORTANT FEATURES
+==================================================
+
+Do NOT replace important reference features with instant state changes.
+
+For example:
+
+BAD:
+
+vehicle.transform.position = slot.position;
+
+Instead of visible movement.
+
+BAD:
+
+yarn.SetActive(false);
+
+Instead of collection animation.
+
+BAD:
+
+thumb.SetActive(true);
+
+Instead of animated thumbs-up feedback.
+
+BAD:
+
+LoadNextLevel();
+
+immediately after final move without celebration.
+
+The important parts of the game need to visibly animate.
+
+==================================================
+70. IMPLEMENTATION PRIORITY
+==================================================
+
+Work in approximately this order:
+
+1. Inspect project.
+2. Inspect Art folder.
+3. Analyze full reference video.
+4. Understand existing architecture.
+5. Preserve/reuse working systems.
+6. Make permanent environment reusable.
+7. Make permanent UI reusable.
+8. Build/refine LevelData architecture.
+9. Implement accurate Level 1.
+10. Implement accurate Level 1 tutorial.
+11. Implement Level 2.
+12. Add actual puzzle difficulty.
+13. Implement reliable vehicle blocking.
+14. Reproduce vehicle-to-slot movement.
+15. Reproduce vehicle movement effects.
+16. Reproduce slot arrival.
+17. Reproduce vehicle turn toward spool.
+18. Reproduce spool animation.
+19. Reproduce progressive yarn collection.
+20. Add success/failure feedback.
+21. Add thumbs-up animation.
+22. Reproduce Dragon behavior.
+23. Add level completion particles.
+24. Add proper transitions.
+25. Implement responsive portrait camera.
+26. Implement responsive UI/Safe Area.
+27. Profile.
+28. Optimize batches/tris/verts/performance.
+29. Validate Level 1 and Level 2 from beginning to end.
+
+==================================================
+71. FINAL VALIDATION — LEVEL 1
+==================================================
+
+Complete Level 1 from start to finish.
+
+Verify:
+
+✓ Correct starting layout
+✓ Correct UI
+✓ Correct camera
+✓ Tutorial hand works
+✓ Tutorial animation works
+✓ Correct vehicle is guided
+✓ Vehicle movement looks like reference
+✓ Movement effects work
+✓ Vehicle reaches proper slot
+✓ Vehicle turns properly
+✓ Spool activates
+✓ Yarn collects visually
+✓ Positive feedback appears
+✓ Thumbs-up appears correctly
+✓ Dragon behavior is correct
+✓ Completion effect plays
+✓ Transition works
+✓ No Console errors
+
+==================================================
+72. FINAL VALIDATION — LEVEL 2
+==================================================
+
+Complete Level 2.
+
+Verify:
+
+✓ Correct layout
+✓ Correct number of vehicles
+✓ Correct colors
+✓ Actual puzzle logic
+✓ Vehicle blocking
+✓ Order matters
+✓ Random tapping is not a trivial solution
+✓ Correct slot behavior
+✓ Correct spool behavior
+✓ Correct yarn behavior
+✓ Correct success/failure feedback
+✓ Dragon behaves correctly
+✓ Completion particles work
+✓ Level completes cleanly
+
+==================================================
+73. VEHICLE SEQUENCE VALIDATION
+==================================================
+
+For every valid vehicle interaction verify this complete chain:
+
+Vehicle selected
+        ↓
+Path checked
+        ↓
+Vehicle leaves board
+        ↓
+Movement effect begins
+        ↓
+Vehicle moves toward slot
+        ↓
+Vehicle enters slot
+        ↓
+Vehicle aligns
+        ↓
+Arrival feedback
+        ↓
+Vehicle turns toward spool
+        ↓
+Spool activates
+        ↓
+Yarn starts collecting
+        ↓
+Yarn visually reduces/moves
+        ↓
+Collection completes
+        ↓
+Success feedback
+        ↓
+Thumbs-up
+        ↓
+Puzzle state updates
+        ↓
+Next move becomes available
+
+Do not skip stages that are visible in the reference.
+
+==================================================
+74. INVALID MOVE VALIDATION
+==================================================
+
+For an invalid move verify:
+
+Vehicle selected
+        ↓
+Move/path checked
+        ↓
+Invalid state detected
+        ↓
+Yarn does NOT collect
+        ↓
+Failure feedback plays
+        ↓
+Vehicle returns/remains as appropriate
+        ↓
+Puzzle state remains valid
+        ↓
+User can choose another vehicle
+
+==================================================
+75. PORTRAIT VALIDATION
+==================================================
+
+Test at several portrait aspect ratios.
+
+At minimum:
+
+✓ 9:16
+✓ approximately 9:18
+✓ approximately 9:19.5
+✓ approximately 9:20
+✓ approximately 9:21
+
+For each:
+
+✓ Entire required puzzle remains visible
+✓ UI remains visible
+✓ Safe Area works
+✓ Dragon visible
+✓ Vehicles visible
+✓ Snake visible
+✓ Slots visible
+✓ Spools visible
+✓ Tutorial visible
+✓ Thumbs-up visible
+✓ No serious UI overlap
+✓ No important object cropped
+
+==================================================
+76. PERFORMANCE VALIDATION
+==================================================
+
+During actual gameplay verify:
+
+✓ Target minimum approximately 30 FPS
+✓ Frame-time target approximately 33.3 ms or better
+✓ Batches stay under 200
+✓ Prefer batches substantially below 200 where practical
+✓ Tris minimized
+✓ Vertices minimized
+✓ SetPass calls minimized
+✓ Shared materials used
+✓ Duplicate material instances avoided
+✓ No unnecessary expensive shaders
+✓ No unnecessary physics every frame
+✓ No unnecessary Update methods
+✓ No major recurring garbage allocation
+✓ Particle effects remain lightweight
+✓ Yarn system remains optimized
+
+Check both normal gameplay and the heaviest visual moments.
+
+==================================================
+77. FINAL QUALITY TARGET
+==================================================
+
+The game should feel like:
+
+Observe puzzle
+        ↓
+Think
+        ↓
+Choose the correct vehicle/color
+        ↓
+Check route
+        ↓
+Vehicle moves
+        ↓
+Movement feedback plays
+        ↓
+Vehicle reaches slot
+        ↓
+Vehicle turns toward spool
+        ↓
+Spool activates
+        ↓
+Matching yarn collects
+        ↓
+Positive feedback
+        ↓
+Thumbs-up
+        ↓
+Puzzle changes
+        ↓
+Think about next move
+        ↓
+Complete puzzle
+        ↓
+Dragon/visual reaction
+        ↓
+Completion particles
+        ↓
+Smooth next-level transition
+
+The player must feel that their choices matter.
+
+==================================================
+78. HARD FINAL REQUIREMENTS
+==================================================
+
+Do not consider the task complete unless these have been addressed:
+
+GAMEPLAY:
+✓ Level 1 tutorial polished
+✓ Level 2 implemented
+✓ Real puzzle decisions
+✓ Vehicle blocking
+✓ Color/order logic
+✓ Random tapping not enough
+
+REFERENCE:
+✓ Complete video analyzed
+✓ Important animations reproduced
+✓ Different images use their appropriate animations
+✓ Timing reasonably follows reference
+
+VEHICLES:
+✓ Existing Art-folder vehicle assets used
+✓ Smooth movement
+✓ Movement effect
+✓ Correct slot path
+✓ Correct alignment
+✓ Turn toward spool
+
+YARN/SPOOL:
+✓ Spool animation
+✓ Progressive yarn collection
+✓ Snake/yarn visually reduces
+✓ Correct color logic
+✓ Success/failure behavior
+
+FEEDBACK:
+✓ Thumbs-up animation
+✓ Correct-move feedback
+✓ Wrong-move feedback
+✓ Completion particles
+
+DRAGON:
+✓ Existing Art-folder Dragon used
+✓ Correct relevant animations/reactions
+
+ARCHITECTURE:
+✓ Permanent UI not recreated every level
+✓ Permanent environment not recreated every level
+✓ Level data separated from core gameplay
+✓ Reusable prefabs/systems
+✓ No giant unnecessary all-in-one script
+
+RESPONSIVE DESIGN:
+✓ All common portrait aspect ratios supported
+✓ Safe Area supported
+✓ Camera adapts to aspect ratio
+✓ UI adapts correctly
+✓ Important gameplay remains visible
+
+PERFORMANCE:
+✓ Target minimum 30 FPS
+✓ Approximately 33.3 ms/frame or better target
+✓ Under 200 batches
+✓ Tris/verts minimized
+✓ Mobile-friendly shaders/materials
+✓ Repeated objects optimized
+✓ Unnecessary runtime Instantiate/Destroy reduced
+✓ No unnecessary repeated physics/update work
+
+==================================================
+79. IMPORTANT WORKING METHOD
+==================================================
+
+Do not blindly change many systems at once.
+
+Use this workflow:
+
+1. Inspect.
+2. Understand.
+3. Compare with reference.
+4. Plan.
+5. Modify.
+6. Compile.
+7. Test.
+8. Compare against video again.
+9. Fix differences.
+10. Profile.
+11. Optimize.
+12. Final validation.
+
+When implementation is complete, re-watch the reference video and compare the first two levels again.
+
+Do not stop merely because the project compiles.
+
+The result should visually and mechanically resemble the reference.
+
+==================================================
+80. FINAL PROJECT GOAL
+==================================================
+
+The final game should be a polished mobile portrait puzzle game based closely on the provided reference while using the existing Unity project and existing Art assets.
+
+Do not rebuild everything unnecessarily.
+
+Do not make the puzzle trivial.
+
+Do not skip important animations.
+
+Do not replace visual interactions with instant state changes.
+
+Do not add unnecessary multiplayer, leaderboards, clubs, seasonal systems, or other large meta features at this stage.
+
+The final priorities are:
+
+REFERENCE ACCURACY
++
+ACTUAL PUZZLE GAMEPLAY
++
+SMOOTH ANIMATIONS
++
+GOOD UI
++
+VEHICLE → SLOT → SPOOL → YARN FLOW
++
+DRAGON REACTIONS
++
+SUCCESS/FAILURE FEEDBACK
++
+THUMBS-UP FEEDBACK
++
+COMPLETION PARTICLES
++
+REUSABLE ARCHITECTURE
++
+ALL PORTRAIT ASPECT RATIOS
++
+SAFE AREA SUPPORT
++
+UNDER 200 BATCHES
++
+LOW TRIS/VERTS
++
+STABLE MINIMUM 30 FPS TARGET
++
+MOBILE OPTIMIZATION
+
+Do the implementation using the existing project as the foundation rather than creating a completely separate replacement game.

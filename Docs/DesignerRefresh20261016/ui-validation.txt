@@ -1,0 +1,1 @@
+slot 5 plus=True label=; slot 6 plus=True label=; slot 7 plus=True label=; after unlock plus5=False

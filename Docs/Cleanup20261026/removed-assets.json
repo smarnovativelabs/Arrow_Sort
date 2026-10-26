@@ -1,0 +1,687 @@
+{
+  "totalAssets": 1024,
+  "retained": 889,
+  "remove": [
+    {
+      "path": "Assets/Art/Materials/Dragon_Game_Background_Grass.mat",
+      "bytes": 3969,
+      "sha256": "c6732cbbf4fa6ae1868653a92d07176a0df8bb3e210236f88637bcce976dd01c"
+    },
+    {
+      "path": "Assets/Docs/AbilityProgression20261023/camera-phone-final.png",
+      "bytes": 462865,
+      "sha256": "bdbdec1d87f60a1010a702a3b54d3aacd04877e710163a3ca2d50dd4e2f4f04e"
+    },
+    {
+      "path": "Assets/Docs/AbilityProgression20261023/camera-phone.png",
+      "bytes": 517640,
+      "sha256": "15788f4d64e6bc6e582fce2a8f6bdcc874d9ba452b19f988c069bf953a302274"
+    },
+    {
+      "path": "Assets/Docs/AbilityProgression20261023/camera-tablet-final.png",
+      "bytes": 571046,
+      "sha256": "7d28b04bfc3ed5b4064abf252b451f2c4a5873022cb4442e2c154b75a6c4f662"
+    },
+    {
+      "path": "Assets/Docs/AbilityProgression20261023/camera-tablet.png",
+      "bytes": 511172,
+      "sha256": "6a00627cdccd2258880574fd784ffd938a1c78f7dea0ee178ff45cf633e6adac"
+    },
+    {
+      "path": "Assets/Docs/AbilityProgression20261023/level2-guide.png",
+      "bytes": 347153,
+      "sha256": "802b626d00b00967e6564a6cfb7871619dafa1ac990b1d93b01abbbccdbd0932"
+    },
+    {
+      "path": "Assets/Docs/CameraQA-20261022/before.png",
+      "bytes": 662427,
+      "sha256": "2e5a67fc749606f6c585bbcab8dec0d5e3f596893a0ecd23dff48ae28209e3c9"
+    },
+    {
+      "path": "Assets/Docs/CameraQA-20261022/compact-level1.png",
+      "bytes": 639538,
+      "sha256": "9c083ab8d4f7d511e494567b57b3c1c2e39686aa084f8e0d4aab121133b2fbc9"
+    },
+    {
+      "path": "Assets/Docs/CameraQA-20261022/flight-early.png",
+      "bytes": 1017533,
+      "sha256": "035b740b06dff6885dce1e459eee6278be3a8608fe6a8d304739b36f7b5f1a0b"
+    },
+    {
+      "path": "Assets/Docs/CameraQA-20261022/flight-fixed-early.png",
+      "bytes": 1022412,
+      "sha256": "feb9299328fdae757ea8df4f68a06590783aa2afc51e5b9de31752a6bd8d9756"
+    },
+    {
+      "path": "Assets/Docs/CameraQA-20261022/flight-fixed-middle.png",
+      "bytes": 1029453,
+      "sha256": "ae1d208389984ca29ad1cf941ae5aec501311255a372c2343d311c7948ec1a8f"
+    },
+    {
+      "path": "Assets/Docs/CameraQA-20261022/flight-sized.png",
+      "bytes": 1038205,
+      "sha256": "b319ca6392e1c7001b6628b31578c4c1efb334a5eb15c745c9c9a15bb39e5114"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/before.png",
+      "bytes": 396560,
+      "sha256": "5204aa56f887cbdc40d81c455d9c29a8295cc5f28c98a68b0d3537c00c46aadd"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/continuous-environment-phone.png",
+      "bytes": 684812,
+      "sha256": "b84e3211eca1b28d3468716dcfc9237bbf229ce1beff6dd33a9599b3d06f8288"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/continuous-environment.png",
+      "bytes": 483450,
+      "sha256": "1d55be35d63485e81bc6fdb188b34f9b0a80304d21b55658286c46cf51992768"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/final-phone.png",
+      "bytes": 666879,
+      "sha256": "5e6560d1462a70f3567c06888ef5d326f2554ea41655de5d5b17c17325badb16"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/fire-and-white-smoke.png",
+      "bytes": 786573,
+      "sha256": "144cda7ebb1ed45d955c70e48031bde5899c79f806bb419bdedf23d60b3a46a1"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/gameplay-settings.png",
+      "bytes": 405777,
+      "sha256": "dfefb3af93161211b780fabd3703d7575807abc0a50d295c0d96dcfe7dff4cb2"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/green-margins-final.png",
+      "bytes": 332731,
+      "sha256": "a6f53858a5d7937780fe9c71084726c61a6478e887b91edf0995b5d923ed663b"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/green-margins.png",
+      "bytes": 346615,
+      "sha256": "e95845870c401da98dafb638ddd45271d6e2a84435810a5cfeda3d304a5ecbc4"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/map-next-level.png",
+      "bytes": 1698041,
+      "sha256": "97969e1bc0f1fad65dad51eaf495c91cf60355502476fa49278fef60ff48a946"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/onboarding-profile.png",
+      "bytes": 533236,
+      "sha256": "c88e1e6642c5fac86344ee13943d19d8eb8a1c5c20e44dc583dc66ec32b8a54a"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/onboarding-welcome.png",
+      "bytes": 739618,
+      "sha256": "182c4afa3a241d252a1974967b0851eee9f0b75239c1f320dfcaa2976f4db945"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/phone-fog.png",
+      "bytes": 618946,
+      "sha256": "d671fd3f73d56f52dee50d974e26655a03ca65492cff848a23a7a5a58fd99359"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/phone.png",
+      "bytes": 409633,
+      "sha256": "fea323f154b092829c510f8058cba34bc82efb3ed0c9cf1f58b0af4b6dae4c0c"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/polish-final-fire.png",
+      "bytes": 735927,
+      "sha256": "899b402efcf8d98fe80a73403d45e828eb88305ff6e569fde5d41b917ba7e7db"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/slots-palette-final.png",
+      "bytes": 790913,
+      "sha256": "78f011bcf9ba732e0ff5bb663532acc584490ccd63cb031d37f88cf6cfd6f5e0"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/tablet-ui-fixed.png",
+      "bytes": 582484,
+      "sha256": "8a923c9284233b61d13c0a636ba4cafcd41b065f2b5b4fa193e0f7896e0c003d"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/tablet.png",
+      "bytes": 412870,
+      "sha256": "2cf0ed303e2876dad079de064f141deb86d67f8cbf99dad0dd785f48366697fa"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/tall-background-check.png",
+      "bytes": 305502,
+      "sha256": "15b76db4544e628ce9373410578f3a5256cad0aa11dddda4dddb7bf453bf4c90"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/tall-live.png",
+      "bytes": 252308,
+      "sha256": "53cc88fec8451001a1b77ebdf285ef1823828a9b7d62419383369f3827c67b67"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/tall-ui-fixed.png",
+      "bytes": 261231,
+      "sha256": "04a07839c6063cea11797071847303f7b77976a2dba35a8e346eb2b396327476"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/ui-tablet-final.png",
+      "bytes": 471473,
+      "sha256": "c3e258c3d0105592dde4a8f11d8532a5493a72f7765f63e694fa4e54163a6012"
+    },
+    {
+      "path": "Assets/Docs/CameraResponsive20261026/ui-tall-final.png",
+      "bytes": 264852,
+      "sha256": "99cd21d9fdcda725dd74ac69e23617ef70d4f33e4438dd7ecbc6681b1193f64a"
+    },
+    {
+      "path": "Assets/Docs/DailyTasks20261022/home-badges.png",
+      "bytes": 3187682,
+      "sha256": "df139893d68869b31a2b791ae70ee308934a9001a816a485089f6b6fa3c6bba7"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/AdPass-Offer.png",
+      "bytes": 1888939,
+      "sha256": "cd552dcb7965153bfb8327556c9fa23b8fed35141398d8058b2550b369dbe3bc"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/Foldable-PhysicalSafeArea.png",
+      "bytes": 3453122,
+      "sha256": "992ec35038495273e73d87bbbdbb09888d2e26297a262ef3b510699cc97dd32b"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/Home-Final.png",
+      "bytes": 1485100,
+      "sha256": "b5e345fa3a6c818a263648e1c8d3d7e0a2b9fc4eca6401270c016a0b729e4294"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/Home-FixedPose-SharpText.png",
+      "bytes": 1466217,
+      "sha256": "f463474432e936d6330131674dd33ae73459fdd1f3bb1847e99b8fc948918227"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/LuckySpin-Clean.png",
+      "bytes": 896069,
+      "sha256": "2ca4069db1acb8c88e14786def4375adbfedc7dde3528f613503a676dcd41e6d"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/LuckySpin-Final.png",
+      "bytes": 974469,
+      "sha256": "7ab723d7d45642a61ba357a81fd99f4ea778f0bc38b1a7de7cdba05ae7e7128f"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/LuckySpin-Repaired.png",
+      "bytes": 1071441,
+      "sha256": "274f695633add3e23d913ea121af41706bf9ed69585306f4943aea5fb41b91c0"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/Profile-Avatars.png",
+      "bytes": 622311,
+      "sha256": "613a226cfa2349b406b376fa801f25efa1e6f379f8d106ccb13d4b2abce568a9"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/Profile-Editor-Polished.png",
+      "bytes": 615315,
+      "sha256": "c32b1bd0417e32af0cb660dcf3f2e83b67855de041d1237f1a61a4844e08b3dd"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/Profile-Main.png",
+      "bytes": 917501,
+      "sha256": "a7339a1b728de29835b29b7432e638c8c6b03fcaf372b1013161b282bcffdabc"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/Profile.png",
+      "bytes": 622479,
+      "sha256": "2ff1b2d396fb8a1ba431325e49999111e56223cb88f7f4d8d0b8883fae4aa9dd"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/SpecialOffer.png",
+      "bytes": 1159693,
+      "sha256": "d51de688f41ae1c1c2f75af7bd68ab01979c6cdd6ee5dc49f7934df1ccb32a80"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/device-1080x1920.png",
+      "bytes": 2475296,
+      "sha256": "6545a38da6b9b594a61448cda86828ed3afb365c689c096b686e45a1b9f8aa8c"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/device-360x640.png",
+      "bytes": 435604,
+      "sha256": "fcdb13dee411dcf1c70c6f34e854b0f0bbd92555fe1deb5fe197ed1e4e340b2c"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/final-1170x2532-safe.png",
+      "bytes": 3717945,
+      "sha256": "21c4724ca9b1d54be6784b130cc51ac2356ffc19d3eb62181206a60d7d8cbcc4"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/final-360x640-safe.png",
+      "bytes": 433755,
+      "sha256": "fba110d756298d23b9dce27295354f3972296329e7d5503c3fbe9c5f7b2fed18"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/fixed-pose-1080x2400.png",
+      "bytes": 3164116,
+      "sha256": "f54ff1fcd482fa95c974b50d6621cd310dbb675a60d23ae6d7fcd50435e58585"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/fixed-pose-720x1280.png",
+      "bytes": 1466104,
+      "sha256": "cf6525dcb77dc0f956716840b0349e6d6eef41df55f4c2cf6302769cde7deef5"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/fixed-pose-768x1024.png",
+      "bytes": 1297881,
+      "sha256": "178ae77350a7b60e39c123db3988904802edd0ac8ddb3b0a9e5d221a235cbe3e"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/home-cloudless-wings.png",
+      "bytes": 1479722,
+      "sha256": "2ec867ff2d306cece5cb47805dd30033073c7bfd07111b73711536fdae0dc4a0"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/home-first.png",
+      "bytes": 2279074,
+      "sha256": "fc936e507e1ea310118209c54eef15f5f852cb480422b6f1a63e36a7c8294597"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/home-play.png",
+      "bytes": 2235848,
+      "sha256": "b55ea0f437ccf45e2c27ef4a5c09ac714371563543b7e0ca05721f8b20e4a6a7"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/phone-1080x2400-safe-final.png",
+      "bytes": 3373050,
+      "sha256": "5f63def209508b8bd0e7cf98e5e8511c32118906c5912ac73c85f0d00a1f5055"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/phone-1080x2400-safe.png",
+      "bytes": 3328500,
+      "sha256": "9154ffb078a069ad2be38547776718ff06c8cf4ff07ed4595b5b4d8beb3879d7"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/tablet-1536x2048-final.png",
+      "bytes": 4143711,
+      "sha256": "b9064c3115ce4bd847cee52ebd468af447427c0fb901b1c4162e6c36aad90161"
+    },
+    {
+      "path": "Assets/Docs/FantasyHome20261021/tablet-768x1024-safe.png",
+      "bytes": 1334794,
+      "sha256": "273382269544be8429a2bb029be3d6aa71c3902c15016093bdc41e8da21b8ecc"
+    },
+    {
+      "path": "Assets/Docs/LoadingScreen20261022/illustrated-tall.png",
+      "bytes": 961191,
+      "sha256": "4a97a334140f6c9ce906a98234a338feacdb0806709254efd20d9b4428710ede"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/final-offer-tablet.png",
+      "bytes": 643890,
+      "sha256": "e2d4f92806f391a87aba02ae381c2e34468fff84b37e6e1013150a269e1638b0"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/final-retry-phone.png",
+      "bytes": 724996,
+      "sha256": "c688a645db39ba5784239f2bac6e01d97c9358b2f4497c8488d2a5e0fdcea33d"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/final-retry-tablet.png",
+      "bytes": 537700,
+      "sha256": "cf34b118be5335870178efb57d70b234ab6d3ad2aa28c931c744b8c547486efa"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/new-offer.png",
+      "bytes": 992644,
+      "sha256": "bfbfc4e72221ab90c90e820451a19d45fb686020d22987b5e2f347db63bc8057"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/new-retry.png",
+      "bytes": 987463,
+      "sha256": "a99f75ab08af2fbc72027fd5f1c7a7c37f7278338ad0d8e3c79cbc7fbdcf6685"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/offer-final.png",
+      "bytes": 75423,
+      "sha256": "00cac8bd76beb7fbe31a25f7bdd5fc939c3d8cb2b913fa532efdf74aca690ce0"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/offer-ui.png",
+      "bytes": 137545,
+      "sha256": "0a77e2fd3fc77da4398e31c6acac159fff05a262e142a6712afc3d49d4d6b727"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/retry-ui.png",
+      "bytes": 490095,
+      "sha256": "62e9592cde55c80533f0e0760f38654cf51ca3309eaeb7871a58b6951a11b2ca"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/tall-retry-fixed.png",
+      "bytes": 440290,
+      "sha256": "5059498c990268368663eab89d259017d7ef23722f060d50a33a1df354a20602"
+    },
+    {
+      "path": "Assets/Docs/LossFlow20261023/tall-wallet.png",
+      "bytes": 625381,
+      "sha256": "5562175acbc13b4383b9839e9b0a151218a2001616edb8aaeb41c6267759ca3a"
+    },
+    {
+      "path": "Assets/Effects/Confetti Particles.prefab",
+      "bytes": 229306,
+      "sha256": "306658c1f120f112de8e82e81150583b79d51e539fb0f53cbf798a4213e7f415"
+    },
+    {
+      "path": "Assets/Effects/Material/confetti.mat",
+      "bytes": 2394,
+      "sha256": "97f32622af392768f4fea3bb6b47fb2513e39888d9cf38d1c71650057d6d70eb"
+    },
+    {
+      "path": "Assets/Effects/Material/sparkle.mat",
+      "bytes": 2054,
+      "sha256": "4429848f2de11f02bc1bc72aa8e61d04f9e253f7f09cabe3c7af37ba60e1c247"
+    },
+    {
+      "path": "Assets/Effects/SmokeExplosionWhite.prefab",
+      "bytes": 234682,
+      "sha256": "2f22a6c22dd5cf67a4d69cc65a03f032b6fea5a2c18db61ff7a1f4d976fd00bb"
+    },
+    {
+      "path": "Assets/Effects/SparkleEffect.prefab",
+      "bytes": 115472,
+      "sha256": "bcc24067f8ce1df7c1ffe976df72f2aafe7c2adf2e55885cdf852d6e5939de9f"
+    },
+    {
+      "path": "Assets/Effects/Texture/confetti.png",
+      "bytes": 75208,
+      "sha256": "a1a0bff45967666f426ee4f1733729966d0c32e657fe0464caff4b89c5116905"
+    },
+    {
+      "path": "Assets/Effects/Texture/sparkle.png",
+      "bytes": 22244,
+      "sha256": "74c2a40f4ad85def13006522a4c814eb39b4c8b3197b4ba1de15b8061ba61961"
+    },
+    {
+      "path": "Assets/Plugins/Android/mainTemplate.gradle.backup",
+      "bytes": 1976,
+      "sha256": "fc2eb42bda879054557ccf1e6cfbb4c8c948b6d3cc01d94fd547b637d91a70c1"
+    },
+    {
+      "path": "Assets/Prefabs/Slot 1.prefab",
+      "bytes": 333756,
+      "sha256": "c7f18818afe33836c14ea5dd766b5fdb28a9b9bfc5d68f206a779c2de4a1f0f5"
+    },
+    {
+      "path": "Assets/Scenes/Wool Crush.unity~RF4210e9a0.TMP",
+      "bytes": 7850005,
+      "sha256": "711b6be79e3f4968e5e31b687d24189c1e898da6bf2661f03bb99f3361f33416"
+    },
+    {
+      "path": "Assets/Scenes/Wool Crush.unity~RF45e264bc.TMP",
+      "bytes": 7854141,
+      "sha256": "2f23639f5d8d7aaf314297e208f03b64c5a687f5bff11c9e504c78591a003e7e"
+    },
+    {
+      "path": "Assets/Screenshots/current_state.png",
+      "bytes": 574175,
+      "sha256": "f858b4ba28f02e67ee33173784ad5f8fb33cb77b989c50388e08b20b32064c91"
+    },
+    {
+      "path": "Assets/Screenshots/dragon_level1_lifted.png",
+      "bytes": 729469,
+      "sha256": "59744604352edf5ab3cb426aa4f154ecd05d0e88b37a423a5f772ec415a7b481"
+    },
+    {
+      "path": "Assets/Screenshots/dragon_lifted_gameplay.png",
+      "bytes": 729469,
+      "sha256": "59744604352edf5ab3cb426aa4f154ecd05d0e88b37a423a5f772ec415a7b481"
+    },
+    {
+      "path": "Assets/Screenshots/head_adjusted_forward_and_down.png",
+      "bytes": 798164,
+      "sha256": "3d868077b4057aee0ecbb12dcedbda2c4c9f8d71d70f8f32f6d513fd380deaf0"
+    },
+    {
+      "path": "Assets/Screenshots/level1_playing_lifted.png",
+      "bytes": 795392,
+      "sha256": "270da1dd3c2e67feb9c817660655dc9ac8a3de5d4880b38afe675f6e4d776280"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-103550.png",
+      "bytes": 2565641,
+      "sha256": "6d876ab081774f193e3ae7777c7735fc13094351a29b744905057d474872bb70"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-103820.png",
+      "bytes": 2122788,
+      "sha256": "0233bd8c8f2c62c758de93f378d103d5e2fe1c0840e8b0ce3552509e6a566689"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-103919.png",
+      "bytes": 2231929,
+      "sha256": "9dc2fd940c04ef273e80347fc13cf1e340df8f01fbb7b2f5d3d19bbaecb03c94"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-104157.png",
+      "bytes": 2343522,
+      "sha256": "94478e7a68c52a102b496a292fa38b0c19f4d99ef2218919026bfe721522e059"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-104336.png",
+      "bytes": 1437092,
+      "sha256": "67f96595e7347dd80808f7b96f9bda3b5fd22ecbe620ec70a9d4fec136b83bc8"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-104459.png",
+      "bytes": 1418912,
+      "sha256": "02852871cb972dbfa2e667b75fb81cb229930504d3158a223b13d42785cb308a"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-105714.png",
+      "bytes": 1341972,
+      "sha256": "3647cf7f9372b8dae2becc5e77b0a80a9a942efb60a55cfb47b86cde5ca4caab"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-105900.png",
+      "bytes": 1398434,
+      "sha256": "5e91939f6471dbd7bd60d042c1dabe33d62920b81cc957f994d13cf71acc5cf5"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-105913.png",
+      "bytes": 1543187,
+      "sha256": "0a199363bcb3aea20598fea0eb620db35945cea032089c46b29e72eeb1deb1ab"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-110940.png",
+      "bytes": 1192059,
+      "sha256": "4fe9ee36f96b56b12d1c7dc4e753ef6990a370b1cdca66c04f1171ca198843e5"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-121028.png",
+      "bytes": 165995,
+      "sha256": "aa27c657151270845f79e21440673ef2f7ba6bcefa45afc3ce4a39d9ed9743bd"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-121113.png",
+      "bytes": 162067,
+      "sha256": "f5f017c68e0d4c20f2595e2354b501df1cbe6bffaa050cb42a4139654dc16ae9"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-121436.png",
+      "bytes": 317633,
+      "sha256": "32172ee0af2dbfefbf216b41a06604bbcc40ae37800b2422bf45708ab4a06f55"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-121441.png",
+      "bytes": 1419462,
+      "sha256": "1062f9a1ff0edd80badd17271728c0362513a9a024f2cda8089218c7cac3199a"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20261021-122242.png",
+      "bytes": 185922,
+      "sha256": "8db34a2af3f73d017f4dd588b3a5c3f911ffa6fc021e0b4b84a0ce3047061791"
+    },
+    {
+      "path": "Assets/Screenshots/three_cameras_view.png",
+      "bytes": 81167,
+      "sha256": "132577eddd059d94c1c1cf7aa34ddbd943f57aa3208f0314e2bbe49eb512af26"
+    },
+    {
+      "path": "Assets/Screenshots/ui_current.png",
+      "bytes": 2402947,
+      "sha256": "4450eed8cf19d2e6ea7071f3fe018725cd54d41e6a68a3df3ef70d04f1153b3b"
+    },
+    {
+      "path": "Assets/Screenshots/ui_home.png",
+      "bytes": 2066378,
+      "sha256": "0584d510dbcc575ab96697e8b03ab80888423aefc6223810260ec0bfe7ff72e3"
+    },
+    {
+      "path": "Assets/Screenshots/ui_level4.png",
+      "bytes": 2802414,
+      "sha256": "c5c68a1d254c448fd4c49900b2643c492f1e8326f8800c5db501072418b90c78"
+    },
+    {
+      "path": "Assets/Screenshots/ui_tutorial.png",
+      "bytes": 2396598,
+      "sha256": "a9581ee4033b249c0c694a3f9c761ba860e69259bd20b9351ec0f0bbaed26930"
+    },
+    {
+      "path": "Assets/Screenshots/updated_snake_gameplay.png",
+      "bytes": 900760,
+      "sha256": "30f2bc11f95fc88e00bbc1679bd30ef119179c24044db65dcf79b6d77a1cf3b8"
+    },
+    {
+      "path": "Assets/Temp/arrow-check.png",
+      "bytes": 687325,
+      "sha256": "ecf5c5e71eeed1bf7230cf84effc0aa15b7a1167b5ee2f701c3d9e78dee0a465"
+    },
+    {
+      "path": "Assets/Temp/arrow-visible.png",
+      "bytes": 645829,
+      "sha256": "1a258bdab1818c5add07de6b3a0855e1c8bdfd0e8f0345d3b500b3164ede42c4"
+    },
+    {
+      "path": "Assets/Temp/board-after.png",
+      "bytes": 707229,
+      "sha256": "306aa9e6468a6dff997b019c722bd4295f2c272a00f91a803279e8b381e189b6"
+    },
+    {
+      "path": "Assets/Temp/board-baseline.png",
+      "bytes": 621363,
+      "sha256": "18707443f80869703e1a6cc44056f19493e776f386493bcc5b9aa9776e700b6a"
+    },
+    {
+      "path": "Assets/Temp/board10.png",
+      "bytes": 654513,
+      "sha256": "003c69191031d660708d0f17de42d6b8c25bdb86a6f81b47a78e90f9fb270990"
+    },
+    {
+      "path": "Assets/Temp/bottom-before.png",
+      "bytes": 244021,
+      "sha256": "33457409c9c22e01aacc09bc355d91b6ffa4a8f01e241b21e9ab9a9b0cf2b0fc"
+    },
+    {
+      "path": "Assets/Temp/final-arrow.png",
+      "bytes": 702630,
+      "sha256": "5b5be8d74f94ae40c0af9dd153886ac1934765586a230f7494e88f0328a1abc3"
+    },
+    {
+      "path": "Assets/Temp/final-board.png",
+      "bytes": 700143,
+      "sha256": "9888cdb062ed73e78bf3a0b51f0b61251fdadb8fc67d4384c46ad98a56bce2cb"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-0.asset",
+      "bytes": 4874,
+      "sha256": "897d1a9be0c8f8336f17bcd32e90161e48896b833d18ef0313c4dbf229492b6a"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-1.asset",
+      "bytes": 4873,
+      "sha256": "570ba6c679669a64cf207c663a038930cd3ef026b6ca3314ce72a5a5fd3cabd9"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-2.asset",
+      "bytes": 4871,
+      "sha256": "b9da29eeef3decc2d771f9e9f2733fbcc543e963515765154a8956a0cce4dda5"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-3.asset",
+      "bytes": 4911,
+      "sha256": "67194ef3ebe5e60b322d0a5e83af5ab942ff77f675fa0a2d649a10db06c5e3fa"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-4.asset",
+      "bytes": 4901,
+      "sha256": "531e61e2d03a17165617e54d0b986e187546990e18b7d3b34f75bf3dabc78536"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-5.asset",
+      "bytes": 4881,
+      "sha256": "c08f64061bdadbf6fb0c3e323ad57a3fe86facf978b52465fa2293c472c3a7e0"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-6.asset",
+      "bytes": 4898,
+      "sha256": "21242906ab7dc406650ded6025911d207de5b338ec793bc28b2d3c91010482c5"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-7.asset",
+      "bytes": 4930,
+      "sha256": "d45caec5f4c0fc6830e61a91cf9934afa011d4b7577a2e1df77103d798e9b26a"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISkin-8.asset",
+      "bytes": 4897,
+      "sha256": "8dc50abd54411ac78cf30c7f806e94c9f7e3febfa6eefbb73d5f82d109600214"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-32.asset",
+      "bytes": 7356,
+      "sha256": "85bd25af1cf1a58d4d9126545a4498ae98316c2635f1b93063d1130cbc652a7b"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-33.asset",
+      "bytes": 7448,
+      "sha256": "5d36e8900f6adbf3b9484f29d6cdb31dccfe2124b948b1db83bc67e2a6e22b56"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-34.asset",
+      "bytes": 13102,
+      "sha256": "8558773a673de833c706a8805e9d4934f8ef5260907eced42c2e274955ad0e01"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-35.asset",
+      "bytes": 12490,
+      "sha256": "7308bafb2e0da2f78bc557f242be76d0b3683e48623da30906b08ba7a33b89d8"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-36.asset",
+      "bytes": 14346,
+      "sha256": "eff05f776f9b636176e23b5721983506e8846b6b3da7883c60af7361f7970eaa"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-37.asset",
+      "bytes": 6696,
+      "sha256": "b7f6767d5d60600c618cc2825a03c5eda01ebe1c59e52702831264079c0a0212"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-38.asset",
+      "bytes": 7158,
+      "sha256": "28d433f22e4667c3235542b63c4810fc5440cf1bfaa5ed16d7549c9ab6962bef"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-39.asset",
+      "bytes": 10398,
+      "sha256": "84e1bb5c79200d00bb54555d4a49059d8e1b3a29a6fa91e09013eeae15db4acb"
+    },
+    {
+      "path": "Assets/WoolGame/Authored/UISprite-40.asset",
+      "bytes": 7404,
+      "sha256": "3365f9bb75d9fd93ec181ff9ab9a01b22740c230dad854308a56e4b57d56a297"
+    },
+    {
+      "path": "Assets/Sounds/Pixabay/MenuCalm.mp3",
+      "bytes": 3025188,
+      "sha256": "604f1b842ffff58a96d9de06a4f59095ab491c873ae5eeefdc463826c7e25937"
+    }
+  ],
+  "removedBytes": 135109661
+}

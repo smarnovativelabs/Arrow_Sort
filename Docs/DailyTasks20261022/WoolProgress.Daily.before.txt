@@ -1,0 +1,52 @@
+using System;
+using UnityEngine;
+namespace WoolGame
+{
+    public static partial class WoolProgress
+    {
+        [Serializable] sealed class DailyRecord
+        {
+            public string day;
+            public int wins,colorMask,claims;
+            public float wool;
+            public bool spun;
+            public int spinReward;
+            public int spinSlot=-1;
+        }
+        public static readonly string[] DailyTitles={"Rescue 3 duck families","Collect 100 wool","Match 4 different colors"};
+        public static readonly int[] DailyTargets={3,100,4};
+        public static readonly int[] DailyRewards={100,75,75};
+        static DailyRecord Daily
+        {
+            get
+            {
+                EnsureLoaded();string today=DateTime.Now.ToString("yyyy-MM-dd",System.Globalization.CultureInfo.InvariantCulture);
+                // Do not re-grant rewards when the device clock moves backwards.
+                if(data.daily==null||string.CompareOrdinal(today,data.daily.day)>0)data.daily=new DailyRecord{day=today};
+                return data.daily;
+            }
+        }
+        public static int DailyCount(int task)
+        {
+            var daily=Daily;
+            if(task==0)return daily.wins;if(task==1)return Mathf.FloorToInt(daily.wool+.001f);
+            int n=0;for(int mask=daily.colorMask;mask!=0;mask>>=1)n+=mask&1;return n;
+        }
+        public static bool DailyClaimed(int task)=>task>=0&&task<3&&(Daily.claims&(1<<task))!=0;
+        public static bool ClaimDailyTask(int task)
+        {
+            if(task<0||task>=3||DailyClaimed(task)||DailyCount(task)<DailyTargets[task])return false;
+            Daily.claims|=1<<task;data.coins+=DailyRewards[task];data.collectedCoins+=DailyRewards[task];Save();return true;
+        }
+        public static void RecordDailyWool(int color,float amount)
+        {
+            if(amount<=0||color<0||color>=WoolArt.Palette.Length)return;
+            Daily.wool+=amount;Daily.colorMask|=1<<color;
+        }
+        public static TimeSpan DailyResetIn=>DateTime.Now.Date.AddDays(1)-DateTime.Now;
+        public static bool NoAdsActive { get { EnsureLoaded();return data.noAdsUntilUnix>0&&(!WoolTrustedClock.Ready||WoolTrustedClock.UnixNow<data.noAdsUntilUnix); } }
+        public static TimeSpan NoAdsRemaining { get { EnsureLoaded();return TimeSpan.FromSeconds(WoolTrustedClock.Ready?Math.Max(0,data.noAdsUntilUnix-WoolTrustedClock.UnixNow):0); } }
+        public static void Flush(){if(data!=null)Save();}
+    }
+}
+

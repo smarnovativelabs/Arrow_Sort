@@ -1,0 +1,150 @@
+using System;
+using System.IO;
+using TMPro;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.UI;
+using WoolGame;
+public static class AuthorDailyTasks
+{
+    static string dir="Assets/WoolGame/Designer/UI/DailyTasks";
+    static Texture2D texture;
+    static TMP_FontAsset font;
+    static Sprite rounded;
+    static Color H(string c)=>WoolArt.Hex(c);
+    public static string Main()
+    {
+        if(Application.isPlaying)throw new Exception("Author in Edit Mode");
+        Directory.CreateDirectory(dir);
+        string image=dir+"/Reference.png";
+        if(!File.Exists(image))File.Copy(@"C:\Users\Muneeb Nazir\Downloads\Glossy Daily Tasks Duck Game UI.png",image);
+        AssetDatabase.ImportAsset(image,ImportAssetOptions.ForceSynchronousImport);
+        var importer=(TextureImporter)AssetImporter.GetAtPath(image);importer.textureType=TextureImporterType.Sprite;importer.spriteImportMode=SpriteImportMode.Single;importer.maxTextureSize=2048;importer.textureCompression=TextureImporterCompression.Uncompressed;importer.mipmapEnabled=false;importer.SaveAndReimport();
+        texture=AssetDatabase.LoadAssetAtPath<Texture2D>(image);
+        var h=UnityEngine.Object.FindAnyObjectByType<WoolHud>();var so=new SerializedObject(h);
+        rounded=(Sprite)so.FindProperty("rounded").objectReferenceValue;
+        font=AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/WoolGame/Fonts/LilitaOne-HomeSharp.asset");
+        if(!font)font=TMP_Settings.defaultFontAsset;
+        var panel=(GameObject)so.FindProperty("dailyPanel").objectReferenceValue;
+        // Preserve the old authored panel for rollback; replace only this feature's contents.
+        foreach(Transform child in panel.transform)child.gameObject.SetActive(false);
+        var old=panel.transform.Find("Daily tasks live");if(old)UnityEngine.Object.DestroyImmediate(old.gameObject);
+        var card=Rect("Daily tasks live",panel.transform,0,0,941,1672);card.anchorMin=card.anchorMax=new Vector2(.5f,.5f);card.anchoredPosition=Vector2.zero;
+        var view=panel.GetComponent<WoolDailyTasks>();if(!view)view=panel.AddComponent<WoolDailyTasks>();
+        view.card=card;view.font=font;
+        Box("Navy background",card,0,0,941,1672,"192D55",false);
+        Picture("Duck and header artwork",card,Crop("HeaderAndDuck",0,0,941,548),0,0,941,548);
+        view.duck=Picture("Duck writing pose",card,Crop("DuckPose",78,135,325,405),78,135,325,405);
+        // The original two-chest board is fully covered by this independent single-chest card.
+        Surface("Single chest board",card,401,139,486,371,WoolSpinSurface.Kind.CreamCard);
+        Text("Weekly caption",card,"COLLECT CREDITS",440,153,408,42,31,H("71370E"));
+        view.chestTotal=Text("Chest credits",card,"0 / 700",446,196,397,57,49,H("71370E"));
+        view.chest=Button("700 credit chest",card,547,266,190,158,"",null);
+        Picture("One chest",view.chest.transform,Crop("Chest",475,318,144,105),0,0,190,139);
+        Text("Chest coin reward",card,"500 COINS",481,415,322,53,44,H("71370E"));
+        view.message=Text("Chest hint",card,"Saved across daily resets",448,459,400,43,24,H("996B39"));
+        // Writing overlay: the pencil and hand move over a separate paper sheet on the duck's clipboard.
+        view.notebook=Box("Notebook paper",card,308,362,61,62,"FFE8AC",false);
+        view.notebook.localRotation=Quaternion.Euler(0,0,-13);
+        view.ink=new Image[3];for(int i=0;i<3;i++)view.ink[i]=Box("Written line "+i,view.notebook,10,16+i*13,34-i*4,3,"85542F",false).GetComponent<Image>();
+        view.writingHand=Box("Writing wing",card,344,385,36,25,"FFD430",false);
+        view.pencil=Rect("Writing pencil",card,334,345,13,73);view.pencil.localRotation=Quaternion.Euler(0,0,-28);
+        Box("Red pencil",view.pencil,0,7,13,53,"F24A26",false);Box("Pencil tip",view.pencil,1,60,11,13,"744123",false);Box("Eraser",view.pencil,0,0,13,9,"FFE9C2",false);
+        view.pencil.gameObject.SetActive(false);view.writingHand.gameObject.SetActive(false);foreach(var line in view.ink)line.gameObject.SetActive(false);
+        view.close=Button("Close daily tasks",card,790,21,112,112,"",null);
+        view.info=Button("Daily tasks information",card,52,28,101,101,"",null);
+        Box("Reward band gold border",card,2,547,937,226,"FFC91D",false);
+        Gradient("Reward band",card,8,559,925,207,"008CDF","00469D","FFD640",30,2);
+        Picture("Daily Reward title",card,Crop("RewardTitle",263,516,418,76),263,516,418,76);
+        Box("Reward track border",card,107,685,745,42,"FFE651",false);
+        Box("Reward track background",card,112,691,735,30,"263970",false);
+        var fill=Box("Daily green fill",card,112,691,735,30,"30E800",false).GetComponent<Image>();
+        fill.type=Image.Type.Filled;fill.fillMethod=Image.FillMethod.Horizontal;fill.fillOrigin=0;fill.fillAmount=0;view.dailyFill=fill;
+        view.creditSprite=Crop("CleanCreditCrown2",720,805,65,60);
+        var creditMat=KeyMaterial("CreditIcon",new Color(.45f,.28f,.96f),.25f);
+        Picture("Credit emblem",card,view.creditSprite,72,647,82,79).GetComponent<Image>().material=creditMat;
+        view.creditTarget=Box("Credit collection point",card,103,697,18,18,"EFFF8C",false);
+        view.dailyTotal=Text("Daily credits",card,"0/100",35,714,169,48,39,Color.white);Outline(view.dailyTotal,H("132033"));
+        view.gifts=new Button[4];view.giftArt=new Image[4];view.giftLabels=new TMP_Text[4];
+        int[] giftX={400,586,789};int[] giftW={88,88,91};
+        for(int i=0;i<4;i++)
+        {
+            float x=240+i*184;
+            view.gifts[i]=Button("Gift "+(i+1),card,x,597,112,124,"",null);
+            int art=i==0?0:i-1;
+            var g=Picture("Gift artwork",view.gifts[i].transform,Crop("CleanGiftArt"+art,giftX[art],592,giftW[art],72),9,0,95,91);
+            g.GetComponent<Image>().material=KeyMaterial("GiftIcon",new Color(.005f,.39f,.73f),.20f);
+            view.giftArt[i]=g.GetComponent<Image>();
+            view.giftLabels[i]=Text("Milestone",view.gifts[i].transform,((i+1)*25).ToString(),0,82,112,46,43,Color.white);Outline(view.giftLabels[i],H("1C164E"));
+        }
+        Box("Countdown pill",card,355,742,231,49,"DC292A",false);
+        view.timer=Text("Midnight countdown",card,"00:00:00",361,743,219,45,33,Color.white);
+        view.rows=new RectTransform[6];view.rowArt=new Graphic[6];view.fills=new Image[6];view.claims=new Button[6];view.counts=new TMP_Text[6];view.claimLabels=new TMP_Text[6];
+        int[] ys={802,941,1081,1223,1371,1519};
+        for(int i=0;i<6;i++)
+        {
+            var row=Rect("Daily task "+i,card,24,800+i*143,893,132);view.rows[i]=row;
+            var bg=Gradient("Task cream",row,0,0,893,132,"FFF8ED","FFE0B4","F8D6A6",27,3);view.rowArt[i]=bg.GetComponent<WoolDailySurface>();
+            Picture("Task icon",row,Crop("TaskIcon"+i,37,ys[i]+5,142,112),12,9,142,112);
+            var title=Text("Task title",row,WoolDailyTaskState.Titles[i],165,7,482,52,36,H("100B61"));title.alignment=TextAlignmentOptions.Left;
+            Box("Task progress background",row,176,80,350,31,"C99667",false);
+            var bar=Box("Task green progress",row,176,80,350,31,"25EF08",false).GetComponent<Image>();bar.type=Image.Type.Filled;bar.fillMethod=Image.FillMethod.Horizontal;bar.fillOrigin=0;view.fills[i]=bar;
+            view.counts[i]=Text("Task count",row,"0/"+WoolDailyTaskState.Targets[i],176,76,350,39,29,Color.white);Outline(view.counts[i],H("713217"));
+            Gradient("Credit award panel",row,653,0,240,132,"9980FF","5031CF","B4A1FF",24,3);
+            Picture("Credit icon",row,view.creditSprite,680,5,57,55).GetComponent<Image>().material=creditMat;
+            Text("Task credits",row,"x"+WoolDailyTaskState.Credits[i],746,5,130,55,40,Color.white);
+            view.claims[i]=Button("Collect task "+i,row,684,67,191,57,"Go",H("FFAB08"));
+            view.claimLabels[i]=view.claims[i].GetComponentInChildren<TMP_Text>();view.claimLabels[i].fontSize=32;
+        }
+
+        view.preview=Rect("Gift preview",card,0,0,941,1672).gameObject;
+        view.preview.GetComponent<RectTransform>().anchorMin=view.preview.GetComponent<RectTransform>().anchorMax=new Vector2(.5f,.5f);view.preview.GetComponent<RectTransform>().anchoredPosition=Vector2.zero;
+        var shield=view.preview.AddComponent<Image>();shield.color=new Color(0,0,0,.25f);shield.raycastTarget=true;
+        view.previewCard=Surface("Reward preview card",view.preview.transform,0,0,326,250,WoolSpinSurface.Kind.CreamCard);
+        view.previewCard.anchorMin=view.previewCard.anchorMax=new Vector2(0,1);
+        view.coinSprite=Crop("Coins",48,950,117,98);
+        Picture("Reward coins",view.previewCard,view.coinSprite,25,25,88,82);
+        view.previewAmount=Text("Reward amount",view.previewCard,"20 COINS",114,24,193,82,35,H("713217"));
+        view.previewCollect=Button("Collect gift",view.previewCard,37,146,252,74,"COLLECT",H("55C721"));
+        view.previewClose=Button("Close gift preview",view.previewCard,268,0,52,44,"×",H("EF5B2C"));
+        view.preview.SetActive(false);
+        so.FindProperty("dailyTasksView").objectReferenceValue=view;
+        so.FindProperty("dailyClaims").arraySize=0;so.FindProperty("dailyCounts").arraySize=0;so.FindProperty("dailyFills").arraySize=0;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        h.ConfigureInputTargets();shield.raycastTarget=true;
+        EditorUtility.SetDirty(view);EditorUtility.SetDirty(h);panel.SetActive(false);
+        EditorSceneManager.MarkSceneDirty(h.gameObject.scene);EditorSceneManager.SaveScene(h.gameObject.scene);AssetDatabase.SaveAssets();
+        return "Authored daily panel: six task rows, 4 gift previews, one 700-credit chest, editable progress and writing layers.";
+    }
+    static Sprite Crop(string name,int x,int y,int w,int h)
+    {
+        string path=dir+"/"+name+".asset";var s=AssetDatabase.LoadAssetAtPath<Sprite>(path);if(s)return s;
+        s=Sprite.Create(texture,new Rect(x,texture.height-y-h,w,h),new Vector2(.5f,.5f),100,0,SpriteMeshType.FullRect);s.name=name;AssetDatabase.CreateAsset(s,path);return s;
+    }
+    static RectTransform Rect(string name,Transform parent,float x,float y,float w,float h)
+    {
+        var rt=new GameObject(name,typeof(RectTransform)).GetComponent<RectTransform>();rt.SetParent(parent,false);rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=new Vector2(.5f,.5f);rt.sizeDelta=new Vector2(w,h);rt.anchoredPosition=new Vector2(x+w/2,-y-h/2);return rt;
+    }
+    static RectTransform Picture(string name,Transform parent,Sprite sprite,float x,float y,float w,float h)
+    {var rt=Rect(name,parent,x,y,w,h);var im=rt.gameObject.AddComponent<Image>();im.sprite=sprite;im.raycastTarget=false;return rt;}
+    static RectTransform Box(string name,Transform parent,float x,float y,float w,float h,string color,bool ray)
+    {var rt=Rect(name,parent,x,y,w,h);var im=rt.gameObject.AddComponent<Image>();im.sprite=rounded;im.type=Image.Type.Sliced;im.color=H(color);im.raycastTarget=ray;return rt;}
+    static RectTransform Surface(string name,Transform parent,float x,float y,float w,float h,WoolSpinSurface.Kind kind)
+    {var rt=Rect(name,parent,x,y,w,h);var im=rt.gameObject.AddComponent<WoolSpinSurface>();im.kind=kind;im.raycastTarget=false;return rt;}
+    static TMP_Text Text(string name,Transform parent,string value,float x,float y,float w,float h,int size,Color color)
+    {var rt=Rect(name,parent,x,y,w,h);var t=rt.gameObject.AddComponent<TextMeshProUGUI>();t.font=font;t.text=value;t.fontSize=size;t.fontSizeMax=size;t.fontSizeMin=size*.68f;t.enableAutoSizing=true;t.alignment=TextAlignmentOptions.Center;t.color=color;t.raycastTarget=false;t.extraPadding=true;return t;}
+    static void Outline(TMP_Text t,Color c){t.fontMaterial=new Material(t.fontSharedMaterial);t.outlineColor=c;t.outlineWidth=.16f;}
+    static RectTransform Gradient(string name,Transform parent,float x,float y,float w,float h,string top,string bottom,string border,float radius,float stroke)
+    {var rt=Rect(name,parent,x,y,w,h);var g=rt.gameObject.AddComponent<WoolDailySurface>();g.top=H(top);g.bottom=H(bottom);g.border=H(border);g.radius=radius;g.stroke=stroke;g.raycastTarget=false;return rt;}
+    static Material KeyMaterial(string name,Color color,float tolerance)
+    {string path=dir+"/"+name+".mat";var m=AssetDatabase.LoadAssetAtPath<Material>(path);if(!m){m=new Material(Shader.Find("WoolGame/UI/DailyIconKey"));AssetDatabase.CreateAsset(m,path);}m.SetColor("_KeyColor",color);m.SetFloat("_Tolerance",tolerance);m.SetFloat("_Softness",.045f);EditorUtility.SetDirty(m);return m;}
+    static Button Button(string name,Transform parent,float x,float y,float w,float h,string label,Color? color)
+    {
+        var rt=Rect(name,parent,x,y,w,h);var im=rt.gameObject.AddComponent<Image>();im.sprite=rounded;im.type=Image.Type.Sliced;im.color=color??Color.clear;im.raycastTarget=true;
+        var b=rt.gameObject.AddComponent<Button>();b.targetGraphic=im;var colors=b.colors;colors.pressedColor=new Color(.8f,.85f,.9f);b.colors=colors;
+        if(color.HasValue){im.color=Color.clear;var g=Gradient("Glossy button face",rt,0,0,w,h,"FFD33B","F68B06","FFF09D",20,3);g.SetAsFirstSibling();}
+        if(label.Length>0)Text("Caption",rt,label,4,2,w-8,h-4,35,Color.white);return b;
+    }
+}
+

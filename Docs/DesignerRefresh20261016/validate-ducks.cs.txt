@@ -1,0 +1,25 @@
+if(!UnityEditor.EditorApplication.isPlaying)return "NOT PLAYING";
+var g=UnityEngine.Object.FindFirstObjectByType<WoolGame.WoolGameController>();g.automatedInput=true;
+var lines=new System.Collections.Generic.List<string>();
+System.Action<bool,string> require=(ok,msg)=>{if(!ok)throw new System.Exception(msg);};
+for(int level=1;level<=10;level++){
+ g.LoadLevel(level);var d=g.rig.duckRescue;float length=g.rig.route.Length;
+ require(d.ClearStandingPoint(d.MotherDistance),"Initial stop in fog");
+ d.Tick(.1f,0,.15f);require(d.EscapeStage==0&&!d.Walking,"Fled before approach");
+ float old=d.MotherDistance;d.Tick(.02f,old-d.approachDistance+.01f,.15f);
+ require(d.EscapeStage==1&&d.Walking,"First escape not started");
+ for(int i=0;i<4000&&d.Walking;i++){d.Tick(.02f,old-d.approachDistance,.15f);require(d.BabyDistance>d.MotherDistance,"Baby not leading");}
+ require(!d.Walking&&d.MotherDistance>old&&d.MotherDistance<length-d.babyLead,"Intermediate stop invalid");
+ require(d.ClearStandingPoint(d.MotherDistance),"Intermediate stop in fog");old=d.MotherDistance;d.Tick(.02f,old-d.approachDistance+.01f,.15f);
+ require(d.EscapeStage==2&&d.Walking,"Final escape not started");
+ for(int i=0;i<4000&&d.Walking;i++)d.Tick(.02f,old-d.approachDistance,.15f);
+ require(!d.Walking&&UnityEngine.Mathf.Abs(d.BabyDistance-length)<.001f,"Endpoint mismatch");
+ require(d.ClearStandingPoint(d.MotherDistance),"Final stop in fog");d.Tick(.1f,0,.15f);require(d.EscapeStage==2,"Dragon retreat reset escape");
+ lines.Add("Level "+level+": fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.");
+}
+g.LoadLevel(3);var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+g.GetType().GetField("paused",flags).SetValue(g,true);
+System.IO.File.WriteAllLines("Docs/DesignerRefresh20261016/duck-validation.txt",lines);
+return string.Join("\n",lines);
+
+

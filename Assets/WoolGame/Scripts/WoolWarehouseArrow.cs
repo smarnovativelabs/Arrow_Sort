@@ -1,0 +1,5 @@
+using UnityEngine;using UnityEngine.UI;namespace WoolGame{public sealed class WoolWarehouseArrow:MaskableGraphic{
+ protected override void OnPopulateMesh(VertexHelper vh){vh.Clear();float w=rectTransform.rect.width*.22f,h=rectTransform.rect.height*.23f;Add(vh,new Vector2(-w,-h*1.8f),new Vector2(w,-h*1.8f),new Vector2(w,h*.3f),new Vector2(-w,h*.3f));int n=vh.currentVertCount;vh.AddVert(new Vector3(-w*2,h*.2f),Color.white,Vector2.zero);vh.AddVert(new Vector3(w*2,h*.2f),Color.white,Vector2.zero);vh.AddVert(new Vector3(0,h*2),Color.white,Vector2.zero);vh.AddTriangle(n,n+1,n+2);}
+ void Add(VertexHelper v,Vector2 a,Vector2 b,Vector2 c,Vector2 d){int n=v.currentVertCount;v.AddVert(a,Color.white,Vector2.zero);v.AddVert(b,Color.white,Vector2.zero);v.AddVert(c,Color.white,Vector2.zero);v.AddVert(d,Color.white,Vector2.zero);v.AddTriangle(n,n+1,n+2);v.AddTriangle(n,n+2,n+3);}
+}
+}

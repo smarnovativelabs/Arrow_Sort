@@ -1,0 +1,82 @@
+[
+  {
+    "file": "Assets/Sounds/Pixabay/UiClick.mp3",
+    "role": "All UI button presses",
+    "title": "Soft UI Click",
+    "creator": "Universfield",
+    "source": "https://pixabay.com/sound-effects/film-special-effects-soft-ui-click-147352/",
+    "license": "https://pixabay.com/service/license-summary/",
+    "downloaded": "2026-10-25",
+    "sha256": "b4c15c383ed6efb57ff160b1ebe2d64ef56f768c8156fa91ec43a091488274e6"
+  },
+  {
+    "file": "Assets/Sounds/Pixabay/MenuCalm.mp3",
+    "role": "Non-level background music",
+    "title": "Cinematic Fantasy Calm Theme",
+    "creator": "Luis_Humanoide",
+    "source": "https://pixabay.com/music/main-title-cinematic-fantasy-calm-theme-294221/",
+    "license": "https://pixabay.com/service/license-summary/",
+    "downloaded": "2026-10-25",
+    "sha256": "604f1b842ffff58a96d9de06a4f59095ab491c873ae5eeefdc463826c7e25937"
+  },
+  {
+    "file": "Assets/Sounds/Pixabay/Victory.mp3",
+    "role": "Level won",
+    "title": "Brass Fanfare",
+    "creator": "Universfield",
+    "source": "https://pixabay.com/sound-effects/film-special-effects-brass-fanfare-144755/",
+    "license": "https://pixabay.com/service/license-summary/",
+    "downloaded": "2026-10-25",
+    "sha256": "14f9882eea7415dfe4037d9c2e03fcfcc323c73ea76bb4b9eee85425fcc6c102"
+  },
+  {
+    "file": "Assets/Sounds/Pixabay/Defeat.mp3",
+    "role": "Level lost",
+    "title": "Game Over Orchestral Stinger - Cartoon Defeat",
+    "creator": "Coghezzi",
+    "source": "https://pixabay.com/sound-effects/musical-game-over-orchestral-stinger-cartoon-defeat-546515/",
+    "license": "https://pixabay.com/service/license-summary/",
+    "downloaded": "2026-10-25",
+    "sha256": "da190f085866298c960f44e0e8f29232170271a88fa03f25462b8ff239ff678c"
+  },
+  {
+    "file": "Assets/Sounds/Pixabay/AbilityUnlock.mp3",
+    "role": "Unlock one slot",
+    "title": "Unlock stinger",
+    "creator": "Sunovia",
+    "source": "https://pixabay.com/sound-effects/film-special-effects-unlock-stinger-289722/",
+    "license": "https://pixabay.com/service/license-summary/",
+    "downloaded": "2026-10-25",
+    "sha256": "c45b33205b8d2fda6827935787feac83fe34b24e1c98da3d6727897a5aab9e0b"
+  },
+  {
+    "file": "Assets/Sounds/Pixabay/AbilityRemove.mp3",
+    "role": "Remove a vehicle",
+    "title": "Pop Cartoon",
+    "creator": "CreatorsHome",
+    "source": "https://pixabay.com/sound-effects/film-special-effects-pop-cartoon-328167/",
+    "license": "https://pixabay.com/service/license-summary/",
+    "downloaded": "2026-10-25",
+    "sha256": "e2021114f80d630692c04ace6bd05219fa0a0fad029819682322fc011d7ef6a7"
+  },
+  {
+    "file": "Assets/Sounds/Pixabay/AbilitySort.mp3",
+    "role": "Rearrange snake colors",
+    "title": "Magic Twinkle",
+    "creator": "Universfield",
+    "source": "https://pixabay.com/sound-effects/film-special-effects-magic-twinkle-244951/",
+    "license": "https://pixabay.com/service/license-summary/",
+    "downloaded": "2026-10-25",
+    "sha256": "d527b2abe7dcdcce7f0a9145b98d6545060367f89260e5b4384799a554e2f35d"
+  },
+  {
+    "file": "Assets/Sounds/Pixabay/AbilityFog.mp3",
+    "role": "Pierce fog",
+    "title": "Magical Whoosh",
+    "creator": "u_hyed0v3ux9",
+    "source": "https://pixabay.com/sound-effects/film-special-effects-magical-whoosh-148459/",
+    "license": "https://pixabay.com/service/license-summary/",
+    "downloaded": "2026-10-25",
+    "sha256": "2afd46002906544ad28ebcc029b8639fd99ec7004f30189b0576dad7c450b1c4"
+  }
+]

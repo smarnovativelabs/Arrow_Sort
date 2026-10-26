@@ -1,0 +1,109 @@
+Designer refresh — completed 16 October 2026
+
+Testing resumed with the user's authorization. Unity is left in Edit Mode;
+the game scene is saved, with no outstanding scene changes.
+
+Implemented
+- Designer tunnel and bottom rail prefabs replace generated tunnel geometry.
+- Ordinary tunnels are smaller (1.65 x 1.75 x 0.85); the bottom rail is larger
+  (9.5 x 2.1 x 1.25), with an extended board and 70 pooled vehicle actors.
+- Generated levels contain 50-70 vehicles and 250-400 dragon segments.
+- Each level reserves one color for 2-3 vehicles, with segments separated across
+  early, middle and late portions. Ammunition matches the segment totals.
+- Difficult vehicle dependencies apply to all difficulties. Hard levels use
+  shorter designer roads; easy and medium use longer roads.
+- Vehicles follow directional exits and perimeter routes to their slots,
+  leaving short matching-color trails.
+- The head meets the body. The designer Tail_Tip now sits above the road and
+  joins the last body segment; its source material is preserved.
+- All 80 slot/color bows use the new colored designer rigs and Bow Aniamtion
+  animation. The string draws before release, recoils during flight and
+  recovers after impact. The existing pooled arrows and hit accounting remain.
+- Assigned the designer bow atlas to the new FBX renderers, whose imported
+  material slots were empty. Reset/cancel safely handles Editor reloads.
+- Removed 112 excess pooled segment objects and 30 dependency-audited unused
+  generated meshes/materials. Designer source assets were preserved.
+
+Validation
+- 1,000 generated levels passed vehicle limits, segment budgets (observed
+  278-390), exact per-color ammunition, scarce-color counts/separation, legal
+  complete departure sequences, and pool bounds.
+- The revised dense layouts completed in live controller simulations for
+  levels 1-8, 10, 25 and 50, using four normal slots. See play-validation.txt.
+- All 80 imported bow rigs were checked for animated bone movement and reset.
+  Skinned-mesh deformation was confirmed on the bow and string pieces.
+- Final live animated-shot check: one launch, exactly one hit, recovery and
+  level-reload reset passed. No duplicate hit on subsequent ticks.
+- Phone (720x1280) and tablet (768x1024) world-camera captures inspected.
+  The tablet preserves the portrait playfield with side margins.
+- Final saved scene: 80 animated bow bindings; no missing bow meshes/materials
+  or missing scripts; correct persistent tail material; tail height zero.
+- Final current Unity Console: zero errors and warnings; compilation succeeded.
+  Historical CLI records include an earlier Pipeline timeout and the now-fixed
+  stale-transform cancellation error; neither recurred in the final checks.
+
+Final visual evidence
+- final-phone.png, final-tablet.png: dense level 3 runtime layout.
+- dense-center-tunnels.png, dense-bottom-rail.png: verified runtime layouts.
+- bow-gameplay-draw.png: actual colored bow and loaded arrow during a shot.
+- tail-final.png: corrected tail joining the body above the road.
+- vehicle-color-trail-final.png: normal-speed colored vehicle trail.
+Earlier diagnostic images remain for comparison; bow-rest/draw/release.png
+show the initial untextured import, and tail-double-sided.png is an invalid
+runtime capture. Do not use those as final-result evidence.
+
+Limits
+Controller stepping is a gameplay-logic check, not a rendered-frame-rate or
+Android performance test. World-camera captures omit screen-overlay HUD.
+No Android/device build was performed.
+
+Backups: Docs/Backups/DesignerRefresh20261016
+
+Presentation follow-up (16 October 2026)
+- Camera fills the screen; fixed portrait margins and their blue UI bars removed.
+- HUD respects safe areas; phone/tablet full-HUD renders inspected.
+- Editor preview set to 9:22 to match the user's narrower crop. Runtime camera
+  still adapts to the actual device aspect ratio.
+- All 80 designer bow rigs enlarged to fit slot rims; shared bow atlas uses URP
+  Unlit. Directional light is white, intensity 1.25, elevation 55 degrees, soft
+  shadows at 0.45 strength.
+- Bottom layout: reserved banner area, four abilities above it, gameplay above.
+  Advertisement is a placeholder, not a connected ad-network banner.
+- Removed the unwanted beige ability backdrop. Original gray floor continues
+  behind abilities. Background texture uses Clamp to prevent grassy top-edge
+  bleed at the bottom; lower extension samples the gray portion of the texture.
+- Rail and depot labels face the camera, retain readable size despite prefab
+  scale, and display N LEFT on the covers. Live checks passed: rail 10 -> 9;
+  depot 6 -> 5, both matching actual remaining unselected source vehicles.
+- Latest clean visual evidence: portrait-floor-final.png (includes complete HUD).
+  Older presentation-phone/tablet captures show the now-removed beige strip.
+- Editor command transport occasionally timed out during saves/captures; saved
+  scene and capture results were checked afterward rather than assuming success.
+- Final review also found historical bow recovery NullReferenceExceptions from
+  live script reloads. TickPresentation now discards a recovery record whose
+  Transform was replaced. A direct stale-record check passed after compilation.
+
+Duck rescue (16 October 2026)
+- Integrated Duck_Baby_Duck.fbx with separate mother/baby roots and the original
+  Duck_Walk and Duck_Happy_Jump clips. Dedicated unlit atlas material preserves
+  the designer texture without changing the shared tail material.
+- The family starts near the route midpoint, shifted to the closest clear stop
+  when that point is under fog. Both silhouettes have clearance from the edge.
+- Approaching within 2.4 route units triggers a walk to an intermediate clear
+  stop, then a second approach triggers the final move. Baby leads by 0.9 route
+  units; both follow the actual route rather than cutting across corners.
+- Waiting uses independent occasional jumps with rest periods, not continuous
+  synchronized looping. Pause and game speed follow controller timing.
+- Dragon reaching the actual route endpoint causes defeat and a brief caught
+  presentation. Clearing the dragon saves the duck family. Retry restores both
+  ducks and their initial escape stage. Legacy kitten visuals are hidden.
+- All three stops checked outside fog on levels 1-10, covering all route choices.
+  Approach triggers, intermediate/final arrivals, baby ordering, and persistence
+  after dragon retreat passed. Live endpoint-loss and defeat-retry checks passed.
+- Both imported jump and walk clips produced measured skinned-mesh deformation.
+  Twelve seconds of idle simulation included 151/240 samples with both resting
+  and 64/240 samples with only one jumping. Idle and walk captures inspected.
+- Evidence: duck-validation.txt, duck-family-clear-stop.png,
+  duck-family-walking.png. Earlier duck-family-idle images show the superseded
+  fogged midpoint and are diagnostic only.
+- Scene backup: Docs/Backups/DesignerRefresh20261016/before-duck-rescue.unity.

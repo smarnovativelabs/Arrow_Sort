@@ -1,0 +1,266 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace WoolGame
+{
+    public static partial class WoolProgress
+    {
+        const int Version = 1;
+        const string SaveKey = "WoolCrush.Campaign.v1";
+        const string BackupKey = "WoolCrush.Campaign.backup";
+        const string MigrationKey = "WoolCrush.LegacyMigration.v1";
+        const string LegacyBackupKey = "WoolCrush.LegacyBackup.v1";
+        const string CoinsKey = "WoolRescue.Coins";
+        static Campaign data;
+        static int totalLevels = 1, previewDepth;
+        static int frontier=1;
+        static readonly Dictionary<int,LevelRecord> records=new Dictionary<int,LevelRecord>();
+        static string previewSnapshot;
+        static bool previewWasLoaded;
+
+        [Serializable]
+        sealed class Campaign
+        {
+            public int version = Version;
+            public bool hasStarted;
+            public DailyRecord daily;
+            public string lastSpinDay;
+            public int spinStreak;
+            public WoolSpinState spin;
+            public bool spinMigrated;
+            public long noAdsUntilUnix;
+            public int coins;
+            public int removePowers,sortPowers,boostPowers;
+            public int mapLastCompletedLevel,mapPresentedLevel;
+            public bool mapPresentationKnown;
+            public string playerName="Player";
+            public string userId;
+            public int avatarIndex;
+            public long collectedCoins;
+            public int collectedCoinsVersion;
+            public WoolDailyPlayState profilePlays;
+            public WoolDailyPlayState profileCompletions;
+            public int winningStreak;
+            public int bestStreak;
+            public string createdUtc;
+            public List<LevelRecord> levels = new List<LevelRecord>();
+            public List<string> collectibles = new List<string>();
+        }
+
+        [Serializable]
+        sealed class LevelRecord
+        {
+            public int level;
+            public int attempts;
+            public int failures;
+            public int lastFailedAttempt;
+            public bool completed;
+            public bool firstTry;
+            public bool bonusClaimed;
+            public int lastCountedCompletionAttempt;
+        }
+
+        [Serializable]
+        sealed class LegacyRecord
+        {
+            public int level, firstTryWins, streak, rescues, coins;
+            public string backedUpUtc;
+        }
+
+        public static int CurrentLevel
+        {
+            get
+            {
+                EnsureLoaded();
+                while(frontier<totalLevels&&HasCompleted(frontier))frontier++;
+                return Math.Min(frontier,totalLevels);
+            }
+        }
+        public static int TotalLevels { get { return totalLevels; } }
+        public static int FirstTryWins { get { EnsureLoaded();return data.levels.FindAll(x=>x.completed&&x.firstTry).Count; } }
+        public static int WinningStreak { get { EnsureLoaded();return data.winningStreak; } }
+        public static int BestStreak { get { EnsureLoaded();return data.bestStreak; } }
+        public static int CompletedCount { get { EnsureLoaded();return data.levels.FindAll(x=>x.completed).Count; } }
+        public static int Collectibles { get { EnsureLoaded();return data.collectibles.Count; } }
+        public static int Coins { get { EnsureLoaded();return data.coins; } }
+        public static bool HasStarted { get { EnsureLoaded();return data.hasStarted; } }
+        public static bool IsPreview { get { return previewDepth>0; } }
+        public static bool IsLoaded { get { return data!=null; } }
+        public static string CreatedUtc { get { EnsureLoaded();return data.createdUtc; } }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetSession()
+        {
+            data=null;records.Clear();frontier=1;totalLevels=1;previewDepth=0;previewSnapshot=null;previewWasLoaded=false;
+        }
+
+        public static void Load(int configuredLevels)
+        {
+            totalLevels=Math.Max(1,configuredLevels);
+            if(data!=null)return;
+            string raw=PlayerPrefs.GetString(SaveKey,"");
+            data=Read(raw);
+            if(data==null&&!string.IsNullOrEmpty(raw))
+            {
+                // Retain corrupt or newer data for recovery instead of overwriting it.
+                if(!IsPreview)PlayerPrefs.SetString("WoolCrush.Campaign.unreadable",raw);
+                data=Read(PlayerPrefs.GetString(BackupKey,""));
+            }
+            if(data==null)
+            {
+                int coins=Math.Max(0,PlayerPrefs.GetInt(CoinsKey,0));
+                if(!IsPreview&&!PlayerPrefs.HasKey(LegacyBackupKey))
+                {
+                    var old=new LegacyRecord {
+                        level=PlayerPrefs.GetInt("WoolRescue.Level",1),
+                        firstTryWins=PlayerPrefs.GetInt("WoolRescue.FirstTryWins",0),
+                        streak=PlayerPrefs.GetInt("WoolRescue.Streak",0),
+                        rescues=PlayerPrefs.GetInt("WoolRescue.Rescues",0),coins=coins,
+                        backedUpUtc=DateTime.UtcNow.ToString("o")
+                    };
+                    PlayerPrefs.SetString(LegacyBackupKey,JsonUtility.ToJson(old));
+                }
+                // Prototype counters include automated runs and cannot establish real wins.
+                data=NewCampaign(coins);
+            }
+            Normalize();
+            Save();
+        }
+
+        static Campaign NewCampaign(int coins)
+        {
+            string id=CreateUserId();
+            return new Campaign { coins=Math.Max(0,coins),collectedCoins=Math.Max(0,coins),collectedCoinsVersion=1,userId=id,playerName=id,createdUtc=DateTime.UtcNow.ToString("o") };
+        }
+        static Campaign Read(string raw)
+        {
+            if(string.IsNullOrEmpty(raw))return null;
+            try { var candidate=JsonUtility.FromJson<Campaign>(raw);return candidate!=null&&candidate.version==Version?candidate:null; }
+            catch(ArgumentException) { return null; }
+        }
+        static void EnsureLoaded() { if(data==null)Load(totalLevels); }
+        static void Normalize()
+        {
+            if(data.levels==null)data.levels=new List<LevelRecord>();
+            if(data.collectibles==null)data.collectibles=new List<string>();
+            records.Clear();frontier=1;
+            var seen=new HashSet<int>();
+            data.levels.RemoveAll(x=>x==null||x.level<1||!seen.Add(x.level));
+            foreach(var record in data.levels)
+            {
+                records[record.level]=record;
+                record.attempts=Math.Max(0,record.attempts);
+                record.failures=Math.Max(0,Math.Min(record.failures,record.attempts));
+                record.lastFailedAttempt=Math.Max(0,Math.Min(record.lastFailedAttempt,record.attempts));
+                if(!record.completed){record.firstTry=false;record.bonusClaimed=false;}
+            }
+            var awards=new HashSet<string>();
+            data.collectibles.RemoveAll(x=>string.IsNullOrEmpty(x)||!awards.Add(x));
+            data.coins=Math.Max(0,data.coins);
+            data.collectedCoins=Math.Max(data.collectedCoins,data.coins);
+            if(string.IsNullOrEmpty(data.userId))data.userId=CreateUserId();
+            if(string.IsNullOrWhiteSpace(data.playerName)||data.playerName=="Player")data.playerName=data.userId;
+            if(data.collectedCoinsVersion<1)
+            {
+                long known=data.levels.FindAll(x=>x.completed).Count*50L+data.levels.FindAll(x=>x.bonusClaimed).Count*100L;
+                if(data.daily!=null)for(int i=0;i<3;i++)if((data.daily.claims&(1<<i))!=0)known+=DailyRewards[i];
+                known+=data.spin!=null?data.spin.lastCoins:data.daily!=null?data.daily.spinReward:0;
+                data.collectedCoins=Math.Max(data.collectedCoins,known);data.collectedCoinsVersion=1;
+            }
+            int completed=data.levels.FindAll(x=>x.completed).Count;
+            data.winningStreak=Mathf.Clamp(data.winningStreak,0,completed);
+            data.bestStreak=Mathf.Clamp(Math.Max(data.bestStreak,data.winningStreak),0,completed);
+            if(string.IsNullOrEmpty(data.createdUtc))data.createdUtc=DateTime.UtcNow.ToString("o");
+        }
+        static LevelRecord Record(int number,bool create)
+        {
+            EnsureLoaded();records.TryGetValue(number,out var record);
+            if(record==null&&create){record=new LevelRecord { level=number };data.levels.Add(record);records[number]=record;}
+            return record;
+        }
+        public static bool HasCompleted(int number) { var record=Record(number,false);return record!=null&&record.completed; }
+        public static bool IsUnlocked(int number) { return number>=1&&number<=totalLevels&&(number<=CurrentLevel||HasCompleted(number)); }
+        public static int Attempts(int number) { var record=Record(number,false);return record==null?0:record.attempts; }
+        public static int Failures(int number) { var record=Record(number,false);return record==null?0:record.failures; }
+
+        public static void MarkStarted()
+        {
+            EnsureLoaded();if(data.hasStarted)return;data.hasStarted=true;Save();
+        }
+        public static void BeginLevel(int number)
+        {
+            if(number<1||number>totalLevels||(!IsPreview&&!IsUnlocked(number)))return;
+            var record=Record(number,true);record.attempts++;data.hasStarted=true;RecordProfilePlay();Save();
+        }
+        public static void MarkFailed(int number)
+        {
+            var record=Record(number,false);
+            if(record==null||record.attempts==0||record.lastFailedAttempt==record.attempts)return;
+            record.failures++;record.lastFailedAttempt=record.attempts;data.winningStreak=0;Save();
+        }
+        // Base reward and completion are persisted together. Replays grant neither again.
+        public static bool CompleteLevel(int number)
+        {
+            if(number<1||number>totalLevels||(!IsPreview&&!IsUnlocked(number)))return false;
+            var record=Record(number,false);
+            if(record==null||record.attempts==0)return false;
+            if(record.lastCountedCompletionAttempt!=record.attempts){RecordProfileCompletion();record.lastCountedCompletionAttempt=record.attempts;}
+            if(!data.mapPresentationKnown){data.mapPresentedLevel=MapDestinationLevel;data.mapPresentationKnown=true;}
+            data.mapLastCompletedLevel=number;
+            if(record.completed){Save();return false;}
+            record.completed=true;record.firstTry=record.attempts==1&&record.failures==0;
+            data.winningStreak++;data.bestStreak=Math.Max(data.bestStreak,data.winningStreak);
+            data.coins+=50;data.collectedCoins+=50;Daily.wins++;RecordSpinLevel();Save();return true;
+        }
+        public static bool ClaimCompletionBonus(int number)
+        {
+            var record=Record(number,false);
+            if(record==null||!record.completed||record.bonusClaimed)return false;
+            record.bonusClaimed=true;data.coins+=100;data.collectedCoins+=100;Save();return true;
+        }
+        public static bool HasClaimedCompletionBonus(int number)
+        {
+            var record=Record(number,false);return record!=null&&record.bonusClaimed;
+        }
+        public static void SetCoins(int amount)
+        {
+            EnsureLoaded();data.collectedCoins+=Math.Max(0,amount-data.coins);data.coins=Math.Max(0,amount);Save();
+        }
+        // Called only by an actual award flow; completing a level does not invent cards.
+        public static bool AwardCollectible(string id)
+        {
+            EnsureLoaded();if(string.IsNullOrEmpty(id)||data.collectibles.Contains(id))return false;
+            data.collectibles.Add(id);Save();return true;
+        }
+        public static void ResetProgress(bool preserveCoins=true)
+        {
+            EnsureLoaded();if(!IsPreview)PlayerPrefs.SetString("WoolCrush.Campaign.beforeReset",JsonUtility.ToJson(data));
+            var previous=data;
+            data=NewCampaign(preserveCoins?previous.coins:0);
+            data.userId=previous.userId;data.playerName=previous.playerName;data.avatarIndex=previous.avatarIndex;data.collectedCoins=previous.collectedCoins;
+            Normalize();Save();
+        }
+        public static void BeginPreview()
+        {
+            if(previewDepth++>0)return;
+            previewWasLoaded=data!=null;previewSnapshot=previewWasLoaded?JsonUtility.ToJson(data):null;
+            EnsureLoaded();
+        }
+        public static void EndPreview()
+        {
+            if(previewDepth==0||--previewDepth>0)return;
+            data=previewWasLoaded?Read(previewSnapshot):null;records.Clear();frontier=1;if(data!=null)Normalize();previewSnapshot=null;
+        }
+        static void Save()
+        {
+            if(IsPreview||data==null)return;
+            string previous=PlayerPrefs.GetString(SaveKey,"");
+            if(Read(previous)!=null)PlayerPrefs.SetString(BackupKey,previous);
+            PlayerPrefs.SetString(SaveKey,JsonUtility.ToJson(data));
+            PlayerPrefs.SetInt(CoinsKey,data.coins);
+            PlayerPrefs.SetInt(MigrationKey,Version);
+            PlayerPrefs.Save();
+        }
+    }
+}

@@ -1,0 +1,11 @@
+Responsive UI update - 2026-10-16
+Saved scene: Assets/Scenes/Wool Crush.unity
+Canvas reference resolution: 1080 x 1920, Scale With Screen Size / Expand.
+Gameplay: reduced camera top reserve from 280 to 75 reference units; hides coin, speed, difficulty and normal-level hint; settings and level remain; footer fills available portrait width. Tablet/landscape retain board proportions.
+Menus: home controls and shop cards scale to available frame; safe-area handling retained. Decorative graphics no longer intercept UI input. Disabled settings hit image restored. Dialog/profile brought above menu. Home/Shop deactivate Map.
+Map: supplied landscape imported with original non-power-of-two aspect ratio, 15 selectable markers per page, scrolling and campaign paging retained.
+Slot plus icons lifted to avoid intersecting slot surface.
+Screens rendered: 1080x1920, 1080x2400, 768x1024, 1920x1080, 1366x768, 2560x1440, 3840x2160, 1600x1000. Screenshots in this directory. Free Aspect is inherently unbounded; responsive formulas apply dynamically.
+Pointer checks on rendered frames: settings open/close, profile open/close, Shop/Home navigation, Tasks open/close, Map navigation and stage selection passed. Purchase target raycast passed without triggering purchase. InputSystem point/click actions enabled.
+Final compiler/Console ground truth: compilationFailed=false; errors=0; warnings=0. Historical tool log includes capture timeouts and initial test failures before rendered frames settled.
+No physical mobile device build performed. Extreme wide layouts necessarily show background beside the proportional portrait board. Reference map source is 408x623; no invented detail/upscale applied.

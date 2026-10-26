@@ -1,0 +1,453 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02f0251463c5642b37e7f21da3da8a, type: 3}
+  m_Name: Level10
+  m_EditorClassIdentifier: Assembly-CSharp::WoolGame.WoolLevelDefinition
+  number: 10
+  difficulty: 2
+  displayName: Tangled Shield
+  chapterName: Sunny Shores
+  layoutStyle: Shield
+  difficultyNote: Four slots. Deep arrow dependencies and long color waits make extra
+    slots or powers valuable.
+  startingGraceSeconds: 0
+  initialHeadProgress: 0.32
+  colorCount: 8
+  initialLegalMoves: 2
+  vehicles:
+  - row: 0
+    column: 5
+    color: 6
+    ammo: 10
+    x: 2.24
+    y: 0.05
+    width: 0.52
+    length: 0.94
+    direction: 3
+    size: 2
+    selected: 0
+  - row: 0
+    column: 4
+    color: 4
+    ammo: 4
+    x: 1.12
+    y: 0.05
+    width: 0.62
+    length: 0.62
+    direction: 3
+    size: 0
+    selected: 0
+  - row: 0
+    column: 3
+    color: 3
+    ammo: 6
+    x: 0
+    y: 0.05
+    width: 0.52
+    length: 0.8
+    direction: 2
+    size: 1
+    selected: 0
+  - row: 0
+    column: 2
+    color: 1
+    ammo: 10
+    x: -1.12
+    y: 0.05
+    width: 0.52
+    length: 0.94
+    direction: 3
+    size: 2
+    selected: 0
+  - row: 0
+    column: 1
+    color: 6
+    ammo: 4
+    x: -2.24
+    y: 0.05
+    width: 0.62
+    length: 0.62
+    direction: 2
+    size: 0
+    selected: 0
+  - row: 1
+    column: 6
+    color: 2
+    ammo: 10
+    x: 3.3600001
+    y: -0.93
+    width: 0.52
+    length: 0.94
+    direction: 2
+    size: 2
+    selected: 0
+  - row: 1
+    column: 5
+    color: 4
+    ammo: 4
+    x: 2.24
+    y: -0.93
+    width: 0.62
+    length: 0.62
+    direction: 1
+    size: 0
+    selected: 0
+  - row: 1
+    column: 4
+    color: 0
+    ammo: 6
+    x: 1.12
+    y: -0.93
+    width: 0.52
+    length: 0.8
+    direction: 1
+    size: 1
+    selected: 0
+  - row: 1
+    column: 3
+    color: 3
+    ammo: 10
+    x: 0
+    y: -0.93
+    width: 0.52
+    length: 0.94
+    direction: 2
+    size: 2
+    selected: 0
+  - row: 1
+    column: 2
+    color: 2
+    ammo: 4
+    x: -1.12
+    y: -0.93
+    width: 0.62
+    length: 0.62
+    direction: 1
+    size: 0
+    selected: 0
+  - row: 1
+    column: 1
+    color: 1
+    ammo: 6
+    x: -2.24
+    y: -0.93
+    width: 0.52
+    length: 0.8
+    direction: 3
+    size: 1
+    selected: 0
+  - row: 1
+    column: 0
+    color: 5
+    ammo: 10
+    x: -3.3600001
+    y: -0.93
+    width: 0.52
+    length: 0.94
+    direction: 2
+    size: 2
+    selected: 0
+  - row: 2
+    column: 6
+    color: 6
+    ammo: 4
+    x: 3.3600001
+    y: -1.9100001
+    width: 0.62
+    length: 0.62
+    direction: 2
+    size: 0
+    selected: 0
+  - row: 2
+    column: 5
+    color: 5
+    ammo: 6
+    x: 2.24
+    y: -1.9100001
+    width: 0.52
+    length: 0.8
+    direction: 2
+    size: 1
+    selected: 0
+  - row: 2
+    column: 1
+    color: 8
+    ammo: 10
+    x: -2.24
+    y: -1.9100001
+    width: 0.52
+    length: 0.94
+    direction: 2
+    size: 2
+    selected: 0
+  - row: 2
+    column: 0
+    color: 0
+    ammo: 4
+    x: -3.3600001
+    y: -1.9100001
+    width: 0.62
+    length: 0.62
+    direction: 2
+    size: 0
+    selected: 0
+  - row: 3
+    column: 6
+    color: 8
+    ammo: 6
+    x: 3.3600001
+    y: -2.89
+    width: 0.52
+    length: 0.8
+    direction: 2
+    size: 1
+    selected: 0
+  - row: 3
+    column: 5
+    color: 5
+    ammo: 10
+    x: 2.24
+    y: -2.89
+    width: 0.52
+    length: 0.94
+    direction: 2
+    size: 2
+    selected: 0
+  - row: 3
+    column: 1
+    color: 4
+    ammo: 4
+    x: -2.24
+    y: -2.89
+    width: 0.62
+    length: 0.62
+    direction: 2
+    size: 0
+    selected: 0
+  - row: 3
+    column: 0
+    color: 3
+    ammo: 6
+    x: -3.3600001
+    y: -2.89
+    width: 0.52
+    length: 0.8
+    direction: 2
+    size: 1
+    selected: 0
+  - row: 4
+    column: 6
+    color: 4
+    ammo: 10
+    x: 3.3600001
+    y: -3.8700001
+    width: 0.52
+    length: 0.94
+    direction: 2
+    size: 2
+    selected: 0
+  - row: 4
+    column: 5
+    color: 1
+    ammo: 4
+    x: 2.24
+    y: -3.8700001
+    width: 0.62
+    length: 0.62
+    direction: 3
+    size: 0
+    selected: 0
+  - row: 4
+    column: 4
+    color: 3
+    ammo: 6
+    x: 1.12
+    y: -3.8700001
+    width: 0.52
+    length: 0.8
+    direction: 3
+    size: 1
+    selected: 0
+  - row: 4
+    column: 3
+    color: 2
+    ammo: 10
+    x: 0
+    y: -3.8700001
+    width: 0.52
+    length: 0.94
+    direction: 3
+    size: 2
+    selected: 0
+  - row: 4
+    column: 2
+    color: 1
+    ammo: 4
+    x: -1.12
+    y: -3.8700001
+    width: 0.62
+    length: 0.62
+    direction: 3
+    size: 0
+    selected: 0
+  - row: 4
+    column: 1
+    color: 5
+    ammo: 6
+    x: -2.24
+    y: -3.8700001
+    width: 0.52
+    length: 0.8
+    direction: 2
+    size: 1
+    selected: 0
+  - row: 4
+    column: 0
+    color: 8
+    ammo: 10
+    x: -3.3600001
+    y: -3.8700001
+    width: 0.52
+    length: 0.94
+    direction: 2
+    size: 2
+    selected: 0
+  - row: 5
+    column: 6
+    color: 0
+    ammo: 4
+    x: 3.3600001
+    y: -4.85
+    width: 0.62
+    length: 0.62
+    direction: 1
+    size: 0
+    selected: 0
+  - row: 5
+    column: 5
+    color: 2
+    ammo: 6
+    x: 2.24
+    y: -4.85
+    width: 0.52
+    length: 0.8
+    direction: 1
+    size: 1
+    selected: 0
+  - row: 5
+    column: 4
+    color: 6
+    ammo: 10
+    x: 1.12
+    y: -4.85
+    width: 0.52
+    length: 0.94
+    direction: 1
+    size: 2
+    selected: 0
+  - row: 5
+    column: 3
+    color: 0
+    ammo: 4
+    x: 0
+    y: -4.85
+    width: 0.62
+    length: 0.62
+    direction: 3
+    size: 0
+    selected: 0
+  - row: 5
+    column: 2
+    color: 8
+    ammo: 6
+    x: -1.12
+    y: -4.85
+    width: 0.52
+    length: 0.8
+    direction: 3
+    size: 1
+    selected: 0
+  - row: 5
+    column: 1
+    color: 6
+    ammo: 10
+    x: -2.24
+    y: -4.85
+    width: 0.52
+    length: 0.94
+    direction: 3
+    size: 2
+    selected: 0
+  - row: 5
+    column: 0
+    color: 4
+    ammo: 4
+    x: -3.3600001
+    y: -4.85
+    width: 0.62
+    length: 0.62
+    direction: 2
+    size: 0
+    selected: 0
+  - row: 6
+    column: 4
+    color: 8
+    ammo: 4
+    x: 1.12
+    y: -5.83
+    width: 0.62
+    length: 0.62
+    direction: 0
+    size: 0
+    selected: 0
+  - row: 6
+    column: 2
+    color: 0
+    ammo: 10
+    x: -1.12
+    y: -5.83
+    width: 0.52
+    length: 0.94
+    direction: 1
+    size: 2
+    selected: 0
+  yarn: 0400000004000000080000000800000006000000060000000000000000000000020000000200000005000000050000000300000003000000030000000300000003000000030000000500000005000000050000000500000002000000020000000200000002000000000000000000000006000000060000000600000006000000060000000600000006000000060000000800000008000000080000000800000008000000080000000800000008000000040000000400000001000000010000000400000004000000080000000800000006000000060000000000000000000000020000000200000005000000050000000500000005000000050000000500000005000000050000000500000005000000020000000200000002000000020000000200000002000000020000000200000000000000000000000600000006000000060000000600000006000000060000000600000006000000080000000800000008000000080000000400000004000000040000000400000004000000040000000400000004000000010000000100000003000000030000000100000001000000040000000400000008000000080000000600000006000000000000000000000002000000020000000200000002000000020000000200000002000000020000000200000002000000000000000000000006000000060000000800000008000000080000000800000004000000040000000100000001000000030000000300000003000000030000000500000005000000030000000300000001000000010000000400000004000000080000000800000006000000060000000000000000000000000000000000000000000000000000000600000006000000080000000800000008000000080000000800000008000000080000000800000004000000040000000100000001000000010000000100000003000000030000000300000003000000030000000300000003000000030000000500000005000000050000000500000005000000050000000500000005000000020000000200000005000000050000000300000003000000010000000100000004000000040000000800000008000000060000000600000006000000060000000600000006000000060000000600000006000000060000000800000008000000040000000400000001000000010000000100000001000000010000000100000001000000010000000300000003000000030000000300000005000000050000000500000005000000020000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  tutorialOrder: 210000001a000000200000001b0000001c000000190000001300000018000000140000001f0000001d0000000f000000170000000b000000160000001500000012000000100000000c0000001e0000000500000011000000080000000a000000060000000e0000000400000007000000090000000d000000020000000300000001000000220000000000000023000000
+  route:
+  - {x: -4, y: 9, z: 0}
+  - {x: -1, y: 8.6, z: 0}
+  - {x: 3.4, y: 8.8, z: 0}
+  - {x: 4, y: 7.7, z: 0}
+  - {x: 2.2, y: 6.9, z: 0}
+  - {x: -2.8, y: 7.1, z: 0}
+  - {x: -4, y: 6.2, z: 0}
+  - {x: -2.8, y: 5.2, z: 0}
+  - {x: 2.8, y: 5.6, z: 0}
+  - {x: 4, y: 4.7, z: 0}
+  - {x: 2.6, y: 3.8, z: 0}
+  - {x: -1.5, y: 3.8, z: 0}
+  openSlots: 4
+  boardRotation: 45
+  boardScale: 0.80049825
+  snakeBatchSize: 7
+  advanceSpeed: 0.36
+  windingRate: 4.2
+  fogAbove: 7
+  tutorial: 0
+  evidence: 'Original campaign design; not an extracted commercial level. Supplied
+    recording: six-box tutorial at 00:00, 28-box diamond / four-slot fog puzzle at
+    02:00, and queue pressure at 02:32. Layout family: Shield. Deterministic full-footprint
+    departure witness; exact per-color capacity balance. Difficulty changes arrow
+    dependencies, board silhouettes, color count and delayed completion of mixed-color
+    wool batches. All levels start with four slots and the same base speed. Hard
+    levels are every multiple of five as requested. YouTube discovery links are documented
+    separately; unwatched footage is not claimed as layout evidence.'

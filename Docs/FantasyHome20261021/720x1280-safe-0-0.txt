@@ -1,0 +1,15 @@
+720x1280 safe=(x:0.00, y:0.00, width:720.00, height:1280.00) buttons=11 frame=1455 animation=36.40063 failures=0
+Profile: (26.78, 1161.40) - (124.72, 1264.70)
+Wallet: (382.57, 1179.00) - (605.99, 1253.99)
+Settings: (618.24, 1169.05) - (702.40, 1260.87)
+Tasks: (34.43, 350.44) - (183.63, 503.46)
+Lucky Spin: (202.76, 350.44) - (351.97, 503.46)
+Rescue Shop: (371.09, 350.44) - (520.30, 503.46)
+Ad Pass: (539.43, 350.44) - (688.63, 503.46)
+Play: (123.19, 201.56) - (596.05, 335.57)
+Shop: (45.91, 9.95) - (229.54, 144.61)
+Home: (252.50, 10.71) - (468.27, 148.44)
+Map: (489.69, 9.95) - (673.33, 144.61)
+Dragon/header gap: 32.49 px
+Duck pose: integrated sprite; separate wings active=False
+Level font: LilitaOne-HomeSharp 2048x2048

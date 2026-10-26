@@ -1,0 +1,9 @@
+Bound 200 authored buttons; original level music: Assets/Sounds/Background.mp3
+UiClick: 0.306s; 1 channel(s); DecompressOnLoad
+MenuCalm: 94.537s; 2 channel(s); Streaming
+Victory: 2.163s; 1 channel(s); DecompressOnLoad
+Defeat: 2.491s; 1 channel(s); DecompressOnLoad
+AbilityUnlock: 1.483s; 1 channel(s); DecompressOnLoad
+AbilityRemove: 0.112s; 1 channel(s); DecompressOnLoad
+AbilitySort: 2.032s; 1 channel(s); DecompressOnLoad
+AbilityFog: 1.054s; 1 channel(s); DecompressOnLoad

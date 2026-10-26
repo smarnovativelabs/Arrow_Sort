@@ -1,0 +1,1 @@
+1000 levels passed: segment range 278-390, 2-3 scarce vehicles, separated color, exact ammunition totals, legal complete exit order and pool bounds.

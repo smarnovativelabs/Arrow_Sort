@@ -1,0 +1,12 @@
+Level 1: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 2: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 3: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 4: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 5: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 6: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 7: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 8: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 9: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+Level 10: fog-safe stops near midpoint, approach trigger, intermediate stop, baby leads, final stop and retreat persistence passed.
+
+12-second idle check: 151 resting samples, 64 independent-jump samples. Mother animated model walk deformation=0.1149038. Baby animated model walk deformation=0.1912812. Endpoint loss passed.

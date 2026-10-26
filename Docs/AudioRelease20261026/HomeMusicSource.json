@@ -1,0 +1,14 @@
+{
+  "file": "Assets/Sounds/Pixabay/MenuHappyRelaxing.mp3",
+  "role": "Home and non-level menu background music",
+  "title": "Happy Relaxing Loop",
+  "creator": "SergeQuadrado (Sergei Chetvertnykh)",
+  "source": "https://pixabay.com/sound-effects/musical-happy-relaxing-loop-251875/",
+  "media": "https://cdn.pixabay.com/audio/2024/10/17/audio_1c2dddc5fc.mp3",
+  "license": "https://pixabay.com/service/license-summary/",
+  "downloaded": "2026-10-26",
+  "contentIdRegistered": true,
+  "sha256": "14d0dd49581af4be1bf2fbc31cc310ae1617ffc32024ace0577b7d97ed7a3461",
+  "previousTrack": "Assets/Sounds/Pixabay/MenuCalm.mp3",
+  "homeVolume": 0.18
+}

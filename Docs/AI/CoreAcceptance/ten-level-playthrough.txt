@@ -1,0 +1,14 @@
+Level 1 won; elapsed=14.78s, moves=6
+Level 2 won; elapsed=113.07s, moves=28
+Level 3 won; elapsed=139.83s, moves=25
+Level 4 won; elapsed=165.76s, moves=29
+Level 5 won; elapsed=145.87s, moves=25
+Level 6 won; elapsed=143.13s, moves=24
+Level 7 won; elapsed=155.80s, moves=29
+Level 8 won; elapsed=157.59s, moves=29
+Level 9 won; elapsed=154.59s, moves=30
+Level 10 won; elapsed=147.43s, moves=29
+Pool/scene identities preserved: True
+PASS 10 levels completed through live selection; peak concurrent collectors=4
+Active render samples=20634, max batches=56, max tris=232807, max SetPass=20
+Editor frame ms median=20.25, p95=31.95. Editor measurements are not device profiling.

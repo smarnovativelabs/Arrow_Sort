@@ -1,0 +1,29 @@
+1043x836 safe=(x:0.00, y:80.00, width:1043.00, height:656.00) buttons=11 frame=991 animation=24.96166 failures=17
+Profile outside safe area
+Profile touch intercepted by none
+Wallet outside safe area
+Wallet touch intercepted by none
+Settings outside safe area
+Settings touch intercepted by none
+Tasks outside safe area
+Tasks touch intercepted by none
+Lucky Spin outside safe area
+Lucky Spin touch intercepted by none
+Rescue Shop outside safe area
+Rescue Shop touch intercepted by none
+Ad Pass outside safe area
+Ad Pass touch intercepted by none
+Play outside safe area
+Map outside safe area
+Map touch intercepted by none
+Profile: (136.78, 2046.20) - (308.20, 2227.00)
+Wallet: (759.51, 2077.01) - (1150.55, 2208.25)
+Settings: (1171.98, 2059.60) - (1319.29, 2220.30)
+Tasks: (150.84, 859.02) - (410.64, 1125.48)
+Lucky Spin: (444.03, 857.54) - (706.71, 1126.96)
+Rescue Shop: (737.91, 856.78) - (1002.07, 1127.72)
+Ad Pass: (1032.78, 857.04) - (1296.45, 1127.47)
+Play: (301.41, 596.60) - (1137.25, 833.47)
+Shop: (170.26, 262.39) - (491.67, 498.09)
+Home: (531.84, 263.72) - (909.50, 504.78)
+Map: (946.99, 262.39) - (1268.40, 498.09)

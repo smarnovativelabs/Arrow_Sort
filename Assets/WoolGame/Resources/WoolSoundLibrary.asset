@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 386a925f8f4442b2ac01fb06bb7667b7, type: 3}
+  m_Name: WoolSoundLibrary
+  m_EditorClassIdentifier: 
+  background: {fileID: 8300000, guid: efe1a42ceb77f0a4bb56d385ca5c9323, type: 3}
+  bonus: {fileID: 8300000, guid: 48139aac3f651184e8308a89ec49e687, type: 3}
+  fire: {fileID: 8300000, guid: be7917434aad4de499aa3d396c15beda, type: 3}
+  coin: {fileID: 8300000, guid: 0bd633285769859409998ff2a6f5ca2e, type: 3}
+  end: {fileID: 8300000, guid: 6af717e77d13843409365625a6f3738f, type: 3}
+  spin: {fileID: 8300000, guid: bbed71372d6004048a527f4e2e9bda55, type: 3}
+  win: {fileID: 8300000, guid: c89271d7ccaa50d47bb87f6b6bfd7c44, type: 3}
+  menuMusic: {fileID: 8300000, guid: a380928c214e38441a2564887fe88809, type: 3}
+  uiClick: {fileID: 8300000, guid: 5dda06a214f772546a63b165c928b463, type: 3}
+  victory: {fileID: 8300000, guid: 8fd48289b800a2748b21f68534d052ea, type: 3}
+  defeat: {fileID: 8300000, guid: 336fd7e16646c1748bea00ecb634f62e, type: 3}
+  unlockSlot: {fileID: 8300000, guid: 6a2111e9f496dae4b877b26bc4634f27, type: 3}
+  removeVehicle: {fileID: 8300000, guid: 5ac7543948ad1694caed71e70a7d5028, type: 3}
+  sortColors: {fileID: 8300000, guid: f6dae2ad1e3a0c044bf556f110bffaaa, type: 3}
+  pierceFog: {fileID: 8300000, guid: 51f731a722f4ba84592a5e771ae87eb7, type: 3}
