@@ -87,6 +87,7 @@ namespace WoolGame
             {
                 var rt=child as RectTransform;
                 if(!rt)continue;
+                if(rt==boardCropLeft||rt==boardCropRight){rt.gameObject.SetActive(false);continue;}
                 if(rt.GetComponent<WoolFullBleedBackground>())
                 {rt.anchorMin=Vector2.zero;rt.anchorMax=Vector2.one;rt.offsetMin=rt.offsetMax=Vector2.zero;continue;}
                 rt.anchorMin=min;rt.anchorMax=max;rt.offsetMin=rt.offsetMax=Vector2.zero;

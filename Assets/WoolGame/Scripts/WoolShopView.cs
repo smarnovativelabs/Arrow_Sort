@@ -22,7 +22,8 @@ public sealed class WoolShopView:MonoBehaviour {
  public void Refresh(){int coins=WoolProgress.Coins;if(balance&&lastBalance!=coins){lastBalance=coins;balance.text=coins.ToString("N0");}if(dailyClaim){bool can=WoolProgress.CanClaimShopDailyGift;dailyClaim.interactable=can;claimText.text=can?"CLAIM FREE":"CLAIMED";}}
  void LateUpdate(){Fit(false);if(Time.unscaledTime>=refreshAt){refreshAt=Time.unscaledTime+1;Refresh();}}
  public void Fit(bool force){var root=(RectTransform)transform;if(!viewport||!design||root.rect.width<=0)return;var size=root.rect.size;var safe=Screen.safeArea;if(!force&&size==lastSize&&safe==lastSafe)return;lastSize=size;lastSafe=safe;
- // The parent HUD already anchors this page inside the safe area.
+ // Only interactive content follows the safe area; decorative art covers the device.
+ var bg=transform.Find("Premium shop backdrop") as RectTransform;if(bg){var fitter=bg.GetComponent<AspectRatioFitter>();if(fitter)fitter.enabled=false;var im=bg.GetComponent<Image>();if(im&&im.sprite)WoolCanvasArt.Cover(bg,im.sprite.rect.width/im.sprite.rect.height);}
  float top=0,bottom=0;
  float scale=Mathf.Min((size.x-40)/900,1.4f);masthead.localScale=Vector3.one*scale;masthead.anchoredPosition=new Vector2(0,-top);
  float nav=navigation?navigation.Height+40:170;viewport.offsetMax=new Vector2(-16,-top-285*scale);viewport.offsetMin=new Vector2(16,Mathf.Max(nav,bottom+24));

@@ -20,7 +20,8 @@ namespace WoolGame
         public void ApplyBoardCrop(float left,float right,float top,int width,int height)
         {
             if(!boardCropLeft||!boardCropRight)return;
-            bool visible=!(menu&&menu.activeSelf);
+            // Full-screen environment replaces the legacy cream side curtains.
+            bool visible=false;
             boardCropLeft.gameObject.SetActive(visible);boardCropRight.gameObject.SetActive(visible);
             if(!visible)return;
             boardCropLeft.anchorMin=Vector2.zero;boardCropLeft.anchorMax=new Vector2(left,top);

@@ -20,10 +20,10 @@ namespace AdsMediation
             if(instance&&instance!=this){Destroy(gameObject);return;}
             instance=this;DontDestroyOnLoad(gameObject);
             ads=GetComponent<AdMobController>();consent=GetComponent<GoogleMobileAdsConsentController>();
-            // Google's demo units: this project's current configuration is test-only.
+            // Android production placements supplied for Arrow Sort.
             ads.androidBannerId="";
-            ads.androidInterstitialId="";
-            ads.androidRewardedVideoId="";
+            ads.androidInterstitialId="ca-app-pub-9058006185556068/3440814807";
+            ads.androidRewardedVideoId="ca-app-pub-9058006185556068/7810384785";
             ads.iosBannerId="";
             ads.iosInterstitialId="";
             ads.iosRewardedVideoId="";

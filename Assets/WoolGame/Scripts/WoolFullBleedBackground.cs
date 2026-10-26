@@ -7,6 +7,14 @@ namespace WoolGame
     public static class WoolCanvasArt
     {
         static readonly Vector3[] Corners=new Vector3[4];
+        public static void FillCanvas(RectTransform art)
+        {
+            if(!art)return;var canvas=art.GetComponentInParent<Canvas>();var parent=art.parent as RectTransform;
+            if(!canvas||!parent)return;var root=(RectTransform)canvas.rootCanvas.transform;root.GetWorldCorners(Corners);
+            Vector2 min=parent.InverseTransformPoint(Corners[0]),max=parent.InverseTransformPoint(Corners[2]);
+            art.anchorMin=art.anchorMax=Vector2.zero;art.pivot=Vector2.zero;art.localScale=Vector3.one;
+            art.anchoredPosition=min-parent.rect.min;art.sizeDelta=max-min;
+        }
         public static void Cover(RectTransform art, float aspect, float overscan=1.015f)
         {
             if(!art||aspect<=0)return;

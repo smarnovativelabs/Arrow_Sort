@@ -162,7 +162,9 @@ namespace WoolGame
             modalCard.sizeDelta=new Vector2(590,power?710:490);
             modalCard.GetComponent<Image>().color=WoolArt.Hex("FFF0D3");
             modalTitle.rectTransform.anchoredPosition=new Vector2(0,power?295:146);
+            modalTitle.rectTransform.sizeDelta=new Vector2(530,90);
             modalBody.rectTransform.anchoredPosition=new Vector2(0,power?-58:40);
+            modalBody.rectTransform.sizeDelta=new Vector2(510,134);
             primary.GetComponent<RectTransform>().anchoredPosition=new Vector2(power?-132:0,power?-242:-88);
             secondary.GetComponent<RectTransform>().anchoredPosition=new Vector2(power?132:0,power?-242:-173);
             primary.GetComponent<RectTransform>().sizeDelta=new Vector2(power?246:460,74);
@@ -181,7 +183,39 @@ namespace WoolGame
             primary.onClick.RemoveAllListeners();if(action!=null)primary.onClick.AddListener(()=>action());
             primary.interactable=action!=null;secondary.gameObject.SetActive(other!=null);
             secondaryText.text=other;secondary.onClick.RemoveAllListeners();if(secondaryAction!=null)secondary.onClick.AddListener(()=>secondaryAction());
-            close.gameObject.SetActive(dismissed!=null);close.onClick.RemoveAllListeners();if(dismissed!=null)close.onClick.AddListener(()=>dismissed());ApplyModalSkin();ApplyUnlockPresentation(title,button,other);FitReleaseUI();
+            close.gameObject.SetActive(dismissed!=null);close.onClick.RemoveAllListeners();if(dismissed!=null)close.onClick.AddListener(()=>dismissed());ApplyModalSkin();ApplyUnlockPresentation(title,button,other);ApplyServiceMessage(title);FitReleaseUI();
+        }
+        // Offers can live outside Portrait composition, so sibling order alone is insufficient.
+        void ApplyServiceMessage(string title)
+        {
+            bool serviceMessage=title=="STORE UNAVAILABLE"||title=="VIDEO UNAVAILABLE";
+            var overlay=modal.GetComponent<Canvas>();
+            if(serviceMessage&&!overlay)overlay=modal.AddComponent<Canvas>();
+            if(overlay)
+            {
+                overlay.overrideSorting=serviceMessage;
+                if(serviceMessage){overlay.sortingLayerID=canvas.sortingLayerID;overlay.sortingOrder=canvas.sortingOrder+100;}
+            }
+            if(!serviceMessage)return;
+            if(!modal.GetComponent<GraphicRaycaster>())modal.AddComponent<GraphicRaycaster>();
+            modal.GetComponent<Image>().color=new Color(0,0,0,.65f);
+            modalCard.sizeDelta=new Vector2(680,490);
+            modalTitle.text=title=="STORE UNAVAILABLE"?"Shop unavailable":"Video not ready";
+            modalTitle.rectTransform.anchoredPosition=new Vector2(0,145);
+            modalTitle.rectTransform.sizeDelta=new Vector2(590,90);
+            modalTitle.font=modalBody.font=primaryText.font=font;
+            modalTitle.fontSizeMin=30;modalTitle.fontSizeMax=42;
+            modalTitle.color=WoolArt.Hex("59361E");modalTitle.outlineWidth=0;
+            modalBody.rectTransform.anchoredPosition=new Vector2(0,20);
+            modalBody.rectTransform.sizeDelta=new Vector2(570,155);
+            modalBody.fontSizeMin=24;modalBody.fontSizeMax=30;
+            modalBody.color=WoolArt.Hex("74513C");modalBody.outlineWidth=0;
+            primary.GetComponent<RectTransform>().anchoredPosition=new Vector2(0,-155);
+            primary.GetComponent<RectTransform>().sizeDelta=new Vector2(460,94);
+            primaryText.rectTransform.sizeDelta=new Vector2(420,78);
+            primaryText.fontSizeMin=26;primaryText.fontSizeMax=34;
+            primaryText.color=Color.white;primaryText.outlineWidth=.12f;
+            primaryText.outlineColor=WoolArt.Hex("287909");
         }
         public void Hide() { RestoreWarehouseTutorial();RestoreWinPresentation();modal.SetActive(false); }
         Image Icon(Transform parent,int index,Vector2 size,Vector2 position)

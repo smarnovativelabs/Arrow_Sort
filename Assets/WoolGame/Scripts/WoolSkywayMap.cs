@@ -88,7 +88,8 @@ namespace WoolGame
             float navHeight=navWidth*(214f/941f);
             navigation.anchorMin=navigation.anchorMax=new Vector2(.5f,0);navigation.pivot=new Vector2(.5f,0);
             navigation.sizeDelta=new Vector2(navWidth,navHeight);navigation.anchoredPosition=Vector2.zero;
-            viewport.offsetMin=new Vector2(0,navHeight);viewport.offsetMax=new Vector2(0,-220*navWidth/941f);
+            // The scrolling map itself reaches every screen edge; controls remain in the safe parent.
+            WoolCanvasArt.FillCanvas(viewport);
             float w=viewport.rect.width,h=viewport.rect.height;
             if(Mathf.Abs(w-width)<.1f&&Mathf.Abs(h-height)<.1f)return;
             width=w;height=h;

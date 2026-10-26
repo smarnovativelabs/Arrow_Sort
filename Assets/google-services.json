@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "588988709385",
+    "project_id": "arrow-sort-puzzle-rescue-ducks",
+    "storage_bucket": "arrow-sort-puzzle-rescue-ducks.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:588988709385:android:f85a0ac8b29bf2cafa16d8",
+        "android_client_info": {
+          "package_name": "com.peri.arrow.sort.puzzle.rescue.duck"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwm0z0cKkQs1jozSTdxtUnfOlfliI3_xg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
