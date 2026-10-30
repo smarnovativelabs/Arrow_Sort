@@ -23,6 +23,7 @@ namespace WoolGame
         sealed class Campaign
         {
             public int version = Version;
+            public int completionRewardsVersion;
             public bool hasStarted;
             public bool onboardingKnown,onboardingSpinTaken;
             public int onboardingStep;
@@ -33,13 +34,25 @@ namespace WoolGame
             public string lastSpinDay;
             public string lastShopGiftDay;
             public bool warehouseTutorialSeen;
+            public bool railTutorialSeen;
+            public bool gameplayRulesTutorialSeen;
+            public float railTutorialElapsed;
+            public float warehouseTutorialElapsed;
             public int spinStreak;
             public WoolSpinState spin;
             public bool spinMigrated;
             public long noAdsUntilUnix;
+            public bool permanentNoAds,removeAdsBonusGranted;
+            public List<string> purchaseTransactions=new List<string>();
+            public List<string> ownedProducts=new List<string>();
             public int coins;
+            public long unavailableAdRewardDay;
+            public int unavailableAdRewardClaims;
             public int removePowers,sortPowers,boostPowers;
             public int abilityGiftMask,abilityTutorialMask;
+            public bool removalLessonTargetPending;
+            public bool hasTutorialCheckpoint;
+            public WoolTutorialCheckpoint tutorialCheckpoint;
             public int mapLastCompletedLevel,mapPresentedLevel;
             public bool mapPresentationKnown;
             public string playerName="Player";
@@ -67,6 +80,7 @@ namespace WoolGame
             public bool firstTry;
             public bool bonusClaimed;
             public int lastCountedCompletionAttempt;
+            public int rewardClaimedAttempt;
         }
 
         [Serializable]
@@ -176,6 +190,12 @@ namespace WoolGame
                 known+=data.spin!=null?data.spin.lastCoins:data.daily!=null?data.daily.spinReward:0;
                 data.collectedCoins=Math.Max(data.collectedCoins,known);data.collectedCoinsVersion=1;
             }
+            // Earlier versions already paid completed attempts at the win event.
+            if(data.completionRewardsVersion<1)
+            {
+                foreach(var old in data.levels)old.rewardClaimedAttempt=old.lastCountedCompletionAttempt;
+                data.completionRewardsVersion=1;
+            }
             int completed=data.levels.FindAll(x=>x.completed).Count;
             data.winningStreak=Mathf.Clamp(data.winningStreak,0,completed);
             data.bestStreak=Mathf.Clamp(Math.Max(data.bestStreak,data.winningStreak),0,completed);
@@ -188,7 +208,7 @@ namespace WoolGame
             return record;
         }
         public static bool HasCompleted(int number) { var record=Record(number,false);return record!=null&&record.completed; }
-        public static bool IsUnlocked(int number) { return number>=1&&number<=totalLevels&&(number<=CurrentLevel||HasCompleted(number)); }
+        public static bool IsUnlocked(int number) { return number>=1&&number<=totalLevels&&(WoolTestBuildOptions.AllLevelsUnlocked||number<=CurrentLevel||HasCompleted(number)); }
         public static int Attempts(int number) { var record=Record(number,false);return record==null?0:record.attempts; }
         public static int Failures(int number) { var record=Record(number,false);return record==null?0:record.failures; }
 
@@ -207,29 +227,39 @@ namespace WoolGame
             if(record==null||record.attempts==0||record.lastFailedAttempt==record.attempts)return;
             record.failures++;record.lastFailedAttempt=record.attempts;data.winningStreak=0;Save();
         }
-        // Base reward and completion are persisted together. Replays grant neither again.
+        // Record completion now; coins are paid only when a reward is claimed.
         public static bool CompleteLevel(int number)
         {
             if(number<1||number>totalLevels||(!IsPreview&&!IsUnlocked(number)))return false;
             var record=Record(number,false);
             if(record==null||record.attempts==0)return false;
-            if(record.lastCountedCompletionAttempt!=record.attempts){RecordProfileCompletion();RecordDailyCompletion();record.lastCountedCompletionAttempt=record.attempts;}
+            if(record.lastCountedCompletionAttempt==record.attempts)return false;
+            RecordProfileCompletion();RecordDailyCompletion();record.lastCountedCompletionAttempt=record.attempts;
             if(!data.mapPresentationKnown){data.mapPresentedLevel=MapDestinationLevel;data.mapPresentationKnown=true;}
             data.mapLastCompletedLevel=number;
             if(record.completed){Save();return false;}
             record.completed=true;record.firstTry=record.attempts==1&&record.failures==0;
             data.winningStreak++;data.bestStreak=Math.Max(data.bestStreak,data.winningStreak);
-            RecordDailyCoins(50);data.coins+=50;data.collectedCoins+=50;Daily.wins++;RecordSpinLevel();Save();return true;
+            Daily.wins++;RecordSpinLevel();Save();return true;
         }
-        public static bool ClaimCompletionBonus(int number)
+        public static bool CanClaimCompletionReward(int number)
         {
             var record=Record(number,false);
-            if(record==null||!record.completed||record.bonusClaimed)return false;
-            record.bonusClaimed=true;RecordDailyCoins(50);data.coins+=50;data.collectedCoins+=50;Save();return true;
+            return record!=null&&record.attempts>0&&record.lastCountedCompletionAttempt==record.attempts&&record.rewardClaimedAttempt!=record.attempts;
         }
+        public static bool ClaimCompletionReward(int number,bool doubled=false)
+        {
+            if(!CanClaimCompletionReward(number))return false;
+            var record=Record(number,false);
+            record.rewardClaimedAttempt=record.attempts;record.bonusClaimed=doubled;
+            int amount=doubled?100:50;
+            RecordDailyCoins(amount);data.coins+=amount;data.collectedCoins+=amount;Save();return true;
+        }
+        public static bool ClaimCompletionBonus(int number)=>ClaimCompletionReward(number,true);
         public static bool HasClaimedCompletionBonus(int number)
         {
-            var record=Record(number,false);return record!=null&&record.bonusClaimed;
+            var record=Record(number,false);
+            return record!=null&&record.rewardClaimedAttempt==record.attempts&&record.bonusClaimed;
         }
         public static void SetCoins(int amount)
         {
@@ -247,13 +277,15 @@ namespace WoolGame
             var previous=data;
             data=NewCampaign(preserveCoins?previous.coins:0);
             data.userId=previous.userId;data.playerName=previous.playerName;data.avatarIndex=previous.avatarIndex;data.collectedCoins=previous.collectedCoins;
+            data.unavailableAdRewardDay=previous.unavailableAdRewardDay;data.unavailableAdRewardClaims=previous.unavailableAdRewardClaims;
             Normalize();Save();
         }
         // Restart the level journey without discarding coins, powers, purchases or profile.
         public static void ResetLevelProgress()
         {
             EnsureLoaded();if(!IsPreview)PlayerPrefs.SetString("WoolCrush.Campaign.beforeLevelReset",JsonUtility.ToJson(data));
-            data.levels.Clear();data.hasStarted=false;data.warehouseTutorialSeen=false;
+            data.levels.Clear();data.hasStarted=false;data.warehouseTutorialSeen=false;data.railTutorialSeen=false;data.railTutorialElapsed=0;
+            data.tutorialCheckpoint=null;data.hasTutorialCheckpoint=false;data.removalLessonTargetPending=false;data.warehouseTutorialElapsed=0;
             data.mapLastCompletedLevel=0;data.mapPresentedLevel=1;data.mapPresentationKnown=true;
             data.winningStreak=0;data.bestStreak=0;Normalize();Save();
         }

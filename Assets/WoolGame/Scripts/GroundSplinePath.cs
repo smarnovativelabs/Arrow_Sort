@@ -30,9 +30,9 @@ namespace WoolGame
             if (Container == null) Container = GetComponent<SplineContainer>();
             BuildSamples();
         }
-        public void UseBaked(Vector3[] pathPoints,float[] pathDistances)
+        public void UseBaked(Vector3[] pathPoints,float[] pathDistances,float entryLength=0)
         {
-            points=pathPoints;cumulative=pathDistances;
+            EntryExtension=entryLength;points=pathPoints;cumulative=pathDistances;
             totalLength=cumulative.Length>0?cumulative[cumulative.Length-1]:0;
         }
 
@@ -60,6 +60,9 @@ namespace WoolGame
             }
         }
 
+
+        public float EntryExtension { get; private set; }
+        public float PlayableLength => totalLength-EntryExtension;
         // Total path length in world units (approximated by sampling)
         public float Length => totalLength;
 

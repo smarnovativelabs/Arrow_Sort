@@ -8,7 +8,9 @@ using System.Collections.Generic;
 
 public class TenjinTradPlusIntegration
 {
+#if tenjin_tradplus_enabled
     private static bool _subscribed_tradplus = false;
+#endif
 
     public TenjinTradPlusIntegration()
     {

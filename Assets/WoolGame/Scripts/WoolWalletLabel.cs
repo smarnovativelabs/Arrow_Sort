@@ -5,6 +5,6 @@ namespace WoolGame {
   public TMP_Text label;
   void OnEnable(){Refresh();}
   void LateUpdate(){Refresh();}
-  void Refresh(){if(!label||!WoolProgress.IsLoaded)return;string value=WoolProgress.Coins.ToString("N0");if(label.text!=value)label.text=value;}
+  void Refresh(){if(!label||!WoolProgress.IsLoaded)return;string value=WoolCoinText.Format(WoolProgress.Coins);if(label.text!=value)label.text=value;}
  }
 }

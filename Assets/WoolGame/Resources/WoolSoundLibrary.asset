@@ -12,18 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 386a925f8f4442b2ac01fb06bb7667b7, type: 3}
   m_Name: WoolSoundLibrary
   m_EditorClassIdentifier: 
-  background: {fileID: 8300000, guid: efe1a42ceb77f0a4bb56d385ca5c9323, type: 3}
-  bonus: {fileID: 8300000, guid: 48139aac3f651184e8308a89ec49e687, type: 3}
-  fire: {fileID: 8300000, guid: be7917434aad4de499aa3d396c15beda, type: 3}
-  coin: {fileID: 8300000, guid: 0bd633285769859409998ff2a6f5ca2e, type: 3}
-  end: {fileID: 8300000, guid: 6af717e77d13843409365625a6f3738f, type: 3}
-  spin: {fileID: 8300000, guid: bbed71372d6004048a527f4e2e9bda55, type: 3}
-  win: {fileID: 8300000, guid: c89271d7ccaa50d47bb87f6b6bfd7c44, type: 3}
-  menuMusic: {fileID: 8300000, guid: a380928c214e38441a2564887fe88809, type: 3}
-  uiClick: {fileID: 8300000, guid: 5dda06a214f772546a63b165c928b463, type: 3}
-  victory: {fileID: 8300000, guid: 8fd48289b800a2748b21f68534d052ea, type: 3}
-  defeat: {fileID: 8300000, guid: 336fd7e16646c1748bea00ecb634f62e, type: 3}
-  unlockSlot: {fileID: 8300000, guid: 6a2111e9f496dae4b877b26bc4634f27, type: 3}
-  removeVehicle: {fileID: 8300000, guid: 5ac7543948ad1694caed71e70a7d5028, type: 3}
-  sortColors: {fileID: 8300000, guid: f6dae2ad1e3a0c044bf556f110bffaaa, type: 3}
-  pierceFog: {fileID: 8300000, guid: 51f731a722f4ba84592a5e771ae87eb7, type: 3}
+  background: {fileID: 8300000, guid: 9216a908ca3b791458e24321632f340e, type: 3}
+  bonus: {fileID: 8300000, guid: 962f4c4273f507941bed4990bba7f922, type: 3}
+  fire: {fileID: 8300000, guid: d6533a2a8bf0f4b4b8166986305af6c1, type: 3}
+  coin: {fileID: 8300000, guid: 51f7a83d883135e41a05013d331d62cf, type: 3}
+  end: {fileID: 8300000, guid: 1a5e9f0e19c9edf4590e1b279b767fbc, type: 3}
+  spin: {fileID: 8300000, guid: 7a0f590731cc90249bd7bb614b0609a6, type: 3}
+  win: {fileID: 8300000, guid: 32f1eb81a28a8e840bdcc0cc27bab7cf, type: 3}
+  menuMusic: {fileID: 8300000, guid: 8e0a5bb042699fc4cbfcc4df4abb4ea3, type: 3}
+  uiClick: {fileID: 8300000, guid: 99597f66162aa824fabf8b0641cc7c61, type: 3}
+  victory: {fileID: 8300000, guid: 32f1eb81a28a8e840bdcc0cc27bab7cf, type: 3}
+  defeat: {fileID: 8300000, guid: 1a5e9f0e19c9edf4590e1b279b767fbc, type: 3}
+  unlockSlot: {fileID: 8300000, guid: 962f4c4273f507941bed4990bba7f922, type: 3}
+  removeVehicle: {fileID: 8300000, guid: 1a436690e83732341a6148067a558a78, type: 3}
+  sortColors: {fileID: 8300000, guid: 04a029a66be6fbb45960ab493f70c9c0, type: 3}
+  pierceFog: {fileID: 8300000, guid: c993223d7001dbe41a87eb188de4b931, type: 3}
+  arrowShot: {fileID: 8300000, guid: 7170dc76d336a7846a00c5fdab77aa78, type: 3}
+  arrowImpact: {fileID: 8300000, guid: fd13fc29f7eb16b47a2c5db888d3a94f, type: 3}
+  vehicleMove: {fileID: 8300000, guid: 8559f669a8442bb4a87b9dc52a9f0077, type: 3}
+  vehicleDock: {fileID: 8300000, guid: d861655386d805e47938cd6cecedc5bf, type: 3}
+  blocked: {fileID: 8300000, guid: aa9055dbb22007642b501cfa4850979b, type: 3}
+  levelStart: {fileID: 8300000, guid: 33f15770175f3ef4a9fa8e951d715007, type: 3}
+  duckQuack: {fileID: 8300000, guid: 019da731970358e45a2c61686a0efd8f, type: 3}

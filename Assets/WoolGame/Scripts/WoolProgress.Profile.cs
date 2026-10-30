@@ -48,9 +48,9 @@ namespace WoolGame
                 if(data.profileCompletions.count+data.profileCompletions.pending!=1)throw new Exception("One completion per attempt");
                 BeginLevel(1);CompleteLevel(1);
                 if(data.profileCompletions.count+data.profileCompletions.pending!=2)throw new Exception("Completed replay counts today");
-                if(CoinsCollected!=50)throw new Exception("Replay must not award duplicate coins");
-                SetCoins(10);if(CoinsCollected!=50)throw new Exception("Spending must not reduce lifetime coins");
-                SetCoins(30);if(CoinsCollected!=70)throw new Exception("Income accumulates in lifetime coins");
+                if(CoinsCollected!=100)throw new Exception("Each completed attempt earns 50 coins");
+                SetCoins(10);if(CoinsCollected!=100)throw new Exception("Spending must not reduce lifetime coins");
+                SetCoins(30);if(CoinsCollected!=120)throw new Exception("Income accumulates in lifetime coins");
                 SetProfile("",0);if(PlayerName!=id)throw new Exception("Empty name defaults to user ID");
                 return "PASS: numeric user ID/default name, stable ID, completed levels/replays counted once, lifetime earnings survive spending, no duplicate coin grants.";
             }

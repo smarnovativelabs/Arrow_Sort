@@ -25,6 +25,7 @@ namespace WoolGame
         public int[] tutorialOrder=Array.Empty<int>();
         public Vector3[] route=Array.Empty<Vector3>();
         [HideInInspector] public int openSlots=4;
+        [Range(4,8)] public int requiredSlots=4;
         public float boardRotation;
         [Range(.4f,1)] public float boardScale=1;
         public int snakeBatchSize=1;

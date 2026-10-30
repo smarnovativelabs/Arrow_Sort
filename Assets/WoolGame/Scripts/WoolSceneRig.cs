@@ -34,9 +34,11 @@ namespace WoolGame
         public void SetVehicle(int index,WoolTile tile,float boardRotation=0,float boardScale=1)
         {
             var t=vehicles[index];t.gameObject.SetActive(true);
+            SetViewLayer(t,"Vehicle View");
             var bounds=authoredLayout.vehiclePool.Show(index,tile,t);
             t.GetComponent<Renderer>().enabled=false;
             t.localScale=new Vector3(tile.width*boardScale/bounds.size.x,.7f/bounds.size.y,tile.length*boardScale/bounds.size.z);
+            authoredLayout.vehiclePool.FitProportions(index,t.localScale);
             t.localPosition=ParkingPresentationOffset+ParkingOffset+new Vector3(0,-3.2f,0)+Quaternion.Euler(0,0,boardRotation)*(new Vector3(tile.x,tile.y+3.2f,0)*boardScale)+Vector3.back*.3f;
             t.localRotation=Quaternion.Euler(0,0,-(int)tile.direction*90+boardRotation)*Quaternion.Euler(-90,0,0);
             var collider=t.GetComponent<BoxCollider>();collider.center=Vector3.zero;collider.size=bounds.size;collider.enabled=true;
@@ -66,7 +68,7 @@ namespace WoolGame
             int width=gameCamera.targetTexture?gameCamera.targetTexture.width:Screen.width;
             int height=gameCamera.targetTexture?gameCamera.targetTexture.height:Screen.height;
             if(width<=0||height<=0)return;
-            Rect safe=gameCamera.targetTexture?new Rect(0,0,width,height):Screen.safeArea;
+            Rect safe=gameCamera.targetTexture?new Rect(0,0,width,height):WoolHud.CurrentSafeArea;
             FitPortraitCamera(width,height,safe);
         }
     }

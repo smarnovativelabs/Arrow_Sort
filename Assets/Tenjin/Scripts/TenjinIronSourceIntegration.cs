@@ -8,7 +8,9 @@ using UnityEngine;
 
 public class TenjinIronSourceIntegration
 {
+#if tenjin_ironsource_enabled
     private static bool _subscribed_ironsource = false;
+#endif
 
     public TenjinIronSourceIntegration()
     {

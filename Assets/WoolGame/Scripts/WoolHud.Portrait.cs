@@ -26,14 +26,18 @@ namespace WoolGame
             // Gameplay controls float over the scene, as in the portrait reference.
             if(releaseHeaderArt)releaseHeaderArt.gameObject.SetActive(false);
             var headerImage=header.GetComponent<UnityEngine.UI.Image>();if(headerImage)headerImage.enabled=false;
-            EdgeControl(header,"Pause",new Vector2(0,1),new Vector2(92,-110));
-            EdgeControl(header,"Level",new Vector2(0,1),new Vector2(135,-205));
+            EdgeControl(header,"Pause",new Vector2(0,1),new Vector2(92+(portraitSafe.xMin-frame.xMin)/frameScale,-110));
+            EdgeControl(header,"Level",new Vector2(0,1),new Vector2(92+(portraitSafe.xMin-frame.xMin)/frameScale,-205));
             var levelPlate=header.Find("Level plate");if(levelPlate)levelPlate.gameObject.SetActive(false);
             foreach(string name in new[]{"Coin plate","Coins"}){var item=header.Find(name);if(item)item.gameObject.SetActive(false);}
-            var speed=header.Find("Gameplay speed");if(speed){speed.gameObject.SetActive(true);EdgeControl(header,"Gameplay speed",Vector2.one,new Vector2(-100,-110));}
+            var speed=header.Find("Gameplay speed");if(speed){speed.gameObject.SetActive(true);EdgeControl(header,"Gameplay speed",Vector2.one,new Vector2(-100+(portraitSafe.xMax-frame.xMax)/frameScale,-110));}
             meter.gameObject.SetActive(false);progress.gameObject.SetActive(false);
             if(boardCropLeft)boardCropLeft.gameObject.SetActive(false);if(boardCropRight)boardCropRight.gameObject.SetActive(false);
             FitReleaseUI();
+            // Clamp the complete authored ability cards, including their captions, inside the safe screen.
+            var bounds=RectTransformUtility.CalculateRelativeRectTransformBounds(safe,footer);
+            float bottomInFrame=(portraitSafe.yMin-frame.yMin)/frameScale-designHeight*.5f+24;
+            if(bounds.min.y<bottomInFrame)footer.anchoredPosition+=Vector2.up*(bottomInFrame-bounds.min.y);
         }
         public void ClearCompactGameplayFrame(){compactDesignHeight=0;if(safe)safe.localScale=Vector3.one;portraitWidth=0;RefreshSafeArea();HideAbilityGuide();HideAbilityEffect();}
         [SerializeField] RectTransform bannerArea,abilityBackdrop;
@@ -88,7 +92,7 @@ namespace WoolGame
                 var rt=child as RectTransform;
                 if(!rt)continue;
                 if(rt==boardCropLeft||rt==boardCropRight){rt.gameObject.SetActive(false);continue;}
-                if(rt.GetComponent<WoolFullBleedBackground>())
+                if((dangerBorder&&rt==dangerBorder.rectTransform)||rt==removalShade||rt.GetComponent<WoolFullBleedBackground>()||rt.GetComponent<WoolTouchFeedback>()||rt.GetComponent<WoolLuckySpin>()||(utilityPanel&&rt==utilityPanel.transform)||(modal&&rt==modal.transform&&warehouseTutorial&&warehouseTutorial.gameObject.activeInHierarchy))
                 {rt.anchorMin=Vector2.zero;rt.anchorMax=Vector2.one;rt.offsetMin=rt.offsetMax=Vector2.zero;continue;}
                 rt.anchorMin=min;rt.anchorMax=max;rt.offsetMin=rt.offsetMax=Vector2.zero;
             }
@@ -104,15 +108,16 @@ namespace WoolGame
                 header.anchorMin=new Vector2(0,1);header.anchorMax=Vector2.one;
                 header.pivot=new Vector2(.5f,1);header.sizeDelta=new Vector2(0,200);
                 header.anchoredPosition=Vector2.zero;
-                EdgeControl(header,"Pause",new Vector2(0,1),new Vector2(70,-65));
-                EdgeControl(header,"Level",new Vector2(.5f,1),new Vector2(0,-66));
-                EdgeControl(header,"Level plate",new Vector2(.5f,1),new Vector2(0,-66));
+                EdgeControl(header,"Pause",new Vector2(0,1),new Vector2(140,-65));
+                EdgeControl(header,"Level",new Vector2(0,1),new Vector2(140,-165));
+                EdgeControl(header,"Level plate",new Vector2(0,1),new Vector2(70,-160));
                 EdgeControl(header,"Level difficulty",new Vector2(0,1),new Vector2(100,-172));
                 EdgeControl(header,"Coin plate",Vector2.one,new Vector2(-185,-65));
                 EdgeControl(header,"Coins",Vector2.one,new Vector2(-158,-65));
                 EdgeControl(header,"Gameplay speed",Vector2.one,new Vector2(-100,-167));
-                foreach(string name in new[]{"Coin plate","Coins"}){var item=header.Find(name);if(item)item.gameObject.SetActive(true);}
+                foreach(string name in new[]{"Coin plate","Coins","Unified gameplay wallet"}){var item=header.Find(name);if(item)item.gameObject.SetActive(false);}
                 foreach(string name in new[]{"Level difficulty","Gameplay speed"}){var item=header.Find(name);if(item)item.gameObject.SetActive(false);}
+                if(gameplaySpeedButton){var speed=(RectTransform)gameplaySpeedButton.transform;speed.anchorMin=speed.anchorMax=Vector2.one;speed.anchoredPosition=new Vector2(-110,-70);gameplaySpeedButton.gameObject.SetActive(true);}
                 meter.anchorMin=meter.anchorMax=new Vector2(.5f,1);meter.anchoredPosition=new Vector2(0,-139);meter.sizeDelta=new Vector2(480,18);
                 progress.rectTransform.anchorMin=progress.rectTransform.anchorMax=new Vector2(.5f,1);progress.rectTransform.anchoredPosition=new Vector2(0,-178);progress.rectTransform.sizeDelta=new Vector2(650,34);
             }
@@ -137,19 +142,20 @@ namespace WoolGame
 
         public void PositionTutorial(Vector2 normalizedSlotBottom)
         {
+            if(removalInstruction&&removalInstruction.gameObject.activeSelf){removalInstruction.anchorMin=removalInstruction.anchorMax=new Vector2(.5f,normalizedSlotBottom.y);removalInstruction.anchoredPosition=new Vector2(0,-45);}
             if(!tutorialCard||!tutorialCard.gameObject.activeSelf||!safe)return;
             float width=Mathf.Max(1,safe.rect.width),height=Mathf.Max(1,safe.rect.height);
             tutorialCard.anchorMin=tutorialCard.anchorMax=new Vector2(.5f,Mathf.Clamp(normalizedSlotBottom.y,.32f,.72f));
             tutorialCard.pivot=new Vector2(.5f,1);tutorialCard.anchoredPosition=new Vector2(0,-36);
-            tutorialCard.sizeDelta=new Vector2(Mathf.Min(880,width-72),130);tutorialCard.localScale=Vector3.one;
+            tutorialCard.sizeDelta=new Vector2(Mathf.Min(930,width-48),132);tutorialCard.localScale=Vector3.one;
             hint.rectTransform.anchorMin=Vector2.zero;hint.rectTransform.anchorMax=Vector2.one;
             hint.rectTransform.offsetMin=new Vector2(20,12);hint.rectTransform.offsetMax=new Vector2(-20,-12);
-            hint.fontSize=29;hint.enableAutoSizing=true;hint.fontSizeMin=23;hint.fontSizeMax=29;hint.gameObject.SetActive(true);
+            hint.fontSize=48;hint.enableAutoSizing=false;hint.fontSizeMin=48;hint.fontSizeMax=48;hint.gameObject.SetActive(true);
             tutorialTip.rectTransform.anchorMin=tutorialTip.rectTransform.anchorMax=new Vector2(.5f,0);
             tutorialTip.rectTransform.anchoredPosition=new Vector2(0,205);
             tutorialTip.rectTransform.sizeDelta=new Vector2(Mathf.Min(900,width-60),90);
             tutorialTip.fontSize=24;
-            tutorialTip.text="No rush. Follow the hand—your duck family is safe while learning.";
+            tutorialTip.text="";tutorialTip.gameObject.SetActive(false);
         }
         static void EdgeControl(RectTransform parent,string name,Vector2 anchor,Vector2 position)
         {

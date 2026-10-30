@@ -48,6 +48,9 @@ namespace WoolGame
             if(sources!=null)foreach(var candidate in sources)
                 if(candidate&&candidate.gameObject.activeInHierarchy&&(candidate.sprite||candidate.color.a>.9f))source=candidate;
             bool visible=source;
+            // The scrolling map already fills the physical canvas. A second, separately
+            // scaled copy behind it makes its paths diverge in the notch and bottom margins.
+            if(source&&source.GetComponentInParent<WoolSkywayMap>())visible=false;
             surface.enabled=visible;
             if(!visible)return;
             var rect=(RectTransform)surface.transform.parent;

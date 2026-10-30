@@ -29,7 +29,8 @@ namespace WoolGame
         [SerializeField] Sprite[] icons=new Sprite[16];
         [SerializeField] Image boosterIcon;
         [SerializeField] RectTransform boosterPicture;
-        public bool ModalVisible => (modal && modal.activeSelf) || (utilityPanel && utilityPanel.gameObject.activeInHierarchy);
+        int gameplayInputBlockedThroughFrame=-1;
+        public bool ModalVisible => Time.frameCount<=gameplayInputBlockedThroughFrame || GameplayRuleVisible || walletShopOpen || (modal && modal.activeSelf) || (utilityPanel && utilityPanel.gameObject.activeInHierarchy);
         public event Action PausePressed, PlayPressed, FreeCoinsPressed;
         public event Action<int> BoosterPressed;
 
@@ -131,7 +132,7 @@ namespace WoolGame
 #endif
         public void Status(int stage,int money,int remaining,int total)
         {
-            level.text="LEVEL "+stage;coins.text=money.ToString();RefreshDifficulty(stage);RefreshAbilityInventory();
+            level.text="LEVEL "+stage;level.fontSize=40;level.alignment=TMPro.TextAlignmentOptions.Center;level.enableAutoSizing=false;level.rectTransform.sizeDelta=new Vector2(180,76);level.rectTransform.pivot=new Vector2(.5f,.5f);var gameplayWallet=header.Find("Unified gameplay wallet");if(gameplayWallet)gameplayWallet.gameObject.SetActive(false);coins.text=WoolCoinText.Format(money);RefreshDifficulty(stage);RefreshAbilityInventory();
             float cleared=1-(float)remaining/Mathf.Max(1,total);
             progressFill.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,480*cleared);
             progress.text=remaining==0?"FAMILY RESCUED!":Mathf.RoundToInt(cleared*100)+"%  •  SAVE THE DUCK FAMILY";
@@ -143,6 +144,7 @@ namespace WoolGame
             var toolsInput=footer.GetComponent<CanvasGroup>();if(!toolsInput)toolsInput=footer.gameObject.AddComponent<CanvasGroup>();
             toolsInput.interactable=!enabled;toolsInput.blocksRaycasts=!enabled;
             tutorialCard.gameObject.SetActive(enabled);tutorialTip.gameObject.SetActive(false);SelectionMode(false,null);
+            var tutorialLayer=tutorialCard.GetComponent<Canvas>();if(enabled&&!tutorialLayer)tutorialLayer=tutorialCard.gameObject.AddComponent<Canvas>();if(tutorialLayer){tutorialLayer.overrideSorting=true;tutorialLayer.sortingOrder=251;}
             hint.rectTransform.SetParent(enabled?tutorialCard:safe,false);
             Place(hint.rectTransform,enabled?new Vector2(.5f,.5f):new Vector2(.5f,1),enabled?Vector2.zero:new Vector2(-70,-165));
             hint.rectTransform.sizeDelta=new Vector2(enabled?570:420,80);hint.fontSize=enabled?27:20;
@@ -151,6 +153,7 @@ namespace WoolGame
         public void SelectionMode(bool enabled,Action cancel)
         {
             cancelSelection.gameObject.SetActive(enabled);cancelSelection.onClick.RemoveAllListeners();if(cancel!=null)cancelSelection.onClick.AddListener(()=>cancel());
+            ShowRemovalInstruction(enabled);RemovalSpotlight(enabled);
         }
         public void Launch(string text,Color color,float progressValue){launch.SetActive(true);launch.GetComponent<Image>().color=color;launchTitle.text=text;launchProgress.text=progressValue>0?Mathf.RoundToInt(progressValue*100)+"%":"";}
         public void EndLaunch(){launch.SetActive(false);}
@@ -200,7 +203,7 @@ namespace WoolGame
             if(!modal.GetComponent<GraphicRaycaster>())modal.AddComponent<GraphicRaycaster>();
             modal.GetComponent<Image>().color=new Color(0,0,0,.65f);
             modalCard.sizeDelta=new Vector2(680,490);
-            modalTitle.text=title=="STORE UNAVAILABLE"?"Shop unavailable":"Video not ready";
+            modalTitle.text=title=="STORE UNAVAILABLE"?"Shop unavailable":"Video unavailable";
             modalTitle.rectTransform.anchoredPosition=new Vector2(0,145);
             modalTitle.rectTransform.sizeDelta=new Vector2(590,90);
             modalTitle.font=modalBody.font=primaryText.font=font;
@@ -217,7 +220,7 @@ namespace WoolGame
             primaryText.color=Color.white;primaryText.outlineWidth=.12f;
             primaryText.outlineColor=WoolArt.Hex("287909");
         }
-        public void Hide() { RestoreWarehouseTutorial();RestoreWinPresentation();modal.SetActive(false); }
+        public void Hide() { gameplayInputBlockedThroughFrame=Time.frameCount+1;RemovalSpotlight(false);RestoreWarehouseTutorial();RestoreLosePresentation();RestoreWinPresentation();RestoreUnlockPresentation();modal.SetActive(false); }
         Image Icon(Transform parent,int index,Vector2 size,Vector2 position)
         {
             var rt=Rect("Icon "+index,parent,new Vector2(.5f,.5f),new Vector2(.5f,.5f),size,position);
@@ -242,7 +245,7 @@ namespace WoolGame
         {
             var rt=Panel(name,parent,new Vector2(.5f,.5f),size,pos,WoolArt.Hex("DCEEE3"));var b=rt.gameObject.AddComponent<Button>();
             var colors=b.colors;colors.highlightedColor=WoolArt.Hex("C4E4D3");colors.pressedColor=WoolArt.Hex("9FD3BC");b.colors=colors;
-            Label("Label",rt,label,21,size-Vector2.one*8,Vector2.zero,WoolArt.Hex("2B6255"));if(action!=null)b.onClick.AddListener(()=>action());BindButtonAudio(b);return b;
+            Label("Label",rt,label,21,size-Vector2.one*8,Vector2.zero,WoolArt.Hex("2B6255"));if(Application.isPlaying)WoolGlossyButton.Style(b);if(action!=null)b.onClick.AddListener(()=>action());BindButtonAudio(b);return b;
         }
         void Place(RectTransform rt,Vector2 anchor,Vector2 pos){rt.anchorMin=rt.anchorMax=anchor;rt.anchoredPosition=pos;}
         // Called after deserialization; only listeners are bound at runtime.
@@ -265,7 +268,7 @@ namespace WoolGame
                 else if(name=="TASKS"||name.StartsWith("Lv."))button.onClick.AddListener(()=>Show("ADVENTURE","Complete puzzles to continue your adventure.","BACK",Hide));
                 else {int kind=Array.IndexOf(WoolBoosters.Names,name);if(kind>=0)button.onClick.AddListener(()=>BoosterPressed?.Invoke(kind));}
             }
-            ConfigureInputTargets();BindPolishedUI();BindCampaignUI();BindEngagementUI();BindSpeedControl();BindReferencePages();BindAdPassOffer();BindSpecialOffer();BindLuckySpin();BindProfileView();BindUnlockPresentation();RefreshSafeArea();
+            if(Application.isPlaying)BindPurchaseUI();ConfigureInputTargets();BindPolishedUI();BindCampaignUI();BindEngagementUI();BindSpeedControl();BindReferencePages();BindAdPassOffer();BindSpecialOffer();BindLuckySpin();BindProfileView();BindUnlockPresentation();RefreshSafeArea();if(Application.isPlaying&&!GetComponent<WoolRewardNotifications>())gameObject.AddComponent<WoolRewardNotifications>();
         }
         void ShowProfile()
         {
@@ -274,4 +277,3 @@ namespace WoolGame
         }
     }
 }
-

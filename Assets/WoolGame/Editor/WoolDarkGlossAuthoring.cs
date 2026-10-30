@@ -12,7 +12,7 @@ namespace WoolGame.Editor
     {
         const string Root="Assets/WoolGame/Designer/SharedSnakePalette";
         const string BackupRoot="Docs/Backups/DarkGlossPalette";
-        static readonly string[] Hex={"B51224","007C9E","B88808","7621AE","007642","C44D08","A70E70","1944AF","50800A","BC3C52"};
+        static readonly string[] Hex={"E53935","00D5E8","FFD600","7B28C9","159447","FF8C00","FF76B5","2454E6","86451F","30343B"};
         static readonly string[] SourceHex={"C3190C","04C4E0","F3C916","A428E3","03A14E","F57D08","C51A73","1851C3","72B50E","F66F92"};
 
         [MenuItem("Tools/Wool Game/Apply Dark Gloss Palette")]

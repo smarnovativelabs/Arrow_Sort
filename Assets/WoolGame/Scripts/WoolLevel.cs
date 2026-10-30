@@ -18,6 +18,9 @@ namespace WoolGame
         public WoolVehicleSource source;
         public int sourceId,sourceOrder;
         [NonSerialized] public bool hidden;
+        [NonSerialized] public bool probing,leaving,carried;
+        [NonSerialized] public float motionX,motionY;
+        [NonSerialized] public WoolDirection transitDirection;
     }
 
     // Deterministic level rules can be exercised without a scene or renderer.
@@ -36,7 +39,7 @@ namespace WoolGame
         public WoolLevel(WoolLevelDefinition definition)
         {
             Number=definition.number;Rows=0;
-            foreach(var p in definition.containerPositions)tunnelObstacles.Add(new WoolTile{x=p.x,y=p.y,width=1.65f,length=1.75f,direction=WoolDirection.Up});
+            foreach(var p in definition.containerPositions)tunnelObstacles.Add(new WoolTile{x=p.x,y=p.y+.45f,width=1.7f,length=2.8f,direction=WoolDirection.Up});
             foreach(var t in definition.vehicles)Tiles.Add(new WoolTile {row=t.row,column=t.column,color=t.color,ammo=t.ammo,direction=t.direction,size=t.size,x=t.x,y=t.y,width=t.width,length=t.length,source=t.source,sourceId=t.sourceId,sourceOrder=t.sourceOrder,hidden=t.source!=WoolVehicleSource.Board});
             Yarn.AddRange(definition.yarn);Solution.AddRange(definition.tutorialOrder);
             var remaining=new int[WoolArt.Palette.Length];
@@ -122,13 +125,40 @@ namespace WoolGame
         public bool CanSelect(int index)
         {
             if (index < 0 || index >= Tiles.Count || Tiles[index].selected||Tiles[index].hidden) return false;
-            WoolTile tile = Tiles[index];
+            return !TryGetBlocker(index,out _,out _);
+        }
+        // Distance to first contact, not a binary rejection. Runtime offsets keep
+        // returning and departing actors solid until their actual bodies clear.
+        public bool TryGetBlocker(int index,out int blocker,out float distance)
+        {
+            blocker=-1;distance=float.PositiveInfinity;
+            if(index<0||index>=Tiles.Count)return false;
+            float bestDistance=float.PositiveInfinity;int bestBlocker=-1;
+            var tile=Tiles[index];
             for(int i=0;i<tunnelObstacles.Count;i++)
-                if(!(tile.source==WoolVehicleSource.Container&&tile.sourceId==i)&&BlocksPath(tile,tunnelObstacles[i],tile.direction))return false;
-            for (int i = 0; i < Tiles.Count; i++)
-                if (i != index && !Tiles[i].selected && !Tiles[i].hidden && BlocksPath(tile, Tiles[i], tile.direction))
-                    return false;
-            return true;
+                if(!(tile.source==WoolVehicleSource.Container&&tile.sourceId==i))Consider(tunnelObstacles[i],-2-i);
+            for(int i=0;i<Tiles.Count;i++)if(i!=index&&!Tiles[i].hidden&&(!Tiles[i].selected||Tiles[i].leaving)){
+                Consider(Tiles[i],i);
+                // A blocked attempt must return here: reserve its parking space
+                // until the complete forward-and-back animation has finished.
+                if(Tiles[i].probing)Consider(Tiles[i],i,true);
+            }
+            distance=bestDistance;blocker=bestBlocker;return !float.IsPositiveInfinity(distance);
+            void Consider(WoolTile other,int id,bool parked=false)
+            {
+                bool vertical=tile.direction==WoolDirection.Up||tile.direction==WoolDirection.Down;
+                var heading=other.leaving||other.carried?other.transitDirection:other.direction;
+                bool otherVertical=heading==WoolDirection.Up||heading==WoolDirection.Down;
+                float ax=vertical?tile.width:tile.length,ay=vertical?tile.length:tile.width;
+                float bx=otherVertical?other.width:other.length,by=otherVertical?other.length:other.width;
+                float dx=other.x+(parked?0:other.motionX)-tile.x-tile.motionX,dy=other.y+(parked?0:other.motionY)-tile.y-tile.motionY;
+                if(vertical?Math.Abs(dx)>=(ax+bx)*.5f-.001f:Math.Abs(dy)>=(ay+by)*.5f-.001f)return;
+                float along=tile.direction==WoolDirection.Up?dy:tile.direction==WoolDirection.Down?-dy:tile.direction==WoolDirection.Right?dx:-dx;
+                float extent=vertical?(ay+by)*.5f:(ax+bx)*.5f;
+                if(along+extent<=.001f)return;
+                float gap=Math.Max(0,along-extent);
+                if(gap<bestDistance){bestDistance=gap;bestBlocker=id;}
+            }
         }
 
         // Full swept AABB, including partial lane overlaps. Direction belongs to
@@ -156,7 +186,7 @@ namespace WoolGame
             return total;
         }
 
-        public bool RemoveBox(int index,List<float> remainingAmounts=null)
+        public bool RemoveBox(int index,List<float> remainingAmounts=null,IList<int> preferredOrder=null)
         {
             if(remainingAmounts!=null&&remainingAmounts.Count!=Yarn.Count)
                 throw new ArgumentException("Wool colors and remaining amounts must have matching lengths.",nameof(remainingAmounts));
@@ -166,28 +196,82 @@ namespace WoolGame
             for(int i=0;i<Yarn.Count;i++)if(Yarn[i]==tile.color)available+=remainingAmounts==null?1:remainingAmounts[i];
             if(available+.0001f<tile.ammo)return false;
             tile.selected=true;float remaining=tile.ammo;
-            for(int i=Yarn.Count-1;i>=0&&remaining>.00001f;i--)
+            var order=new List<int>();if(preferredOrder!=null)foreach(int i in preferredOrder)if(i>=0&&i<Yarn.Count&&!order.Contains(i))order.Add(i);for(int i=Yarn.Count-1;i>=0;i--)if(!order.Contains(i))order.Add(i);
+            var cleared=new List<int>();foreach(int i in order)
             {
+                if(remaining<=.00001f)break;
                 if(Yarn[i]!=tile.color)continue;
                 float amount=remainingAmounts==null?1:remainingAmounts[i];
                 float take=Math.Min(remaining,amount);remaining-=take;amount-=take;
-                if(amount<=.00001f){Yarn.RemoveAt(i);if(remainingAmounts!=null)remainingAmounts.RemoveAt(i);}
+                if(amount<=.00001f)cleared.Add(i);
                 else if(remainingAmounts!=null)remainingAmounts[i]=amount;
             }
+            cleared.Sort();for(int n=cleared.Count-1;n>=0;n--){int i=cleared[n];Yarn.RemoveAt(i);if(remainingAmounts!=null)remainingAmounts.RemoveAt(i);}
             return true;
         }
 
-        public void SortColors(int use,List<float> remainingAmounts=null)
+public void SortColors(int use,List<float> remainingAmounts=null,IList<int> priority=null)
         {
             if(remainingAmounts!=null&&remainingAmounts.Count!=Yarn.Count)
                 throw new ArgumentException("Wool colors and remaining amounts must have matching lengths.",nameof(remainingAmounts));
             var random=new Random(unchecked(Number*7919+use*104729));
-            for(int i=Yarn.Count-1;i>0;i--)
+            var colors=new List<int>();
+            var indices=new Dictionary<int,List<int>>();
+            for(int i=0;i<Yarn.Count;i++)
             {
-                int j=random.Next(i+1),value=Yarn[i];Yarn[i]=Yarn[j];Yarn[j]=value;
-                // A partially wound section retains its exact color and quantity.
-                if(remainingAmounts!=null){float amount=remainingAmounts[i];remainingAmounts[i]=remainingAmounts[j];remainingAmounts[j]=amount;}
+                int color=Yarn[i];
+                if(!indices.ContainsKey(color)){indices[color]=new List<int>();colors.Add(color);}
+                indices[color].Add(i);
             }
+            // Split each colour into short runs before interleaving them.
+            // Original indices keep partially consumed amounts attached to their colour.
+            int[] sizes={2,4,6,10};
+            var chunks=new Dictionary<int,Queue<List<int>>>();
+            foreach(int color in colors)
+            {
+                var source=indices[color];var queue=new Queue<List<int>>();
+                for(int offset=0;offset<source.Count;)
+                {
+                    int left=source.Count-offset;
+                    var choices=new List<int>();
+                    foreach(int size in sizes)if(size<=left&&left-size!=1)choices.Add(size);
+                    int take=choices.Count>0?choices[random.Next(choices.Count)]:left;
+                    queue.Enqueue(source.GetRange(offset,take));offset+=take;
+                }
+                chunks[color]=queue;
+            }
+            var sorted=new List<int>(Yarn.Count);
+            var amounts=remainingAmounts==null?null:new List<float>(Yarn.Count);
+            int previous=-1;
+            while(sorted.Count<Yarn.Count)
+            {
+                int chosen=-1;
+                // Help a ready crossbow with one short front group, not its entire colour.
+                if(sorted.Count==0&&priority!=null)
+                    foreach(int color in priority)
+                        if(chunks.ContainsKey(color)&&chunks[color].Count>0){chosen=color;break;}
+                if(chosen<0)
+                {
+                    int most=0;var candidates=new List<int>();
+                    foreach(int color in colors)
+                    {
+                        int count=chunks[color].Count;if(count==0||color==previous)continue;
+                        if(count>most){most=count;candidates.Clear();}
+                        if(count==most)candidates.Add(color);
+                    }
+                    // Only one colour left: preserve its wool rather than inventing colours.
+                    if(candidates.Count==0)
+                        foreach(int color in colors)if(chunks[color].Count>0)candidates.Add(color);
+                    chosen=candidates[random.Next(candidates.Count)];
+                }
+                foreach(int index in chunks[chosen].Dequeue())
+                {
+                    sorted.Add(Yarn[index]);if(amounts!=null)amounts.Add(remainingAmounts[index]);
+                }
+                previous=chosen;
+            }
+            Yarn.Clear();Yarn.AddRange(sorted);
+            if(amounts!=null){remainingAmounts.Clear();remainingAmounts.AddRange(amounts);}
         }
 
     }
@@ -198,7 +282,6 @@ namespace WoolGame
         public static readonly int[] Prices={800,600,700,500};
         public static readonly int[] UnlockLevels={2,4,6,8};
         public static bool Available(int kind,int level)=>kind>=0&&kind<4&&level>=UnlockLevels[kind];
-        public static readonly string[] Descriptions={"Unlock a new slot","Remove any box","Refresh the dragon body colors","Collect hidden dragon wool for a short time"};
+        public static readonly string[] Descriptions={"Open one locked slot so another crossbow can join this level.","Choose any vehicle. Remove it and clear its matching amount of dragon wool.","Reshuffle dragon colours into short groups of 2, 4, 6 or 10. A ready crossbow colour comes first.","Reach matching wool through the fog for 12 seconds. Watch the countdown on this button."};
     }
 }
-

@@ -22,37 +22,63 @@ public sealed class WoolWinPresentation:MonoBehaviour {
   if(!duckImage)duckImage=duck.GetComponent<Image>();
   if(!bonusSkin)bonusSkin=bonus.GetComponent<Image>().sprite;if(!collectSkin)collectSkin=collect.GetComponent<Image>().sprite;
   bonus.GetComponent<Image>().sprite=canDouble?bonusSkin:collectedButton;collect.GetComponent<Image>().sprite=collectSkin;
-  displayBalance=Mathf.Max(0,balance);walletLabel.text=displayBalance.ToString();
-  rewardLabel.text=earned>0?"+"+earned:"Reward saved";
+  // The save already contains the base reward; animate from the pre-reward balance.
+  displayBalance=Mathf.Max(0,balance-Mathf.Max(0,earned));walletLabel.text=WoolCoinText.Format(displayBalance);
+  rewardLabel.text="+"+Mathf.Max(0,earned);
   collectLabel.text="Continue";bonusLabel.text=canDouble?"2x coins":"Collected";
   var mapCaption=home.GetComponentInChildren<TMP_Text>();if(mapCaption)mapCaption.text="Map";
-  if(collectAmount)collectAmount.text=earned>0?"+"+earned:"Map";
+  if(collectAmount)collectAmount.text="+"+Mathf.Max(0,earned);
   if(bonusAmount)bonusAmount.text=canDouble?"+"+(earned+50):"";
   collect.onClick.RemoveAllListeners();collect.onClick.AddListener(()=>Begin(collectAction));
   bonus.onClick.RemoveAllListeners();bonus.onClick.AddListener(()=>{if(allowDouble)Begin(bonusAction);});
   home.onClick.RemoveAllListeners();home.onClick.AddListener(()=>Begin(homeAction));
   if(close){close.onClick.RemoveAllListeners();close.onClick.AddListener(()=>Begin(collectAction));}
+  LayoutRewardButton(collect,collectLabel,collectAmount,earned>0,false);
+  LayoutRewardButton(bonus,bonusLabel,bonusAmount,canDouble,canDouble);
   SetButtons(true);foreach(var coin in flyingCoins)if(coin)coin.gameObject.SetActive(false);
   Fit();if(confetti)confetti.Play();
+ }
+ void LayoutRewardButton(Button button,TMP_Text label,TMP_Text amount,bool showAmount,bool showVideo){
+  var video=button.transform.Find("Reward video icon");if(video){video.gameObject.SetActive(showVideo);var vr=(RectTransform)video;vr.anchoredPosition=new Vector2(-120,-34);vr.sizeDelta=new Vector2(46,44);}
+  var coin=button.transform.Find("Reward coin");if(coin)coin.gameObject.SetActive(showAmount);
+  if(amount)amount.gameObject.SetActive(showAmount);
+  var bounds=((RectTransform)button.transform).rect;
+  var rt=label.rectTransform;rt.anchorMin=rt.anchorMax=rt.pivot=new Vector2(.5f,.5f);
+  rt.localScale=Vector3.one;rt.anchoredPosition=new Vector2(0,showAmount?26:0);
+  rt.sizeDelta=new Vector2(bounds.width-80,showAmount?48:70);
+  label.enableAutoSizing=true;label.fontSizeMin=24;label.fontSizeMax=40;
+  label.textWrappingMode=TextWrappingModes.NoWrap;label.overflowMode=TextOverflowModes.Truncate;
+  label.alignment=TextAlignmentOptions.Center;label.margin=new Vector4(4,2,4,2);
+  if(amount){var ar=amount.rectTransform;ar.anchorMin=ar.anchorMax=ar.pivot=new Vector2(.5f,.5f);
+   ar.localScale=Vector3.one;ar.anchoredPosition=new Vector2(showVideo?62:34,-28);
+   ar.sizeDelta=new Vector2(140,46);amount.enableAutoSizing=true;amount.fontSizeMin=24;amount.fontSizeMax=36;
+   amount.textWrappingMode=TextWrappingModes.NoWrap;amount.overflowMode=TextOverflowModes.Truncate;amount.alignment=TextAlignmentOptions.Center;}
+  if(coin){var cr=(RectTransform)coin;cr.anchoredPosition=new Vector2(showVideo?-38:-72,-28);cr.sizeDelta=new Vector2(46,46);}
+  if(video){var vr=(RectTransform)video;vr.anchoredPosition=new Vector2(-104,-28);vr.sizeDelta=new Vector2(42,40);}
  }
  void Begin(Action action){if(busy||action==null)return;busy=true;SetButtons(false);action();}
  void SetButtons(bool enabled){collect.interactable=home.interactable=enabled;if(close)close.interactable=enabled;bonus.interactable=enabled&&allowDouble;}
  void OnDisable(){StopAllCoroutines();busy=collecting=false;if(flyingCoins!=null)foreach(var c in flyingCoins)if(c)c.gameObject.SetActive(false);if(walletCoin)walletCoin.rectTransform.localScale=Vector3.one;}
- public void Fit(){var root=transform as RectTransform;if(!root)return;var size=root.rect.size;var safe=Screen.safeArea;
+ public void Fit(){var root=transform as RectTransform;if(!root)return;var size=root.rect.size;var safe=WoolHud.CurrentSafeArea;
   if(lastSize==size&&lastSafe==safe)return;lastSize=size;lastSafe=safe;
   if(Screen.width<=0||Screen.height<=0)return;
   float top=(Screen.height-safe.yMax)/Screen.height*size.y,bottom=safe.yMin/Screen.height*size.y;
   float left=safe.xMin/Screen.width*size.x,right=(Screen.width-safe.xMax)/Screen.width*size.x;
   float safeWidth=size.x-left-right,center=(left-right)*.5f;
-  float buttonScale=Mathf.Min(1.25f,(safeWidth-44)/820f),topScale=Mathf.Min(1,safeWidth/650f);
-  if(rewardButtons){rewardButtons.localScale=Vector3.one*buttonScale;rewardButtons.anchoredPosition=new Vector2(center,bottom+26+80*buttonScale);}
-  float contentBottom=-size.y*.5f+bottom+26+160*buttonScale+12,contentTop=size.y*.5f-top-140*topScale;
-  float scale=Mathf.Max(.1f,Mathf.Min((safeWidth-32)/820f,(contentTop-contentBottom)/1000f));
+  float safeHeight=size.y-top-bottom;
+  float buttonScale=Mathf.Max(.1f,Mathf.Min(1.15f,(safeWidth-48)/820f,safeHeight*.17f/160f));
+  float topScale=Mathf.Max(.1f,Mathf.Min(1,safeWidth/650f,safeHeight*.12f/112f));
+  float footerBottom=bottom+32;
+  if(rewardButtons){rewardButtons.localScale=Vector3.one*buttonScale;rewardButtons.anchoredPosition=new Vector2(center,footerBottom+80*buttonScale);}
+  float contentBottom=-size.y*.5f+footerBottom+160*buttonScale+32;
+  float contentTop=size.y*.5f-top-24-112*topScale-24;
+  // Keep all celebration elements in one fixed frame, between header and actions.
+  float scale=Mathf.Max(.1f,Mathf.Min((safeWidth-48)/970f,(contentTop-contentBottom)/1000f));
   card.localScale=Vector3.one*scale;card.anchoredPosition=new Vector2(center,(contentBottom+contentTop)*.5f);
-  float extra=Mathf.Max(0,(contentTop-contentBottom)/scale-1000);
-  var banner=card.Find("Victory banner") as RectTransform;if(banner)banner.anchoredPosition=new Vector2(0,345+Mathf.Min(160,extra*.22f));
-  var rewardRow=(RectTransform)rewardLabel.transform.parent;rewardRow.anchoredPosition=new Vector2(0,-325-Mathf.Min(140,extra*.18f));
-  var caption=card.Find("Victory caption") as RectTransform;if(caption)caption.anchoredPosition=new Vector2(0,rewardRow.anchoredPosition.y-100);
+  var banner=card.Find("Victory banner") as RectTransform;if(banner){banner.anchoredPosition=new Vector2(0,350);banner.sizeDelta=new Vector2(760,300);}
+  if(duck)duck.sizeDelta=new Vector2(430,430);
+  var rewardRow=(RectTransform)rewardLabel.transform.parent;rewardRow.anchoredPosition=new Vector2(0,-330);
+  var caption=card.Find("Victory caption") as RectTransform;if(caption)caption.anchoredPosition=new Vector2(0,-430);
   wallet.localScale=Vector3.one*topScale;wallet.anchoredPosition=new Vector2(center,-top-24*topScale);
   var h=(RectTransform)home.transform;h.localScale=Vector3.one*topScale;h.anchoredPosition=new Vector2(left+22,-top-22);
   if(close){var c=(RectTransform)close.transform;c.localScale=Vector3.one*topScale;c.anchoredPosition=new Vector2(-right-22,-top-22);}
@@ -62,17 +88,18 @@ public sealed class WoolWinPresentation:MonoBehaviour {
   if(duck){
    if(duckImage&&danceFrames!=null&&danceFrames.Length>0)duckImage.sprite=danceFrames[Mathf.FloorToInt(clock/Mathf.Max(.08f,danceFrameSeconds))%danceFrames.Length];
    float beat=Mathf.Sin(clock*Mathf.PI*2/1.08f);
-   duck.anchoredPosition=new Vector2(beat*9,-5+Mathf.Abs(beat)*16);duck.localRotation=Quaternion.Euler(0,0,beat*3);
+   duck.anchoredPosition=new Vector2(beat*9,-48+Mathf.Abs(beat)*12);duck.localRotation=Quaternion.Euler(0,0,beat*3);
    duck.localScale=new Vector3(1+beat*.015f,1-beat*.015f,1);
   }
   if(glow)glow.localRotation=Quaternion.Euler(0,0,clock*5);
  }
  public void Collect(int amount,int balance,Action after,bool doubled=false){
   if(!gameObject.activeInHierarchy||collecting)return;collecting=true;busy=true;allowDouble=false;SetButtons(false);
+  if(amount>0){var audio=FindFirstObjectByType<WoolGameAudio>();if(audio)audio.Play(WoolGameAudio.Cue.Coin);}
   var source=(RectTransform)(doubled?bonus:collect).transform;
-  bonusLabel.text="Collected";if(bonusAmount)bonusAmount.text="";
+  bonusLabel.text="Collected";if(bonusAmount)bonusAmount.text="";LayoutRewardButton(bonus,bonusLabel,bonusAmount,false,false);
   if(collectedButton)bonus.GetComponent<Image>().sprite=collectedButton;
-  if(amount>0)rewardLabel.text="+"+amount;
+  if(amount>0)rewardLabel.text="+"+WoolCoinText.Format(amount);
   StopAllCoroutines();StartCoroutine(Fly(amount,balance,source,after));
  }
  IEnumerator Fly(int amount,int balance,RectTransform source,Action after){
@@ -81,7 +108,7 @@ public sealed class WoolWinPresentation:MonoBehaviour {
    for(float elapsed=0;elapsed<1.3f;elapsed+=Mathf.Min(Time.unscaledDeltaTime,.05f)){
     Vector3 origin=root.InverseTransformPoint(source.TransformPoint(source.rect.center)),target=root.InverseTransformPoint(walletCoin.transform.position);
     for(int i=0;i<count;i++){
-     float t=Mathf.Clamp01((elapsed-i*.14f)/.88f);var im=flyingCoins[i];im.gameObject.SetActive(t>0&&t<1);if(t>=1&&arrived<i+1){arrived=i+1;displayBalance=start+Mathf.RoundToInt((balance-start)*(arrived/(float)count));walletLabel.text=displayBalance.ToString();}
+     float t=Mathf.Clamp01((elapsed-i*.14f)/.88f);var im=flyingCoins[i];im.gameObject.SetActive(t>0&&t<1);if(t>=1&&arrived<i+1){arrived=i+1;displayBalance=start+Mathf.RoundToInt((balance-start)*(arrived/(float)count));walletLabel.text=WoolCoinText.Format(displayBalance);}
      if(t<=0||t>=1)continue;float u=t*t*(3-2*t);var bend=(origin+target)*.5f+new Vector3((i-1)*120,150);
      im.rectTransform.anchoredPosition=Vector3.Lerp(Vector3.Lerp(origin,bend,u),Vector3.Lerp(bend,target,u),u);
      im.rectTransform.localScale=Vector3.one*Mathf.Lerp(1.15f,.6f,t);im.rectTransform.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*Mathf.PI*3)*18);
@@ -90,7 +117,7 @@ public sealed class WoolWinPresentation:MonoBehaviour {
    }
   }
   foreach(var im in flyingCoins)if(im)im.gameObject.SetActive(false);walletCoin.rectTransform.localScale=Vector3.one;
-  displayBalance=balance;walletLabel.text=balance.ToString();collectLabel.text="Collected";if(collectAmount)collectAmount.text="";
+  displayBalance=balance;walletLabel.text=WoolCoinText.Format(balance);collectLabel.text="Collected";if(collectAmount)collectAmount.text="";
   if(collectedButton)collect.GetComponent<Image>().sprite=collectedButton;
   yield return new WaitForSecondsRealtime(.35f);
   // Keep actions locked through navigation; a fast second tap cannot repeat the payout.
@@ -102,7 +129,7 @@ public sealed partial class WoolHud {
  void RestoreWinPresentation(){if(!winPresentation)return;bool was=winPresentation.gameObject.activeSelf;winPresentation.gameObject.SetActive(false);if(was)modal.GetComponent<Image>().color=winPreviousBackdrop;modalCard.gameObject.SetActive(true);}
  public void ShowLevelComplete(int earned,int balance,bool canDouble,Action collected,Action doubled,Action homeAction){
   HideAbilityGuide();HideAbilityEffect();Tutorial(false);
-  RestoreWinPresentation();RestoreUnlockPresentation();winPreviousBackdrop=modal.GetComponent<Image>().color;modal.GetComponent<Image>().color=new Color(0,0,0,.86f);
+  RestoreLosePresentation();RestoreWinPresentation();RestoreUnlockPresentation();winPreviousBackdrop=modal.GetComponent<Image>().color;modal.GetComponent<Image>().color=new Color(0,0,0,.86f);
   modalCard.gameObject.SetActive(false);if(rewardButton)rewardButton.gameObject.SetActive(false);modal.SetActive(true);modal.transform.SetAsLastSibling();winPresentation.gameObject.SetActive(true);winPresentation.Open(earned,balance,canDouble,collected,doubled,homeAction);
  }
  public void FlyWinCoins(int amount,int balance,Action after,bool doubled=false){winPresentation.Collect(amount,balance,after,doubled);}
@@ -188,3 +215,4 @@ public sealed partial class WoolHud {
  }
 #endif
 }}
+

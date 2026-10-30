@@ -37,9 +37,10 @@ namespace WoolGame
         public TMP_FontAsset font;
         public Image[] ink;
         Action closeAction,spinAction,playAction,walletChanged,shopAction;
-        bool collecting,videoBusy;
+        bool collecting;
         public bool IsCollecting=>collecting;
         float nextRefresh;
+        readonly bool[] giftPulseReady=new bool[4];
         int shownCredits,shownChest,previewGift=-1;
         Coroutine writing;
         Vector2 lastSize;
@@ -52,7 +53,14 @@ namespace WoolGame
             for(int i=0;i<rows.Length;i++){int task=i;claims[i].onClick.RemoveAllListeners();claims[i].onClick.AddListener(()=>TaskPressed(task));}
             for(int i=0;i<4;i++){int gift=i;gifts[i].onClick.RemoveAllListeners();gifts[i].onClick.AddListener(()=>Preview(gift));}
             chest.onClick.RemoveAllListeners();chest.onClick.AddListener(()=>Preview(4));
-            previewClose.onClick.RemoveAllListeners();previewClose.onClick.AddListener(()=>preview.SetActive(false));
+            if(previewClose)previewClose.gameObject.SetActive(false);
+            var dismissArt=preview.GetComponent<UnityEngine.UI.Image>();
+            if(!dismissArt)dismissArt=preview.AddComponent<UnityEngine.UI.Image>();
+            dismissArt.color=Color.clear;dismissArt.raycastTarget=true;
+            var dismiss=preview.GetComponent<UnityEngine.UI.Button>();
+            if(!dismiss)dismiss=preview.AddComponent<UnityEngine.UI.Button>();
+            dismiss.targetGraphic=dismissArt;dismiss.transition=UnityEngine.UI.Selectable.Transition.None;
+            dismiss.onClick.RemoveAllListeners();dismiss.onClick.AddListener(()=>preview.SetActive(false));
             previewCollect.onClick.RemoveAllListeners();previewCollect.onClick.AddListener(CollectPreview);
         }
         void OnEnable(){collecting=false;shownCredits=WoolProgress.DailyCredits;shownChest=WoolProgress.DailyChestCredits;nextRefresh=0;if(preview)preview.SetActive(false);if(message)message.text="Saved across daily resets";Fit();Refresh();}
@@ -101,6 +109,7 @@ namespace WoolGame
         {
             if(((RectTransform)transform).rect.size!=lastSize)Fit();
             if(Time.unscaledTime>=nextRefresh){nextRefresh=Time.unscaledTime+.2f;Refresh();}
+            for(int i=0;i<4;i++)if(giftArt[i])giftArt[i].transform.localScale=Vector3.one*(giftPulseReady[i]?1+.08f*Mathf.Sin(Time.unscaledTime*5):1);
         }
         public void Refresh()
         {
@@ -114,17 +123,17 @@ namespace WoolGame
             chest.interactable=!collecting;
             var left=WoolProgress.DailyResetIn;timer.text=left.Hours.ToString("00")+":"+left.Minutes.ToString("00")+":"+left.Seconds.ToString("00");
             int slot=0;
-            for(int pass=0;pass<2;pass++)for(int i=0;i<rows.Length;i++)
+            for(int pass=0;pass<3;pass++)for(int i=0;i<rows.Length;i++)
             {
-                bool done=WoolProgress.DailyClaimed(i);if(done!=(pass==1))continue;
+                bool done=WoolProgress.DailyClaimed(i);bool ready=!done&&WoolProgress.DailyCount(i)>=WoolProgress.DailyTargets[i];if((done?2:ready?0:1)!=pass)continue;
                 var pos=rows[i].anchoredPosition;float target=-taskRowHeight*.5f-slot*(taskRowHeight+20);
-                if(!collecting){rows[i].SetSiblingIndex(slot);rows[i].anchoredPosition=new Vector2(pos.x,target);}slot++;
+                if(!collecting){if(rows[i].GetSiblingIndex()!=slot)rows[i].SetSiblingIndex(slot);rows[i].anchoredPosition=new Vector2(pos.x,target);}slot++;
                 int count=Mathf.Min(WoolProgress.DailyCount(i),WoolProgress.DailyTargets[i]);
                 counts[i].text=count+"/"+WoolProgress.DailyTargets[i];fills[i].fillAmount=count/(float)WoolProgress.DailyTargets[i];
                 rowArt[i].color=done?new Color(.66f,.66f,.72f):Color.white;
                 fills[i].color=done?new Color(.24f,.45f,.28f):new Color(.15f,1,.03f);
-                claimLabels[i].text=done?"Collected":count>=WoolProgress.DailyTargets[i]?"Collect":i==5?videoBusy?"Loading...":"Watch":"Go";
-                claims[i].interactable=!done&&!collecting&&!videoBusy;
+                claimLabels[i].text=done?"Collected":count>=WoolProgress.DailyTargets[i]?"Collect":"Go";
+                claims[i].interactable=!done&&!collecting;
             }
             for(int i=0;i<4;i++)
             {
@@ -134,12 +143,12 @@ namespace WoolGame
                 if(giftGlows!=null&&giftGlows.Length==4)giftGlows[i].SetActive(done);
                 giftArt[i].color=ready||done?Color.white:new Color(.88f,.9f,.97f);
                 giftLabels[i].text=((i+1)*25).ToString();
-                giftArt[i].transform.localScale=Vector3.one*(ready&&!done?1+.035f*Mathf.Sin(Time.unscaledTime*5):1);
+                giftPulseReady[i]=ready&&!done;
             }
         }
         void TaskPressed(int task)
         {
-            if(collecting||videoBusy)return;
+            if(collecting)return;
             preview.SetActive(false);
             if(WoolProgress.DailyCount(task)>=WoolProgress.DailyTargets[task])
             {
@@ -149,19 +158,10 @@ namespace WoolGame
             if(task==1&&shopAction!=null){shopAction();return;}
             playAction?.Invoke();
         }
-        void WatchVideo()
-        {
-            videoBusy=true;message.text="Waiting for reward video...";Refresh();bool settled=false;
-            WoolServices.EnsureAds().ShowRewardedVideo(_=>
-            {
-                if(settled)return;settled=true;WoolProgress.RecordDailyVideo();
-                if(!this)return;videoBusy=false;message.text="Video complete! Your task is ready to collect.";Refresh();
-            },failure=>{if(settled)return;settled=true;if(!this)return;videoBusy=false;message.text="VIDEO UNAVAILABLE - "+failure;Refresh();});
-        }
         void Preview(int gift)
         {
             if(collecting)return;
-            if(preview.activeSelf&&previewGift==gift){CollectPreview();return;}
+            if(preview.activeSelf&&previewGift==gift){preview.SetActive(false);return;}
             previewGift=gift;previewAmount.text="x"+(gift==4?500:WoolDailyTaskState.GiftCoins[gift]);
             bool done=gift<4?WoolProgress.DailyGiftClaimed(gift):WoolProgress.DailyChestCollected;
             bool ready=gift==4?WoolProgress.DailyChestCredits>=700:WoolProgress.DailyCredits>=(gift+1)*25&&!done;
@@ -194,7 +194,7 @@ namespace WoolGame
             shownCredits=before+amount;shownChest=weekly+amount;PlayCoin();
             var from=new Vector2[rows.Length];var to=new Vector2[rows.Length];for(int i=0;i<rows.Length;i++)from[i]=rows[i].anchoredPosition;
             if(taskLayout)taskLayout.enabled=false;
-            int slot=0;for(int pass=0;pass<2;pass++)for(int i=0;i<rows.Length;i++)if(WoolProgress.DailyClaimed(i)==(pass==1))to[i]=new Vector2(from[i].x,-taskRowHeight*.5f-slot++*(taskRowHeight+20));
+            int slot=0;for(int pass=0;pass<3;pass++)for(int i=0;i<rows.Length;i++)if(WoolProgress.DailyClaimed(i)==(pass==1))to[i]=new Vector2(from[i].x,-taskRowHeight*.5f-slot++*(taskRowHeight+20));
             for(float t=0;t<.32f;t+=Time.unscaledDeltaTime){for(int i=0;i<rows.Length;i++)rows[i].anchoredPosition=Vector2.Lerp(from[i],to[i],Mathf.SmoothStep(0,1,t/.32f));yield return null;}
             collecting=false;if(taskLayout)taskLayout.enabled=true;Refresh();
         }
@@ -236,3 +236,5 @@ namespace WoolGame
         void PlayCoin(){var audio=FindFirstObjectByType<WoolGameAudio>();if(audio)audio.Play(WoolGameAudio.Cue.Coin);}
     }
 }
+
+

@@ -36,8 +36,10 @@ namespace WoolGame
         public void Hide(){gameObject.SetActive(false);}
         void RefreshCopy()
         {
-            if(rewardLabel)rewardLabel.text="+"+bonusCoins;
-            if(priceLabel)priceLabel.text=displayPrice;
+            var shared=WoolIapCatalog.Find(WoolIapCatalog.RemoveAds);
+            if(shared!=null){bonusCoins=shared.coins;displayPrice=shared.displayPrice;}
+            if(rewardLabel)rewardLabel.text="+"+WoolCoinText.Format(bonusCoins);
+            bool owned=Application.isPlaying&&WoolProgress.OwnsProduct(WoolIapCatalog.RemoveAds);if(purchaseButton)purchaseButton.interactable=!owned;if(priceLabel)priceLabel.text=owned?"OWNED":WoolPurchases.Current?WoolPurchases.Current.Price(WoolIapCatalog.RemoveAds)??displayPrice:displayPrice;
             if(dimmer)dimmer.color=new Color(0,0,0,backdropAlpha);
         }
         public void Fit()
@@ -64,3 +66,4 @@ namespace WoolGame
         }
     }
 }
+

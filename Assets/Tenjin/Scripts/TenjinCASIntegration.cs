@@ -7,7 +7,9 @@ using UnityEngine;
 
 public class TenjinCASIntegration
 {
+#if tenjin_cas_enabled
     private static bool _subscribed_cas = false;
+#endif
 
     public TenjinCASIntegration()
     {

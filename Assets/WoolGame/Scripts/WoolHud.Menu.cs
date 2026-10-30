@@ -101,13 +101,13 @@ namespace WoolGame
         void Navigate(int index){CloseEngagement();if(index==0)ShowShop();else if(index==2){if(mapPage)mapPage.gameObject.SetActive(false);if(profilePanel)profilePanel.SetActive(false);homePage.gameObject.SetActive(true);shopPage.gameObject.SetActive(false);if(cardsPage)cardsPage.gameObject.SetActive(false);SelectTab("Home");}else if(index==4)ShowMap();}
         public void Home(int stage,int balance)
         {
-            ClearCompactGameplayFrame();
+            ResetWalletShop();ClearCompactGameplayFrame();
             Tutorial(false);meter.gameObject.SetActive(false);progress.gameObject.SetActive(false);
             header.gameObject.SetActive(false);footer.gameObject.SetActive(false);hint.gameObject.SetActive(false);if(bannerArea)bannerArea.gameObject.SetActive(false);
-            unlockedLevel=WoolProgress.CurrentLevel;menu.SetActive(true);homeLevel.text="Level "+unlockedLevel;homeCoins.text=shopCoins.text=balance.ToString();
+            unlockedLevel=WoolProgress.CurrentLevel;menu.SetActive(true);homeLevel.text="Level "+unlockedLevel;homeCoins.text=shopCoins.text=WoolCoinText.Format(balance);
             if(homeLock)homeLock.gameObject.SetActive(false);RefreshDifficulty(unlockedLevel);Navigate(2);
         }
-        public void CloseMenu(){safe.gameObject.SetActive(true);CloseEngagement();menu.SetActive(false);if(profilePanel)profilePanel.SetActive(false);header.gameObject.SetActive(true);footer.gameObject.SetActive(true);hint.gameObject.SetActive(false);if(bannerArea)bannerArea.gameObject.SetActive(false);}
+        public void CloseMenu(){ResetWalletShop();safe.gameObject.SetActive(true);CloseEngagement();menu.SetActive(false);if(profilePanel)profilePanel.SetActive(false);header.gameObject.SetActive(true);footer.gameObject.SetActive(true);hint.gameObject.SetActive(false);if(bannerArea)bannerArea.gameObject.SetActive(false);}
         public void ShowShop(){CloseEngagement();if(mapPage)mapPage.gameObject.SetActive(false);if(profilePanel)profilePanel.SetActive(false);homePage.gameObject.SetActive(false);if(cardsPage)cardsPage.gameObject.SetActive(false);shopPage.gameObject.SetActive(true);SelectTab("Shop");}
         void ShowCards()
         {

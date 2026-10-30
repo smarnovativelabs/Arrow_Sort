@@ -12,7 +12,6 @@ namespace WoolGame
                 if(!data.spinMigrated&&WoolTrustedClock.Ready)
                 {
                     if(data.spin==null)data.spin=new WoolSpinState();
-                    data.spin.noAdsUntil=Math.Max(data.spin.noAdsUntil,data.noAdsUntilUnix);
                     // Existing used spins stay used on upgrade; device-dated future streaks grant no reward.
                     DateTime last;
                     if(DateTime.TryParse(data.lastSpinDay,out last))
@@ -24,12 +23,17 @@ namespace WoolGame
                     }
                     data.spinMigrated=true;Save();
                 }
+                if(data.spin==null)data.spin=new WoolSpinState();
+                if(data.spin.UpgradePolicy()){data.noAdsUntilUnix=0;Save();}
                 return data.spin;
             }
         }
+        public static int ReadySpinNotifications=>Math.Max(AvailableSpins,SpinState.extraSpins);
         public static int AvailableSpins=>SpinState?.Available(WoolTrustedClock.UnixNow)??0;
         public static int SpinStreak=>SpinState?.CurrentStreak(WoolTrustedClock.UnixNow)??0;
         public static int SpinLevelProgress=>SpinState?.levelProgress??0;
+        public static int SpinMilestoneProgress=>SpinState.CycleProgress(WoolTrustedClock.UnixNow);
+        public static bool LastSpinMilestone=>SpinState.lastSpinMilestone;
         public static int UnlockPowerCount {get{EnsureLoaded();return data.spin?.unlockPowers??0;}}
         public static bool DailySpinUsed=>!WoolTrustedClock.Ready||!(SpinState?.DailyReady(WoolTrustedClock.UnixNow)??false);
         public static int LastSpinSlot=>SpinState?.lastSlot??-1;
@@ -39,7 +43,7 @@ namespace WoolGame
         public static int SpinDaily()
         {
             if(!WoolTrustedClock.Ready)return -1;
-            var state=SpinState;int slot=state.Spin(WoolTrustedClock.UnixNow,UnityEngine.Random.Range(0,8));
+            var state=SpinState;int slot=state.Spin(WoolTrustedClock.UnixNow,UnityEngine.Random.Range(1,8));
             if(slot<0)return -1;
             if(OnboardingStep==WoolOnboardingStep.Spin)data.onboardingSpinTaken=true;
             RecordDailyCoins(state.lastCoins);data.coins+=state.lastCoins;data.collectedCoins+=state.lastCoins;data.noAdsUntilUnix=state.noAdsUntil;Save();

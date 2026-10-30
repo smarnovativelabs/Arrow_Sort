@@ -20,7 +20,7 @@ namespace WoolGame
                 var lesson=new WoolLevel(1);tiles.AddRange(lesson.Tiles);order.AddRange(lesson.Solution);
                 foreach(var tile in tiles)
                 {
-                    tile.x*=1.25f;tile.y=tile.row==0?-3.6f:-6.1f;
+                    tile.x*=1.25f;tile.y=tile.row==0?-3.6f:-5.9f;
                     tile.width=1.05f;tile.length=tile.size==WoolSize.Small?1.05f:tile.size==WoolSize.Medium?1.45f:1.85f;
                 }
                 data.tutorial=true;data.displayName="Your first rescue";data.layoutStyle="Guided crossbow rescue";

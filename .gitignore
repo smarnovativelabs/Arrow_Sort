@@ -132,3 +132,18 @@ InitTestScene*.unity*
 *.pfx
 .env
 .env.*
+# Local work products are never part of a game source push.
+/Docs/
+/Tools/
+/outputs/
+/CleanupRecovery*/
+/*Backup*/
+/*BackUp*/
+/Feature Image/
+*.backup*
+/Assets/WoolGame/Editor/*CheckTemp.cs
+/Assets/WoolGame/Editor/*CheckTemp.cs.meta
+/Assets/WoolGame/Designer/ChunkyVehicles20261030/
+/Assets/WoolGame/Designer/ChunkyVehicles20261030.meta
+/Assets/WoolGame/Designer/ReferenceVehicles/Meshes/RaisedDirection_*.asset*
+/Assets/WoolGame/Designer/ReferenceBlocks20261030/ArrowVehicle_*_10Colors.fbx*

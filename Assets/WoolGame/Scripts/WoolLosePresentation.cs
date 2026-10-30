@@ -20,9 +20,19 @@ public sealed class WoolLosePresentation:MonoBehaviour {
  public TMP_Text affordability;
  public const int ClearCost=1200;
  float clock; bool selected;
+ Material retryTextMaterial;
+ void RestoreRetryLabel(){
+  TMP_Text text=null;foreach(var t in retry.GetComponentsInChildren<TMP_Text>(true)){text=t;break;}
+  if(!text){var go=new GameObject("Visible retry label",typeof(RectTransform),typeof(TextMeshProUGUI));go.transform.SetParent(retry.transform,false);text=go.GetComponent<TMP_Text>();}
+  text.gameObject.SetActive(true);text.enabled=true;text.text="RETRY";text.color=Color.white;text.raycastTarget=false;text.alignment=TextAlignmentOptions.Center;text.enableAutoSizing=true;text.fontSize=text.fontSizeMax=64;text.fontSizeMin=48;text.textWrappingMode=TextWrappingModes.NoWrap;
+  if(!retryTextMaterial&&text.fontSharedMaterial){retryTextMaterial=new Material(text.fontSharedMaterial);retryTextMaterial.SetColor("_FaceColor",Color.white);retryTextMaterial.SetColor("_OutlineColor",new Color(.1f,.25f,.04f));retryTextMaterial.SetFloat("_OutlineWidth",.14f);retryTextMaterial.EnableKeyword("OUTLINE_ON");}if(retryTextMaterial)text.fontSharedMaterial=retryTextMaterial;
+  var rect=text.rectTransform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=new Vector2(24,8);rect.offsetMax=new Vector2(-24,-8);rect.localScale=Vector3.one;text.transform.SetAsLastSibling();text.canvasRenderer.SetAlpha(1);
+ }
+ void OnDestroy(){if(retryTextMaterial)Destroy(retryTextMaterial);}
  public void Open(bool canContinue,Action resume,Action restart,Action goHome){
+ RestoreRetryLabel();
  clock=0;selected=false;continueButton.gameObject.SetActive(canContinue);
- if(offerPage){offerPage.SetActive(canContinue);retryPage.SetActive(!canContinue);if(backdrop)backdrop.color=new Color(0,0,0,canContinue?.78f:.96f);balance.text=WoolProgress.Coins.ToString("N0");coinButton.interactable=WoolProgress.Coins>=ClearCost;coinButton.onClick.RemoveAllListeners();coinButton.onClick.AddListener(()=>{if(selected)return;selected=true;coinButton.interactable=false;resumeCoins?.Invoke();});cancelOffer.onClick.RemoveAllListeners();cancelOffer.onClick.AddListener(()=>{if(selected)return;offerPage.SetActive(false);retryPage.SetActive(true);if(backdrop)backdrop.color=new Color(0,0,0,.96f);});}
+ if(offerPage){offerPage.SetActive(canContinue);retryPage.SetActive(!canContinue);if(backdrop)backdrop.color=Color.black;balance.text=WoolCoinText.Format(WoolProgress.Coins);coinButton.interactable=WoolProgress.Coins>=ClearCost;coinButton.onClick.RemoveAllListeners();coinButton.onClick.AddListener(()=>{if(selected)return;selected=true;coinButton.interactable=false;resumeCoins?.Invoke();});cancelOffer.onClick.RemoveAllListeners();cancelOffer.onClick.AddListener(()=>{if(selected)return;offerPage.SetActive(false);retryPage.SetActive(true);if(backdrop)backdrop.color=Color.black;});}
  Bind(continueButton,resume);Bind(retry,restart);Bind(home,goHome);Fit();
  }
  public Action resumeCoins;
@@ -31,8 +41,8 @@ public sealed class WoolLosePresentation:MonoBehaviour {
  if(retryBanner){float half=h/scale*.5f;retryBanner.anchoredPosition=new Vector2(0,half-245);retryCaption.anchoredPosition=new Vector2(0,-half+340);((RectTransform)retry.transform).anchoredPosition=new Vector2(0,-half+175);((RectTransform)home.transform).anchoredPosition=new Vector2(-310,half-85);hero.anchoredPosition=new Vector2(0,Mathf.Clamp((half-700)*.08f,0,70));hero.sizeDelta=new Vector2(730,Mathf.Min(850,half*2-790));if(wallet)wallet.anchoredPosition=new Vector2(190,half-105);}
  if(background)background.gameObject.SetActive(false);}
  void Update(){Fit();clock+=Mathf.Min(Time.unscaledDeltaTime,.05f);hero.localRotation=Quaternion.Euler(0,0,Mathf.Sin(clock*1.8f)*1.2f);
- if(backdrop)backdrop.color=retryPage&&retryPage.activeSelf?Color.black:new Color(0,0,0,.78f);
- if(offerPage&&offerPage.activeSelf){int coins=WoolProgress.Coins;balance.text=coins.ToString("N0");if(affordability){affordability.text=coins>=ClearCost?"Enough coins to clear slots":"Need "+(ClearCost-coins).ToString("N0")+" more coins";affordability.color=coins>=ClearCost?new Color(.5f,1,.45f):new Color(1,.72f,.42f);}coinButton.interactable=!selected&&coins>=ClearCost;}
+ if(backdrop)backdrop.color=Color.black;
+ if(offerPage&&offerPage.activeSelf){int coins=WoolProgress.Coins;balance.text=WoolCoinText.Format(coins);if(affordability){affordability.text=coins>=ClearCost?"Enough coins to clear slots":"Need "+WoolCoinText.Format(ClearCost-coins)+" more coins";affordability.color=coins>=ClearCost?new Color(.5f,1,.45f):new Color(1,.72f,.42f);}coinButton.interactable=!selected&&coins>=ClearCost;}
  if(animatedCharacters&&characterFrames!=null&&characterFrames.Length>0)animatedCharacters.sprite=characterFrames[(int)(clock*8)%characterFrames.Length];
  if(smilingDragon){smilingDragon.localRotation=Quaternion.Euler(0,0,Mathf.Sin(clock*2.2f)*3);smilingDragon.localScale=new Vector3(1,1+Mathf.Sin(clock*3)*.025f,1);}
  for(int i=0;i<tears.Length;i++){float t=Mathf.Repeat(clock*.5f+i*.25f,1);var im=tears[i];im.rectTransform.anchoredPosition=eyePositions[i%eyePositions.Length]+new Vector2((i%2==0?-1:1)*t*5,-(t<.7f?t/.7f*40:40+Mathf.Pow((t-.7f)/.3f,2)*35));im.rectTransform.localScale=Vector3.one*(.5f+Mathf.Sin(t*Mathf.PI)*.5f);im.color=new Color(.85f,.96f,1,Mathf.Min(1,t*12)*Mathf.Clamp01((1-t)*6)*.88f);}
@@ -42,7 +52,7 @@ public sealed partial class WoolHud {
  [SerializeField] WoolLosePresentation losePresentation; Color losePreviousBackdrop;
  void RestoreLosePresentation(){if(!losePresentation)return;bool was=losePresentation.gameObject.activeSelf;losePresentation.gameObject.SetActive(false);if(was)modal.GetComponent<Image>().color=losePreviousBackdrop;modalCard.gameObject.SetActive(true);}
  public void ShowLose(bool canContinue,Action resume,Action restart,Action goHome){
- RestoreLosePresentation();RestoreWinPresentation();RestoreUnlockPresentation();losePreviousBackdrop=modal.GetComponent<Image>().color;modal.GetComponent<Image>().color=Color.black;modalCard.gameObject.SetActive(false);if(rewardButton)rewardButton.gameObject.SetActive(false);modal.SetActive(true);modal.transform.SetAsLastSibling();losePresentation.gameObject.SetActive(true);losePresentation.Open(canContinue,resume,restart,goHome);
+ RestoreLosePresentation();RestoreWinPresentation();RestoreUnlockPresentation();close.gameObject.SetActive(false);losePreviousBackdrop=modal.GetComponent<Image>().color;modal.GetComponent<Image>().color=Color.black;modalCard.gameObject.SetActive(false);if(rewardButton)rewardButton.gameObject.SetActive(false);modal.SetActive(true);modal.transform.SetAsLastSibling();losePresentation.gameObject.SetActive(true);losePresentation.Open(canContinue,resume,restart,goHome);
  }
  public void BindLoseCoins(Action action){losePresentation.resumeCoins=action;}
 #if UNITY_EDITOR

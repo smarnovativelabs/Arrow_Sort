@@ -53,7 +53,7 @@ namespace WoolGame
 
             values[0].text=WoolProgress.FirstTryWins.ToString();values[1].text=WoolTrustedClock.Ready?WoolProgress.TodayCompletedCount.ToString():"--";
             values[2].text=WoolProgress.WinningStreak.ToString();values[3].text=WoolProgress.BestStreak.ToString();
-            values[4].text=WoolProgress.CompletedCount.ToString();values[5].text=WoolProgress.CoinsCollected.ToString();
+            values[4].text=WoolProgress.CompletedCount.ToString();values[5].text=WoolCoinText.Format(WoolProgress.CoinsCollected);
         }
         void Edit(){draft=WoolProgress.AvatarIndex;var current=WoolProgress.PlayerName==WoolProgress.UserId?"":WoolProgress.PlayerName;nameInput.SetTextWithoutNotify(current.Substring(0,Math.Min(MaxNameLength,current.Length)));LimitMessage(false);if(editorIdLabel)editorIdLabel.text="Player ID: "+WoolProgress.UserId;mainScreen.SetActive(false);editScreen.SetActive(true);RefreshSelection();}
         void RefreshSelection()

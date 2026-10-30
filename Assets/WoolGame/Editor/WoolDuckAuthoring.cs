@@ -32,6 +32,8 @@ namespace WoolGame.Editor
             var eating=AssetDatabase.LoadAllAssetsAtPath("Assets/Art/Fbx/duck eating .fbx").OfType<AnimationClip>().ToArray();
             rescue.motherEat=eating.Single(c=>c.name=="Duck_Mother_Rig|Duck_Eating");
             rescue.babyEat=eating.Single(c=>c.name=="Duck_Baby|Duck_Baby_Eating");
+            BindAnimator(rescue.motherModel,"MotherDuck",rescue.motherWalk,rescue.motherEat,rescue.motherJump);
+            BindAnimator(rescue.babyModel,"BabyDuck",rescue.babyWalk,rescue.babyEat,rescue.babyJump);
             const string materialPath="Assets/WoolGame/Designer/DuckAtlas.mat";
             var material=AssetDatabase.LoadAssetAtPath<Material>(materialPath);
             if(!material)
@@ -62,6 +64,26 @@ namespace WoolGame.Editor
             model.transform.localPosition=-(rotation*skeleton.localPosition)*scale;
             foreach(var renderer in model.GetComponentsInChildren<SkinnedMeshRenderer>(true))renderer.updateWhenOffscreen=true;
             return holder;
+        }
+        public static void BindAnimator(GameObject model,string name,AnimationClip walk,AnimationClip feed,AnimationClip jump)
+        {
+            const string folder="Assets/WoolGame/Animations/Ducks";
+            System.IO.Directory.CreateDirectory(folder);AssetDatabase.Refresh();
+            string path=folder+"/"+name+".controller";
+            var controller=AssetDatabase.LoadAssetAtPath<UnityEditor.Animations.AnimatorController>(path);
+            if(!controller)controller=UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath(path);
+            var machine=controller.layers[0].stateMachine;
+            string[] names={"Feed","Walk","Jump"};AnimationClip[] motions={feed,walk,jump};
+            for(int i=0;i<names.Length;i++){
+                var state=machine.states.Select(s=>s.state).FirstOrDefault(s=>s.name==names[i]);
+                if(!state)state=machine.AddState(names[i],new Vector3(250,i*80));
+                state.motion=motions[i];state.writeDefaultValues=true;if(i==0)machine.defaultState=state;
+            }
+            var animator=model.GetComponent<Animator>();if(!animator)animator=model.AddComponent<Animator>();
+            animator.runtimeAnimatorController=controller;animator.applyRootMotion=false;animator.cullingMode=AnimatorCullingMode.AlwaysAnimate;animator.enabled=true;
+            if(!model.GetComponent<WoolDuckAnimationDriver>())model.AddComponent<WoolDuckAnimationDriver>();
+            foreach(var skin in model.GetComponentsInChildren<SkinnedMeshRenderer>(true))skin.updateWhenOffscreen=true;
+            EditorUtility.SetDirty(controller);EditorUtility.SetDirty(animator);EditorUtility.SetDirty(model);
         }
     }
 }

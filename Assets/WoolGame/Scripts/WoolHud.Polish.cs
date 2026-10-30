@@ -24,7 +24,7 @@ namespace WoolGame
         }
         void BindPolishedUI()
         {
-            if(freeCoinButton){freeCoinButton.onClick.RemoveAllListeners();freeCoinButton.onClick.AddListener(()=>FreeCoinsPressed?.Invoke());}
+            if(freeCoinButton){freeCoinButton.onClick.RemoveAllListeners();freeCoinButton.onClick.AddListener(ShowCoinOptions);}
             if(profileClose){profileClose.onClick.RemoveAllListeners();profileClose.onClick.AddListener(()=>profilePanel.SetActive(false));}
         }
         void OpenProfile()
@@ -37,7 +37,7 @@ namespace WoolGame
         void ApplyModalSkin()
         {
             if(skin==null||skin.Length<9)return;
-            Paint(modalCard.GetComponent<Image>(),0);Paint(primary.GetComponent<Image>(),1);Paint(secondary.GetComponent<Image>(),2);Paint(close.GetComponent<Image>(),3);
+            Paint(modalCard.GetComponent<Image>(),0);Paint(primary.GetComponent<Image>(),1);Paint(secondary.GetComponent<Image>(),1);Paint(close.GetComponent<Image>(),3);
             modalTitle.color=WoolArt.Hex("59361E");modalBody.color=WoolArt.Hex("74513C");
         }
         void Paint(Image image,int sprite){if(!image||skin==null||skin.Length<9)return;image.sprite=skin[sprite];image.type=Image.Type.Sliced;image.color=Color.white;}

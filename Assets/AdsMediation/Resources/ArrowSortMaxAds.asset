@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf2c1ab8ca8f0ce45bb4ee517dace9a1, type: 3}
+  m_Name: ArrowSortMaxAds
+  m_EditorClassIdentifier: Assembly-CSharp::AdsMediation.MaxAdsConfiguration
+  sdkKey: TRg6tE6Jqd63wDA1Egi746kgkf6hBDmP1x3ddKVkxqed_NUoJtPlTFEBu1FT03HiToJf035dbl7ZG8wrgvuCWc
+  androidInterstitialId: ba7c17afdca42c2f
+  androidRewardedId: d0f9afa56459e5b1
+  tenjinSdkKey: IG4KQKTXP4B5NJUKBVXUE1VUVZNXAVBQ
+  androidAdMobInterstitialId: ca-app-pub-9058006185556068/3440814807
+  androidAdMobRewardedId: ca-app-pub-9058006185556068/7810384785
+  iosInterstitialId: 
+  iosRewardedId: 

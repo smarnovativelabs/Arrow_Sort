@@ -4,29 +4,36 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace WoolGame {
 [Serializable] public sealed class WoolShopOffer {
- public string bundleName,price; public int coins; public int[] abilities=new int[4];
+ public string productId,bundleName,price; public int coins; public int[] abilities=new int[4];
  public TMP_Text title,coinAmount,priceText; public TMP_Text[] counts; public Button purchase;
- public void Refresh(){if(title)title.text=bundleName;if(coinAmount)coinAmount.text=coins.ToString("N0");if(priceText)priceText.text=price;if(counts!=null)for(int i=0;i<counts.Length;i++)if(counts[i])counts[i].text="x"+(i<abilities.Length?abilities[i]:0);}
+ public void Refresh(){
+ var product=WoolIapCatalog.Find(productId);
+ if(product!=null){bundleName=product.name;coins=product.coins;price=Application.isPlaying&&WoolPurchases.Current?WoolPurchases.Current.Price(productId)??product.displayPrice:product.displayPrice;abilities=new[]{product.powers,product.powers,product.powers,product.powers};}
+ if(title)title.text=bundleName;if(coinAmount)coinAmount.text=WoolCoinText.Format(coins);
+ bool owned=Application.isPlaying&&product!=null&&product.purchaseOnce&&WoolProgress.OwnsProduct(productId);if(purchase)purchase.interactable=!owned;
+ if(priceText){priceText.text=owned?"OWNED":price;priceText.textWrappingMode=TextWrappingModes.NoWrap;priceText.enableAutoSizing=true;priceText.fontSizeMin=18;priceText.fontSizeMax=38;priceText.overflowMode=TextOverflowModes.Truncate;}
+ if(counts!=null)for(int i=0;i<counts.Length;i++)if(counts[i])counts[i].text="x"+(i<abilities.Length?abilities[i]:0);
+}
 }
 public sealed class WoolShopView:MonoBehaviour {
  public WoolHud owner;public RectTransform masthead,viewport,content,design;public WoolMenuNavigation navigation;
  public ScrollRect scroll;public TMP_Text balance,claimText;public Button dailyClaim;public WoolShopOffer[] offers;
  public float designHeight=2810;public const float DesignHeight=2575;float refreshAt;Vector2 lastSize;Rect lastSafe;int lastBalance=-1;
- void OnEnable(){Bind();Fit(true);Refresh();}
+ void OnEnable(){if(owner&&balance){var wallet=balance.GetComponentInParent<WoolCoinWallet>(true);if(wallet)wallet.MatchAppearance(owner.HomeWallet);}Bind();Fit(true);Refresh();}
  void OnDisable(){if(dailyClaim)dailyClaim.onClick.RemoveListener(Claim);}
- void Bind(){if(dailyClaim){dailyClaim.onClick.RemoveListener(Claim);dailyClaim.onClick.AddListener(Claim);}if(offers!=null)foreach(var offer in offers){offer.Refresh();offer.purchase.onClick.RemoveAllListeners();offer.purchase.onClick.AddListener(()=>owner.ShopPurchaseUnavailable());}}
+ void Bind(){if(dailyClaim){dailyClaim.onClick.RemoveListener(Claim);dailyClaim.onClick.AddListener(Claim);}if(offers!=null)foreach(var offer in offers){offer.Refresh();offer.purchase.onClick.RemoveAllListeners();offer.purchase.onClick.AddListener(()=>owner.BuyShopProduct(offer.productId));}}
  public void FocusBundles(){Fit(true);scroll.verticalNormalizedPosition=1;}
  public void FocusDailyGift(){Fit(true);scroll.verticalNormalizedPosition=0;}
- public void FocusCoinPacks(){Fit(true);Canvas.ForceUpdateCanvases();float y=1850*design.localScale.x;float travel=content.rect.height-viewport.rect.height;scroll.verticalNormalizedPosition=travel>0?Mathf.Clamp01(1-(y-80)/travel):1;}
+ public void FocusCoinPacks(){Fit(true);Canvas.ForceUpdateCanvases();float offset=(3130-80)*design.localScale.x;content.sizeDelta=new Vector2(content.sizeDelta.x,Mathf.Max(content.sizeDelta.y,viewport.rect.height+offset));float travel=content.rect.height-viewport.rect.height;scroll.verticalNormalizedPosition=travel>0?Mathf.Clamp01(1-offset/travel):1;}
  void Claim(){if(WoolProgress.ClaimShopDailyGift()){var audio=FindFirstObjectByType<WoolGameAudio>();if(audio)audio.Play(WoolGameAudio.Cue.Coin);owner.RefreshShopBalance();Refresh();}}
- public void Refresh(){int coins=WoolProgress.Coins;if(balance&&lastBalance!=coins){lastBalance=coins;balance.text=coins.ToString("N0");}if(dailyClaim){bool can=WoolProgress.CanClaimShopDailyGift;dailyClaim.interactable=can;claimText.text=can?"CLAIM FREE":"CLAIMED";}}
+ public void Refresh(){if(offers!=null)foreach(var offer in offers)offer.Refresh();int coins=WoolProgress.Coins;if(balance&&lastBalance!=coins){lastBalance=coins;balance.text=WoolCoinText.Format(coins);}if(dailyClaim){bool can=WoolProgress.CanClaimShopDailyGift;dailyClaim.interactable=can;claimText.text=can?"CLAIM FREE":"CLAIMED";}}
  void LateUpdate(){Fit(false);if(Time.unscaledTime>=refreshAt){refreshAt=Time.unscaledTime+1;Refresh();}}
  public void Fit(bool force){var root=(RectTransform)transform;if(!viewport||!design||root.rect.width<=0)return;var size=root.rect.size;var safe=Screen.safeArea;if(!force&&size==lastSize&&safe==lastSafe)return;lastSize=size;lastSafe=safe;
  // Only interactive content follows the safe area; decorative art covers the device.
  var bg=transform.Find("Premium shop backdrop") as RectTransform;if(bg){var fitter=bg.GetComponent<AspectRatioFitter>();if(fitter)fitter.enabled=false;var im=bg.GetComponent<Image>();if(im&&im.sprite)WoolCanvasArt.Cover(bg,im.sprite.rect.width/im.sprite.rect.height);}
  float top=0,bottom=0;
  float scale=Mathf.Min((size.x-40)/900,1.4f);masthead.localScale=Vector3.one*scale;masthead.anchoredPosition=new Vector2(0,-top);
- float nav=navigation?navigation.Height+40:170;viewport.offsetMax=new Vector2(-16,-top-285*scale);viewport.offsetMin=new Vector2(16,Mathf.Max(nav,bottom+24));
+ float nav=navigation?navigation.Height+40:170;viewport.offsetMax=new Vector2(-16,-top-315*scale);viewport.offsetMin=new Vector2(16,Mathf.Max(nav,bottom+24));
  content.localScale=Vector3.one;content.sizeDelta=new Vector2(0,designHeight*scale);design.localScale=Vector3.one*scale;design.anchoredPosition=Vector2.zero;
  }
 #if UNITY_EDITOR
@@ -39,7 +46,7 @@ public static partial class WoolProgress {
 }
 public sealed partial class WoolHud {
  public void ShopPurchaseUnavailable(){Show("STORE UNAVAILABLE","Purchases are currently unavailable.\nNo payment has been taken.","BACK TO SHOP",Hide);}
- public void RefreshShopBalance(){var value=WoolProgress.Coins.ToString();if(homeCoins)homeCoins.text=value;if(shopCoins)shopCoins.text=value;}
+ public void RefreshShopBalance(){var value=WoolCoinText.Format(WoolProgress.Coins);if(homeCoins)homeCoins.text=value;if(shopCoins)shopCoins.text=value;}
 #if UNITY_EDITOR
 
  public void AuthorPremiumShop(Sprite[] art,Sprite backdrop){
@@ -65,7 +72,7 @@ public sealed partial class WoolHud {
  offer.title.rectTransform.anchoredPosition=new Vector2(-135,135);offer.title.rectTransform.sizeDelta=new Vector2(570,70);offer.title.fontSize=49;offer.title.fontSizeMax=49;
  var remove=new System.Collections.Generic.List<GameObject>();foreach(Transform child in row)if(child.name.StartsWith("Reward "))remove.Add(child.gameObject);foreach(var child in remove)UnityEngine.Object.DestroyImmediate(child);
  var coin=ShopImage("Premium coin reward",row,plate,new Vector2(165,238),new Vector2(-340,-30));ShopImage("Premium coin pile",coin.transform,art[10],new Vector2(147,150),new Vector2(0,28));
- offer.coinAmount=ShopLabel("Editable bundle coins",coin.transform,offer.coins.ToString("N0"),37,new Vector2(155,60),new Vector2(0,-78),WoolArt.Hex("78320C"));
+ offer.coinAmount=ShopLabel("Editable bundle coins",coin.transform,WoolCoinText.Format(offer.coins),37,new Vector2(155,60),new Vector2(0,-78),WoolArt.Hex("78320C"));
  offer.counts=new TMP_Text[4];int count=i+2;for(int k=0;k<count;k++){float x=-155+(k%2)*165;float y=count==2?-35:25-(k/2)*125;
  var cell=ShopImage("Ability reward "+k,row,plate,new Vector2(150,118),new Vector2(x,y));var icon=ShopImage("Ability icon",cell.transform,UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/WoolGame/Designer/UI/Unlock/LayeredIcon"+k+".asset"),new Vector2(88,82),new Vector2(0,14));icon.preserveAspect=true;
  offer.counts[k]=ShopLabel("Editable ability quantity",cell.transform,"x1",31,new Vector2(115,34),new Vector2(0,-40),WoolArt.Hex("78320C"));}
@@ -121,7 +128,7 @@ public sealed partial class WoolHud {
  var offers=new System.Collections.Generic.List<WoolShopOffer>();
  var ads=ShopImage("Remove Ads offer",design,plate,new Vector2(900,250),new Vector2(0,-135));ads.color=WoolArt.Hex("FFE1DF");
  var adTitle=ShopLabel("Ads offer title",ads.transform,"Remove Ads",47,new Vector2(310,70),new Vector2(-265,60),WoolArt.Hex("B42D39"));
- ShopLabel("Ads benefits",ads.transform,"No automatic pop-up ads\nNo bottom banner ads\nReward videos stay optional",28,new Vector2(510,115),new Vector2(165,40),WoolArt.Hex("6D3015"));
+ ShopLabel("Ads benefits",ads.transform,"No automatic pop-up ads\nReward videos stay optional",28,new Vector2(510,115),new Vector2(165,40),WoolArt.Hex("6D3015"));
  ShopImage("Ads coin emblem",ads.transform,skin[5],new Vector2(100,100),new Vector2(-330,-25));
  var adCoins=ShopLabel("Editable ad coins",ads.transform,"5,000",39,new Vector2(210,70),new Vector2(-210,-40),WoolArt.Hex("793409"));
  var adBuy=ShopBuy(ads.transform,"Rs2,250.00",new Vector2(350,78),new Vector2(235,-77));offers.Add(new WoolShopOffer{bundleName="Remove Ads",price="Rs2,250.00",coins=5000,title=adTitle,coinAmount=adCoins,priceText=adBuy.GetComponentInChildren<TMP_Text>(),purchase=adBuy});
@@ -132,14 +139,14 @@ public sealed partial class WoolHud {
  int slots=3+i;float area=600,step=area/slots,left=-435;var counts=new TMP_Text[4];TMP_Text amount=null;
  for(int k=0;k<slots;k++){float x=left+step*(k+.5f);var cell=ShopImage("Reward "+k,row.transform,plate,new Vector2(step-9,147),new Vector2(x,-14));
  var icon=ShopImage(k==0?"Duck coin reward":"Ability "+(k-1),cell.transform,k==0?skin[5]:UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/WoolGame/Designer/UI/Unlock/LayeredIcon"+(k-1)+".asset"),new Vector2(Mathf.Min(100,step-18),93),new Vector2(0,17));
- var label=ShopLabel("Editable reward quantity",cell.transform,k==0?coins[i].ToString("N0"):"x1",32,new Vector2(step-15,40),new Vector2(0,-48),WoolArt.Hex("72300C"));if(k==0)amount=label;else counts[k-1]=label;
+ var label=ShopLabel("Editable reward quantity",cell.transform,k==0?WoolCoinText.Format(coins[i]):"x1",32,new Vector2(step-15,40),new Vector2(0,-48),WoolArt.Hex("72300C"));if(k==0)amount=label;else counts[k-1]=label;
  }
  var buy=ShopBuy(row.transform,prices[i],new Vector2(270,82),new Vector2(300,-83));var grants=new int[4];for(int k=0;k<i+2;k++)grants[k]=1;
  offers.Add(new WoolShopOffer{bundleName=names[i],price=prices[i],coins=coins[i],abilities=grants,title=name,coinAmount=amount,counts=counts,priceText=buy.GetComponentInChildren<TMP_Text>(),purchase=buy});
  }
  int[] packs={500,1000,2500,5000,10000,25000};string[] packPrices={"Rs150.00","Rs300.00","Rs700.00","Rs1,400.00","Rs2,850.00","Rs6,900.00"};
  for(int i=0;i<6;i++){var row=ShopImage("Coin pack "+packs[i],design,plate,new Vector2(286,250),new Vector2((i%3-1)*306,-1335-(i/3)*270));
- ShopImage("Duck coin",row.transform,skin[5],new Vector2(112,110),new Vector2(0,43));var amount=ShopLabel("Editable pack coins",row.transform,packs[i].ToString("N0"),40,new Vector2(245,50),new Vector2(0,-22),WoolArt.Hex("713014"));var buy=ShopBuy(row.transform,packPrices[i],new Vector2(250,72),new Vector2(0,-83));offers.Add(new WoolShopOffer{bundleName="Coin pack",coins=packs[i],price=packPrices[i],coinAmount=amount,purchase=buy,priceText=buy.GetComponentInChildren<TMP_Text>()});}
+ ShopImage("Duck coin",row.transform,skin[5],new Vector2(112,110),new Vector2(0,43));var amount=ShopLabel("Editable pack coins",row.transform,WoolCoinText.Format(packs[i]),40,new Vector2(245,50),new Vector2(0,-22),WoolArt.Hex("713014"));var buy=ShopBuy(row.transform,packPrices[i],new Vector2(250,72),new Vector2(0,-83));offers.Add(new WoolShopOffer{bundleName="Coin pack",coins=packs[i],price=packPrices[i],coinAmount=amount,purchase=buy,priceText=buy.GetComponentInChildren<TMP_Text>()});}
  var gift=ShopImage("Daily free 50 coins",design,plate,new Vector2(900,250),new Vector2(0,-1900));
  ShopLabel("Editable daily heading",gift.transform,"Daily Gift",50,new Vector2(520,78),new Vector2(60,69),WoolArt.Hex("733714"));
  ShopImage("Daily gift coin",gift.transform,skin[5],new Vector2(170,170),new Vector2(-315,0));
@@ -154,3 +161,4 @@ public sealed partial class WoolHud {
 #endif
 }
 }
+

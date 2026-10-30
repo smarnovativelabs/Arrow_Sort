@@ -8,7 +8,7 @@ public sealed class WoolMapTopBar:MonoBehaviour {
  readonly Vector3[] corners=new Vector3[4];Vector2 lastSize;Rect lastSafe;float nextRefresh;int lastCoins=-1,lastLevel=-1;
  void OnEnable(){if(!coins||!settings||!current||!map||!owner)return;coins.onClick.RemoveAllListeners();coins.onClick.AddListener(owner.ShowCoinOptions);settings.onClick.RemoveAllListeners();settings.onClick.AddListener(()=>owner.ShowAudioSettings(owner.Hide));current.onClick.RemoveAllListeners();current.onClick.AddListener(map.OpenMap);lastSize=Vector2.zero;Refresh();}
  void LateUpdate(){Fit();if(Time.unscaledTime>=nextRefresh){nextRefresh=Time.unscaledTime+.5f;Refresh();}}
- void Refresh(){int value=WoolProgress.Coins,n=WoolProgress.CurrentLevel;if(value!=lastCoins){lastCoins=value;balance.text=value.ToString("N0");}if(n!=lastLevel){lastLevel=n;level.text="LEVEL "+n;}}
+ void Refresh(){int value=WoolProgress.Coins,n=WoolProgress.CurrentLevel;if(value!=lastCoins){lastCoins=value;balance.text=WoolCoinText.Format(value);}if(n!=lastLevel){lastLevel=n;level.text="LEVEL "+n;}}
  void Fit(){
   var root=(RectTransform)transform;var size=root.rect.size;var safe=Screen.safeArea;if(lastSize==size&&lastSafe==safe)return;lastSize=size;lastSafe=safe;
   var canvas=GetComponentInParent<Canvas>();var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;

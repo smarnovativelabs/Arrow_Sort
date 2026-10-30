@@ -25,6 +25,9 @@ namespace WoolGame
             foreach(var ps in particles)
             {
                 var main=ps.main;main.playOnAwake=false;main.loop=true;main.stopAction=ParticleSystemStopAction.None;
+                main.simulationSpace=ParticleSystemSimulationSpace.Local;
+                var velocity=ps.velocityOverLifetime;velocity.space=ParticleSystemSimulationSpace.Local;
+                var force=ps.forceOverLifetime;force.space=ParticleSystemSimulationSpace.Local;
                 main.maxParticles=Mathf.Min(main.maxParticles,160);
                 // A compact, dense flame stays readable against the bright path.
                 if(ps.name==effectPrefab.name){main.startSpeedMultiplier*=.72f;main.startSizeMultiplier*=1.25f;}

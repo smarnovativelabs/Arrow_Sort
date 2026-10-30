@@ -1,6 +1,7 @@
 <dependencies>
   <packages>
     <package>androidx.constraintlayout:constraintlayout:2.1.4</package>
+    <package>com.applovin.mediation:google-adapter:23.4.0.0</package>
     <package>com.applovin:applovin-sdk:13.0.1</package>
     <package>com.google.android.gms:play-services-ads:23.4.0</package>
     <package>com.google.android.gms:play-services-ads-identifier:18.1.0</package>

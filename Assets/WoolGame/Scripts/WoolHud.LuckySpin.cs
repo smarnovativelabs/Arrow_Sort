@@ -41,11 +41,11 @@ namespace WoolGame
                 float a=i*45*Mathf.Deg2Rad;
                 float x=405+Mathf.Sin(a)*250,y=405-Mathf.Cos(a)*250;
                 if(i==0)FantasyImage("No Ads reward",luckySpin.wheel,noAds,x-64,y-54,128,128,false).GetComponent<Image>().useSpriteMesh=true;
-                else if(i==4)FantasyImage("Unlock Slot reward",luckySpin.wheel,unlock,x-77,y-65,154,145,true).GetComponent<Image>().useSpriteMesh=true;
-                else if(i!=5)FantasyImage("Duck coins "+i,luckySpin.wheel,coins,x-95,y-57,190,127,true);
-                float r=i==5?250:337;float tx=405+Mathf.Sin(a)*r,ty=405-Mathf.Cos(a)*r;
+                
+                else if(WoolSpinState.Coins[i]>0)FantasyImage("Duck coins "+i,luckySpin.wheel,coins,x-95,y-57,190,127,true);
+                float r=i>0&&WoolSpinState.Coins[i]==0?250:337;float tx=405+Mathf.Sin(a)*r,ty=405-Mathf.Cos(a)*r;
                 var label=FantasyText("Prize label "+i,luckySpin.wheel,tx-76,ty-34,152,68,i==0||i==4||i==5?31:45,i==0?Color.white:brown);
-                label.text=i==0?"NO ADS\n24H":i==4?"UNLOCK x1":i==5?"TRY\nAGAIN":WoolSpinState.Coins[i].ToString();
+                label.text=i==0?"NO ADS\n24H":WoolSpinState.Coins[i]==0?"TRY\nAGAIN":WoolCoinText.Format(WoolSpinState.Coins[i]);
                 if(i==0&&outline)label.fontSharedMaterial=outline;
             }
             FantasyImage("Original flower hub",luckySpin.wheel,originalHub,330,330,150,150,false).GetComponent<Image>().useSpriteMesh=true;

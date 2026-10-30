@@ -11,7 +11,7 @@ namespace WoolGame
         public float TravelRadius {get;private set;}=1;
         public bool ParkingTravelReady {get;private set;}
         // Presentation offsets never alter logical tile positions or blocking rules.
-        public void CompactParking(WoolVehicleSources sources)
+        public void CompactParking(WoolVehicleSources sources,bool tutorial=false)
         {
             Physics.SyncTransforms();
             var min=Vector2.one*float.MaxValue;var max=Vector2.one*float.MinValue;
@@ -33,14 +33,15 @@ namespace WoolGame
             if(min.x==float.MaxValue)return;
             TravelRadius=radius;
             float slotY=world.InverseTransformPoint(slots[0].position).y;
-            TravelTop=slotY-.8f;
-            float shift=TravelTop-radius-.18f-max.y;
+            TravelTop=slotY-1.0f;
+            float shift=TravelTop-radius-.45f-max.y;
+            if(tutorial)shift-=.6f;
             ParkingPresentationOffset=Vector3.up*shift;
             foreach(var v in vehicles)if(v&&v.gameObject.activeInHierarchy)v.localPosition+=ParkingPresentationOffset;
             if(sources)sources.ShiftPresentation(ParkingPresentationOffset);
             min.y+=shift;max.y+=shift;
-            TravelLeft=min.x-radius-.12f;TravelRight=max.x+radius+.12f;
-            TravelBottom=min.y-radius-.12f;
+            TravelLeft=min.x-radius-.30f;TravelRight=max.x+radius+.30f;
+            TravelBottom=min.y-radius-.30f;
             ParkingTravelReady=true;
             Physics.SyncTransforms();
         }
@@ -49,18 +50,20 @@ namespace WoolGame
         {
             if(!vehicleCamera)return;
             float scale=GameplayFrame.width>0?GameplayFrame.width/1080f:WoolHud.PortraitScale(width,height);
-            float pixelsPerUnit=vehicleCamera.pixelHeight/(2*vehicleCamera.orthographicSize);
+            var camera=SlotCamera;
+            float pixelsPerUnit=camera.pixelHeight/(2*camera.orthographicSize);
             for(int i=0;i<counts.Length;i++)
             {
                 var text=counts[i];if(!text||string.IsNullOrEmpty(text.text))continue;
-                var p=vehicleCamera.WorldToScreenPoint(slots[i].position);
-                p.y-=text.text=="+"?0:29*scale;p.z=8;
-                text.transform.SetPositionAndRotation(vehicleCamera.ScreenToWorldPoint(p),vehicleCamera.transform.rotation);
+                var p=camera.WorldToScreenPoint(slots[i].position);
+                bool locked=text.text=="AD +"||text.text=="+";
+                p.y-=locked?0:29*scale;p.z=8;
+                text.transform.SetPositionAndRotation(camera.ScreenToWorldPoint(p),camera.transform.rotation);
                 text.alignment=TMPro.TextAlignmentOptions.Center;text.enableAutoSizing=false;
                 text.rectTransform.sizeDelta=new Vector2(64,32);
                 text.overflowMode=TMPro.TextOverflowModes.Overflow;text.textWrappingMode=TMPro.TextWrappingModes.NoWrap;
                 float lineHeight=Mathf.Max(.1f,text.GetPreferredValues(text.text,100,100).y);
-                float size=36*scale/(lineHeight*Mathf.Max(.001f,pixelsPerUnit));
+                float size=(locked?29:36)*scale/(lineHeight*Mathf.Max(.001f,pixelsPerUnit));
                 var parent=text.transform.parent.lossyScale;
                 text.transform.localScale=new Vector3(size/Mathf.Abs(parent.x),size/Mathf.Abs(parent.y),size/Mathf.Abs(parent.z));
             }

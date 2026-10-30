@@ -10,7 +10,7 @@ namespace WoolGame
             get
             {
                 EnsureLoaded();string today=TaskDay;
-                if(data.dailyTasks==null||string.CompareOrdinal(today,data.dailyTasks.day)>0)data.dailyTasks=new WoolDailyTaskState{day=today,version=2};
+                if(data.dailyTasks==null||string.CompareOrdinal(today,data.dailyTasks.day)>0)data.dailyTasks=new WoolDailyTaskState{day=today,version=4};
                 data.dailyTasks.Upgrade();return data.dailyTasks;
             }
         }
@@ -43,7 +43,7 @@ namespace WoolGame
             {
                 data=NewCampaign(0);records.Clear();totalLevels=10;
                 if(ClaimDailyTask(2)||ClaimDailyGift(0)||ClaimDailyChest())throw new Exception("Premature claim");
-                var s=DailyTasks;s.wins=2;s.coins=500;s.unlocks=s.removes=s.sorts=s.amplifies=1;
+                var s=DailyTasks;s.wins=2;s.coins=500;s.unlocks=s.removes=s.sorts=s.amplifies=s.videos=1;
                 for(int i=0;i<DailyTitles.Length;i++)if(!ClaimDailyTask(i)||ClaimDailyTask(i))throw new Exception("Task single claim");
                 if(DailyCredits!=100||DailyChestCredits!=100||Coins!=0)throw new Exception("Credit sum or coin separation");
                 for(int i=0;i<4;i++)if(!ClaimDailyGift(i)||ClaimDailyGift(i))throw new Exception("Gift single claim");
@@ -54,7 +54,7 @@ namespace WoolGame
                 if(!ClaimDailyChest()||ClaimDailyChest()||Coins!=700||DailyChestCredits!=15)throw new Exception("Chest amount, overflow or duplicate");
                 string raw=JsonUtility.ToJson(data);data=Read(raw);
                 if(Coins!=700||DailyChestCredits!=15)throw new Exception("Persistence");
-                data.dailyTasks.day="2999-01-01";data.dailyTasks.claims=255;
+                data.dailyTasks.day="2999-01-01";data.dailyTasks.claims=(1<<DailyTitles.Length)-1;
                 if(DailyCredits!=100)throw new Exception("Clock rollback reset");
                 var legacy=new WoolDailyTaskState{claims=(1<<1)|(1<<3)};legacy.Upgrade();if(legacy.Points!=30||!legacy.Claimed(1)||legacy.Claimed(3))throw new Exception("Six-task save migration");
                 var boundary=new WoolDailyTaskState{version=2,wins=2,coins=500,unlocks=1,removes=1,sorts=1,amplifies=1};boundary.Claim(0);if(boundary.ClaimGift(0))throw new Exception("10 < 25 boundary");boundary.Claim(1);if(!boundary.ClaimGift(0)||boundary.ClaimGift(1))throw new Exception("25 boundary");
@@ -65,3 +65,4 @@ namespace WoolGame
 #endif
     }
 }
+

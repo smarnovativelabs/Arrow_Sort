@@ -25,7 +25,7 @@ namespace AdsMediation
         private RewardedAd rewardedAd;
 
         bool isPersonalizedads;
-        bool rewardedInterReceived = false;
+
         bool rvRewardReceived = false;
         bool initiallyAdsLoaded;
         bool loadBannerMust;
@@ -413,7 +413,7 @@ namespace AdsMediation
                     if (loadError != null)
                     {
                         print("Rewarded ad failed to load with error: ");
-                        print(loadError.GetMessage() + "--" + loadError.GetCode());
+                        Debug.LogWarning("Rewarded ad load failed: " + loadError.ToString());
 
                         rvRetryAttempt++;
                         double retryDelay = Mathf.Pow(2, Mathf.Min(7, rvRetryAttempt));

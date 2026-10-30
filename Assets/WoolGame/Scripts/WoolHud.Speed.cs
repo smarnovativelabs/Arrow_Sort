@@ -32,9 +32,9 @@ namespace WoolGame
             if(gameplaySpeedLabel)
             {
                 gameplaySpeedLabel.textWrappingMode=TextWrappingModes.NoWrap;
-                gameplaySpeedLabel.enableAutoSizing=false;gameplaySpeedLabel.fontSize=46;
+                gameplaySpeedLabel.enableAutoSizing=false;gameplaySpeedLabel.fontSize=72;
                 gameplaySpeedLabel.color=new Color(.2f,.27f,.12f,1);gameplaySpeedLabel.outlineColor=Color.white;
-                gameplaySpeedLabel.outlineWidth=.1f;gameplaySpeedLabel.raycastTarget=false;
+                gameplaySpeedLabel.outlineWidth=.1f;gameplaySpeedLabel.raycastTarget=false;gameplaySpeedButton.GetComponent<RectTransform>().sizeDelta=new Vector2(160,110);gameplaySpeedLabel.rectTransform.anchorMin=Vector2.zero;gameplaySpeedLabel.rectTransform.anchorMax=Vector2.one;gameplaySpeedLabel.rectTransform.offsetMin=Vector2.one*5;gameplaySpeedLabel.rectTransform.offsetMax=-Vector2.one*5;
             }
         }
 #if UNITY_EDITOR

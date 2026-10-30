@@ -7,6 +7,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 // Android Resolver Dependencies Start
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // Assets/GoogleMobileAds/Editor/GoogleMobileAdsDependencies.xml:12
+    implementation 'com.applovin.mediation:google-adapter:23.4.0.0' // Assets/MaxSdk/Mediation/Google/Editor/Dependencies.xml:3
     implementation 'com.applovin:applovin-sdk:13.0.1' // Assets/MaxSdk/AppLovin/Editor/Dependencies.xml:4
     implementation 'com.google.android.gms:play-services-ads:23.4.0' // Assets/GoogleMobileAds/Editor/GoogleMobileAdsDependencies.xml:7
     implementation 'com.google.android.gms:play-services-ads-identifier:18.1.0' // Assets/Tenjin/Editor/TenjinDependencies.xml:7

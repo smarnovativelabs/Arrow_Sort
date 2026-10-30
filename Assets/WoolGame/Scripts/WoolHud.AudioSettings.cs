@@ -4,7 +4,7 @@ namespace WoolGame
     public sealed partial class WoolHud
     {
         [UnityEngine.SerializeField] WoolUtilityPanel utilityPanel;
-        public void ShowCoinOptions(){CloseEngagement();Hide();if(utilityPanel)utilityPanel.ShowCoins(()=>{ShowShop();var view=shopPage.GetComponent<WoolShopView>();if(view)view.FocusCoinPacks();},()=>FreeCoinsPressed?.Invoke(),RefreshWalletLabels);}
+        public void ShowCoinOptions(){if(utilityPanel)utilityPanel.ShowCoins(ShowWalletShop,()=>FreeCoinsPressed?.Invoke(),RefreshWalletLabels);}
         public void ShowAudioSettings(Action back,Action home=null)
         {
             if(!gameAudio)return;

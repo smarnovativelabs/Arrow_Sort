@@ -12,7 +12,7 @@ namespace WoolGame
         const float Cell=.48f;
         static readonly int[] Palette={3,1,4,8,6,0,2,5,7,9};
         public static int DifficultyTier(int number)=>Math.Min(14,Math.Max(0,(number-1)/5));
-        public static WoolDifficulty DifficultyFor(int number)=>number%5==0||DifficultyTier(number)>=2?WoolDifficulty.Hard:DifficultyTier(number)>=1||number>=2?WoolDifficulty.Medium:WoolDifficulty.Easy;
+        public static WoolDifficulty DifficultyFor(int number)=>number>=5?WoolDifficulty.Hard:number>=2?WoolDifficulty.Medium:WoolDifficulty.Easy;
         public static WoolLevelDefinition Generate(int number,Vector3[] referenceRoute)
         {
             if(number<1||number>MaxLevel)throw new ArgumentOutOfRangeException(nameof(number));
@@ -49,13 +49,7 @@ namespace WoolGame
             list.Sort((a,b)=>{int v=a.source.CompareTo(b.source);if(v!=0)return v;v=a.sourceId.CompareTo(b.sourceId);if(v!=0)return v;v=a.y.CompareTo(b.y);if(v!=0)return v;v=a.x.CompareTo(b.x);return v!=0?v:a.sourceOrder.CompareTo(b.sourceOrder);});
             uint signature=unchecked((uint)number*2654435761u);
             for(int i=0;i<list.Count;i++){int digit=i<10?(int)(signature%10):random.Next(10);if(i<10)signature/=10;list[i].color=Palette[(digit+i*3)%10];}
-            // Use the three designer vehicle sizes while balancing ammunition and footprints.
-            var capacityOrder=new List<WoolTile>(list);capacityOrder.Sort((a,b)=>a.length.CompareTo(b.length));
-            for(int i=0;i<capacityOrder.Count;i++)
-            {
-                var size=i<capacityOrder.Count*.50f?WoolSize.Small:i<capacityOrder.Count*.85f?WoolSize.Medium:WoolSize.Large;
-                capacityOrder[i].size=size;capacityOrder[i].ammo=WoolLevel.Capacity(size);
-            }
+            // Keep each designer mesh matched to its actual packed footprint.
             data.vehicles=list.ToArray();
             var order=new List<int>();foreach(var tile in witness)order.Add(list.IndexOf(tile));
             for(int i=0;i<list.Count;i++)if(list[i].source!=WoolVehicleSource.Board)order.Add(i);
@@ -87,7 +81,7 @@ namespace WoolGame
             for(int lane=0;lane<lanes;lane++)for(int at=0;at<extent;)
             {
                 int remain=extent-at;if(remain<2)break;
-                int length=Math.Min(remain,2+random.Next(2));if(remain-length==1)length=length>2?length-1:length+1;
+                int length=Math.Min(remain,2+random.Next(3));if(remain-length==1)length=length>2?length-1:length+1;
                 int cx=x+(vertical?lane*2:at),cy=y+(vertical?at:lane*2);
                 int w=vertical?2:length,h=vertical?length:2;
                 var size=length==2?WoolSize.Small:length==3?WoolSize.Medium:WoolSize.Large;
@@ -124,13 +118,15 @@ namespace WoolGame
         }
         public static void ApplyChallenge(WoolLevelDefinition data)
         {
+            if(data.number>=5)data.difficulty=WoolDifficulty.Hard;
             var cars=data.vehicles;var order=data.tutorialOrder;
             if(cars.Length<50||cars.Length>MaxVehicles||order.Length!=cars.Length)throw new InvalidOperationException("Challenge levels need 50-70 vehicles and a complete exit order.");
             int total=0;foreach(var car in cars){car.ammo=WoolLevel.Capacity(car.size);total+=car.ammo;}
             for(int i=0;total<250;i=(i+1)%cars.Length)
                 if(cars[i].size<WoolSize.Large){int old=cars[i].ammo;cars[i].size++;cars[i].ammo=WoolLevel.Capacity(cars[i].size);total+=cars[i].ammo-old;}
             for(int i=cars.Length-1;total>400;i=(i+cars.Length-1)%cars.Length)
-                if(cars[i].size>WoolSize.Small){int old=cars[i].ammo;cars[i].size--;cars[i].ammo=WoolLevel.Capacity(cars[i].size);total+=cars[i].ammo-old;}
+                if(cars[i].size>WoolSize.Small){int old=cars[i].ammo;cars[i].size--;cars[i].length=Math.Min(cars[i].length,cars[i].source==WoolVehicleSource.Board?Cell*((int)cars[i].size+2)-.09f:cars[i].size==WoolSize.Small?.78f:1.02f);cars[i].ammo=WoolLevel.Capacity(cars[i].size);total+=cars[i].ammo-old;}
+            if(data.number>=5){ApplyFiveSlotChallenge(data,total);return;}
             int scarce=(data.number%10)*7%10,count=data.difficulty==WoolDifficulty.Hard?3:2;
             foreach(var car in cars)if(car.color==scarce)car.color=(scarce+1+(data.number%8))%10;
             cars[order[0]].color=scarce;
@@ -138,8 +134,9 @@ namespace WoolGame
             var regular=new List<int>();int rareAmmo=0;
             foreach(int index in order){if(cars[index].color==scarce)rareAmmo+=cars[index].ammo;else regular.Add(index);}
             var result=new List<int>(total);
-            // A held scarce bow leaves three usable slots; reserve room for later scarce cars too.
-            int batch=4-count;data.snakeBatchSize=batch;
+            // Challenge levels mix three regular vehicles around held scarce bows.
+            // The support flow supplies an extra slot, or allows the no-ad fallback.
+            int batch=data.number>=5?3:4-count;data.snakeBatchSize=batch;
             for(int start=0;start<regular.Count;start+=batch)
             {
                 int end=Math.Min(regular.Count,start+batch);
@@ -151,7 +148,7 @@ namespace WoolGame
             result.Insert(result.Count/2,scarce);
             for(int i=2;i<rareAmmo;i++)result.Add(scarce);
             data.yarn=result.ToArray();data.tutorial=false;data.generatorRevision=5;
-            data.difficultyNote="A scarce color uses "+count+" vehicles, with wool at the front, middle and tail. Plan around its occupied slot.";
+            data.difficultyNote="A scarce color uses "+count+" vehicles, with wool at the front, middle and tail. "+(data.number>=5?"Three-vehicle color batches and faster advance require support and careful slot planning.":"Plan around its occupied slot.");
         }
     }
 }

@@ -12,7 +12,7 @@ namespace WoolGame
         readonly Vector3[] releaseCanvasCorners=new Vector3[4];
         void FitReleaseUI()
         {
-            if(releaseHeaderArt&&header&&canvas)
+            if(releaseHeaderArt&&header&&canvas&&releaseHeaderArt.gameObject.activeSelf&&header.lossyScale.sqrMagnitude>.000001f)
             {
                 ((RectTransform)canvas.rootCanvas.transform).GetWorldCorners(releaseCanvasCorners);
                 var min=header.InverseTransformPoint(releaseCanvasCorners[0]);

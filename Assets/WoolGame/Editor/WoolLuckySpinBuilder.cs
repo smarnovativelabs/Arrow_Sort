@@ -90,20 +90,21 @@ namespace WoolGame.Editor
         public static string ValidateRules()
         {
             void Check(bool condition,string message){if(!condition)throw new Exception(message);}
-            long day=20000L*86400;
-            var s=new WoolSpinState();Check(s.Available(0)==0,"Unverified time must block spins");
-            Check(s.Available(day)==1,"Initial daily spin");Check(s.Spin(day,5)==5&&s.lastCoins==0,"Try Again consumes a spin, no coins");
-            Check(s.Spin(day+86399,1)==-1,"Cannot reclaim within same UTC day");
-            Check(s.Available(day+86400)==1,"24h UTC reset while game closed");
+            long day=new DateTimeOffset(new DateTime(2026,1,1,0,0,0,DateTimeKind.Local)).ToUnixTimeSeconds();
+            var s=new WoolSpinState();Check(s.Available(0)==0,"Invalid time must block spins");
+            Check(s.Available(day)==1,"Initial daily spin");Check(s.Spin(day,2)==2&&s.lastCoins==0,"Try Again consumes a spin, no coins");
+            Check(s.Spin(day+86399,1)==-1,"Cannot reclaim within same local day");
+            Check(s.Available(day+86400)==1,"Local midnight reset while game closed");
             for(int i=1;i<30;i++)s.Spin(day+i*86400,1);
             Check(s.streak==30&&s.lastSlot==0&&s.noAdsUntil==day+30*86400,"Day 30 guarantees 24h No Ads");
             Check(s.extraSpins==1,"Day 30 awards exactly one extra spin");
-            Check(s.Spin(day+29*86400,4)==4&&s.unlockPowers==1&&s.streak==30&&s.extraSpins==0,"Extra spin grants real unlock power without inflating streak");
+            Check(s.Spin(day+29*86400,5)==5&&s.lastCoins==250&&s.unlockPowers==0&&s.streak==30&&s.extraSpins==0,"Extra spin grants coins without inflating streak");
             Check(s.Spin(day+29*86400,0)==-1,"No duplicate milestone grant");
             Check(s.Spin(day+32*86400,1)==1&&s.streak==1,"Missed days reset streak");
             s.CompleteLevel();s.CompleteLevel();Check(s.extraSpins==0,"No early level spin");s.CompleteLevel();Check(s.extraSpins==1&&s.levelProgress==0,"Three completions grant one spin");
-            var copy=JsonUtility.FromJson<WoolSpinState>(JsonUtility.ToJson(s));Check(copy.lastDailyDay==s.lastDailyDay&&copy.extraSpins==1&&copy.unlockPowers==1,"Save/reload keeps timer, spins and powers");
-            return "PASS: UTC reset, closed-game deadline, unavailable time, one claim/day, Try Again, 30-day guarantee and extra spin, unlock reward, streak gap, level-earned spin, save/reload.";
+            var copy=JsonUtility.FromJson<WoolSpinState>(JsonUtility.ToJson(s));Check(copy.lastDailyDay==s.lastDailyDay&&copy.extraSpins==1&&copy.unlockPowers==0,"Save/reload keeps timer, spins and powers");
+            return "PASS: local reset, closed-game deadline, invalid time, one claim/day, Try Again, exclusive 30-day reward and extra spin, unlock reward, streak gap, level-earned spin, save/reload.";
         }
     }
 }
+

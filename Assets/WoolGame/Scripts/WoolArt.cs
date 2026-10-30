@@ -4,9 +4,9 @@ namespace WoolGame
     public static class WoolArt
     {
         public static readonly Color[] Palette = {
-            Hex("B51224"), Hex("007C9E"), Hex("B88808"), Hex("7621AE"), Hex("007642"), Hex("C44D08"), Hex("A70E70"), Hex("1944AF"), Hex("50800A"), Hex("BC3C52")
+            Hex("E53935"), Hex("00D5E8"), Hex("FFD600"), Hex("7B28C9"), Hex("159447"), Hex("FF8C00"), Hex("FF76B5"), Hex("2454E6"), Hex("86451F"), Hex("30343B")
         };
-        public static readonly string[] ColorNames = { "Red", "Sky", "Honey", "Purple", "Mint", "Peach", "Pink", "Blue", "Lime", "Coral" };
+        public static readonly string[] ColorNames = { "Red", "Cyan", "Yellow", "Purple", "Green", "Orange", "Pink", "Blue", "Brown", "Charcoal" };
         public static Color Hex(string hex) { ColorUtility.TryParseHtmlString("#"+hex,out var color); return color; }
         public static Vector2 BlockSize(WoolSize size,WoolDirection direction)
         {

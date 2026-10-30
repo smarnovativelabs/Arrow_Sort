@@ -8,7 +8,9 @@ using UnityEngine;
 
 public class TenjinHyperBidIntegration
 {
+#if tenjin_hyperbid_enabled
     private static bool _subscribed_hyperbid = false;
+#endif
     public TenjinHyperBidIntegration()
     {
     }

@@ -1,0 +1,5 @@
+<dependencies>
+  <androidPackages>
+    <androidPackage spec="com.applovin.mediation:google-adapter:23.4.0.0" />
+  </androidPackages>
+</dependencies>

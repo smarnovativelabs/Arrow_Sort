@@ -64,14 +64,14 @@ namespace WoolGame
                 dragon.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*1.3f)*1.2f);
             }
             // The duck and wings are one authored fixed-pose sprite.
-            if(wheel)wheel.localRotation=Quaternion.Euler(0,0,-t*24);
+            if(wheel)wheel.localRotation=Quaternion.Euler(0,0,-t*22);
             if(actionIcons!=null)for(int i=0;i<actionIcons.Length;i++)
             {
                 var icon=actionIcons[i];if(!icon||icon==wheel)continue;
-                icon.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*2+i*1.7f)*(i==2?5:3));
-                icon.localScale=Vector3.one*(1+.035f*Mathf.Sin(t*2.4f+i));
+                icon.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*1.7f+i*1.4f)*2.5f);
+                icon.localScale=Vector3.one*(1+.018f*Mathf.Sin(t*2+i));
             }
-            if(levelButton)levelButton.localScale=Vector3.one*(1+.017f*Mathf.Sin(t*2.6f));
+            if(levelButton)levelButton.localScale=Vector3.one;
             // Keep glyphs at a stable screen size while the button artwork pulses behind them.
             if(levelName&&levelButton)levelName.localScale=Vector3.one/levelButton.localScale.x;
             if(clouds!=null)for(int i=0;i<clouds.Length;i++)if(clouds[i])

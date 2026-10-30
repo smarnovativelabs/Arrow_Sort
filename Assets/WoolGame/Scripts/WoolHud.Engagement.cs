@@ -19,6 +19,7 @@ namespace WoolGame
         void BindEngagementUI()
         {
             if(dailyTasksView)dailyTasksView.Bind(CloseEngagement,ShowDailySpin,()=>{CloseEngagement();PlayPressed?.Invoke();},RefreshWalletLabels,ShowShop);
+            if(dailyTasksView&&dailyPanel){var legacy=dailyPanel.transform.Find("Daily card");if(legacy)legacy.gameObject.SetActive(false);}
             BindNav(homePage,"TASKS",ShowDailyTasks);BindNav(homePage,"Lv.16",ShowDailySpin);BindNav(homePage,"NO ADS",ShowNoAdsStatus);
             if(dailyClose){dailyClose.onClick.RemoveAllListeners();dailyClose.onClick.AddListener(CloseEngagement);}
             if(spinClose){spinClose.onClick.RemoveAllListeners();spinClose.onClick.AddListener(CloseEngagement);}
@@ -43,7 +44,7 @@ namespace WoolGame
             var left=WoolProgress.NoAdsRemaining;
             Show("NO ADS ACTIVE",((int)left.TotalHours)+"h "+left.Minutes+"m remaining.\nPop-up and banner ads are paused.\nReward videos remain optional.","BACK",Hide);
         }
-        void RefreshWalletLabels(){homeCoins.text=shopCoins.text=WoolProgress.Coins.ToString();}
+        void RefreshWalletLabels(){homeCoins.text=shopCoins.text=WoolCoinText.Format(WoolProgress.Coins);foreach(var wallet in GetComponentsInChildren<WoolCoinWallet>(true))wallet.Refresh();}
         public void CloseEngagement(){if(utilityPanel)utilityPanel.Hide();if(dailyPanel)dailyPanel.SetActive(false);if(spinPanel)spinPanel.SetActive(false);if(adPassOffer)adPassOffer.Hide();if(specialOffer)specialOffer.Hide();if(luckySpin)luckySpin.gameObject.SetActive(false);if(profileView)profileView.gameObject.SetActive(false);}
         public void ShowDailyTasks()
         {

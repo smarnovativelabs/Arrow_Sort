@@ -178,7 +178,7 @@ namespace WoolGame
         {
             if(campaignLevels==null||campaignLevels.Length==0)return;
             var d=LevelDifficulty(number);
-            if(homeDifficulty){homeDifficulty.text=d==WoolDifficulty.Hard?"HARD LEVEL":d==WoolDifficulty.Medium?"A fresh challenge":"A gentle adventure";homeDifficulty.color=d==WoolDifficulty.Hard?WoolArt.Hex("FFEFBC"):Color.white;}
+            if(homeDifficulty){homeDifficulty.text=d==WoolDifficulty.Hard?"HARD LEVEL":d==WoolDifficulty.Medium?"A fresh challenge":"A gentle adventure";homeDifficulty.color=d==WoolDifficulty.Hard?WoolArt.Hex("FFEFBC"):Color.white;homeDifficulty.outlineColor=WoolArt.Hex("43200F");homeDifficulty.outlineWidth=.2f;}
             if(gameDifficulty){gameDifficulty.text=d.ToString().ToUpperInvariant();gameDifficulty.color=d==WoolDifficulty.Hard?WoolArt.Hex("E44837"):WoolArt.Hex("7C633F");}
         }
     }

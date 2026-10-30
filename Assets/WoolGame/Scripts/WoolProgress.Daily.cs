@@ -39,8 +39,8 @@ namespace WoolGame
             Daily.wool+=amount;Daily.colorMask|=1<<color;
         }
         public static TimeSpan DailyResetIn=>DateTime.Now.Date.AddDays(1)-DateTime.Now;
-        public static bool NoAdsActive { get { EnsureLoaded();return data.noAdsUntilUnix>0&&(!WoolTrustedClock.Ready||WoolTrustedClock.UnixNow<data.noAdsUntilUnix); } }
-        public static TimeSpan NoAdsRemaining { get { EnsureLoaded();return TimeSpan.FromSeconds(WoolTrustedClock.Ready?Math.Max(0,data.noAdsUntilUnix-WoolTrustedClock.UnixNow):0); } }
+        public static bool NoAdsActive=>SpinState.HasNoAds(WoolTrustedClock.UnixNow);
+        public static TimeSpan NoAdsRemaining=>TimeSpan.FromSeconds(NoAdsActive?Math.Max(0,SpinState.noAdsUntil-WoolTrustedClock.UnixNow):0);
         public static void Flush(){if(data!=null)Save();}
     }
 }

@@ -8,7 +8,9 @@ using UnityEngine;
 
 public class TenjinTopOnIntegration
 {
+#if tenjin_topon_enabled
     private static bool _subscribed = false;
+#endif
     public TenjinTopOnIntegration()
     {
     }

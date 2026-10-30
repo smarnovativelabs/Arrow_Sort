@@ -3,7 +3,7 @@ Shader "WoolGame/SoftFog"
 {
     Properties
     {
-        _Color ("Fog Color", Color) = (0.88, 1, 0.85, 0.85)
+        _Color ("Fog Color", Color) = (1, 1, 1, 1)
 
         _Density ("Maximum Density", Range(0, 1)) = 0.9
 
@@ -12,6 +12,7 @@ Shader "WoolGame/SoftFog"
         _EndFade ("Fade End", Range(0, 1)) = 0.0
 
         _MinimumDensity ("Bottom Density", Range(0, 1)) = 0.0
+        _SideFade ("Side Fade", Range(0, 0.5)) = 0
     }
 
     SubShader
@@ -56,6 +57,7 @@ Shader "WoolGame/SoftFog"
                 half _StartFade;
                 half _EndFade;
                 half _MinimumDensity;
+                half _SideFade;
             CBUFFER_END
 
             Varyings vert(Attributes input)
@@ -90,7 +92,7 @@ Shader "WoolGame/SoftFog"
 
                 return half4(
                     _Color.rgb,
-                    saturate(_Color.a * density)
+                    saturate(_Color.a * density) * (_SideFade > 0 ? smoothstep(0, _SideFade, min(input.uv.x, 1-input.uv.x)) : 1)
                 );
             }
 

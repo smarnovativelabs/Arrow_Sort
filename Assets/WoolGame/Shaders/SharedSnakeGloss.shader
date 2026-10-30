@@ -4,6 +4,7 @@ Shader "WoolGame/Shared Snake Gloss"
     {
         _BaseMap("Original detail atlas", 2D) = "white" {}
         _TailRamp("Shared ten dark colors", 2D) = "white" {}
+        _SortWhite("Sort power reveal", Range(0,1)) = 0
         _Shine("Surface shine", Range(0,1)) = 0.85
         _NeutralBrightness("Metal and markings", Range(0,1)) = 1
         _DetailStrength("Use original shading detail", Range(0,1)) = 0
@@ -28,6 +29,7 @@ Shader "WoolGame/Shared Snake Gloss"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseMap_ST;
                 float _Shine;
+                float _SortWhite;
                 float _NeutralBrightness;
                 float _DetailStrength;
             CBUFFER_END
@@ -84,7 +86,9 @@ Shader "WoolGame/Shared Snake Gloss"
                 half3 illumination=.75h+.25h*min(light.color,half3(1.2h,1.2h,1.2h))*diffuse;
                 color*=lerp(illumination,half3(1,1,1),gloss);
                 half3 neutral=detail*_NeutralBrightness;
-                return half4(lerp(neutral,color,colored),1);
+                half3 result=lerp(neutral,color,colored);
+                result=lerp(result,half3(.88h,.95h,1)*( .82h+.18h*diffuse),_SortWhite);
+                return half4(result,1);
             }
             ENDHLSL
         }

@@ -11,7 +11,7 @@ namespace WoolGame
         void BindAdPassOffer()
         {
             if(!adPassOffer)return;
-            adPassOffer.Bind(()=>Show("STORE UNAVAILABLE","Purchases are currently unavailable.\nNo payment has been taken.","BACK",Hide));
+            adPassOffer.Bind(()=>BuyShopProduct(WoolIapCatalog.RemoveAds));
         }
         public void ShowAdPassOffer()
         {
@@ -56,3 +56,4 @@ namespace WoolGame
 #endif
     }
 }
+

@@ -1,7 +1,7 @@
 using UnityEngine;
 namespace WoolGame
 {
-    // One serial shot, reusing the authored slot weapons, arrows and shared effects.
+    // Each occupied slot owns an independent shot and recovery sequence.
     public sealed partial class WoolArrowPool : MonoBehaviour
     {
         public WoolAuthoredLayout authoredLayout;
@@ -40,10 +40,12 @@ namespace WoolGame
         Quaternion returnRotation;
         float timer,flightTime;
         int shooter=-1,color;
-        public bool Busy=>stage!=ShotStage.Idle;
-        public bool InFlight=>stage==ShotStage.Travel;
-        public int ShotsLaunched {get;private set;}
-        public int Hits {get;private set;}
+        public bool Busy=>SerialBusy||AnyParallelBusy(false);
+        bool SerialBusy=>stage!=ShotStage.Idle;
+        public bool InFlight=>stage==ShotStage.Travel||AnyParallelBusy(true);
+        public bool AllowFogTargets{get;set;}
+        int localShots;public int ShotsLaunched=>localShots+ParallelCount(false);
+        int localHits;public int Hits=>localHits+ParallelCount(true);
         void Awake()
         {
             if(hitEffect&&!hitEffect.gameObject.scene.IsValid())
@@ -60,7 +62,8 @@ namespace WoolGame
         }
         public void ResetPool()
         {
-            Cancel();ShotsLaunched=Hits=0;
+            Cancel();localShots=localHits=0;AllowFogTargets=false;
+            foreach(var worker in parallelShooters)if(worker)worker.ResetPool();
             if(impactSegment)impactSegment.gameObject.SetActive(false);
             recovering=null;recoveringArrow=null;
             if(impactProperties==null)impactProperties=new MaterialPropertyBlock();
@@ -87,27 +90,37 @@ namespace WoolGame
         }
         public void Dock(int slot,int color,Vector3 position)
         {
+            if(!parallelWorker&&slot>0){Worker(slot).Dock(slot,color,position);return;}
             var binding=authoredLayout.slots[slot];
             foreach(var variant in binding.colors)variant.gameObject.SetActive(false);
             activeBows[slot]=binding.colors[color];activeColors[slot]=color;
+            WoolSceneRig.SetViewLayer(binding.arrival.transform,"Slot View");
+            var smokePosition=position+Vector3.up*.65f;
+            if(sceneRig&&sceneRig.SlotCamera){var camera=sceneRig.SlotCamera;var screen=camera.WorldToScreenPoint(smokePosition);screen.z=camera.nearClipPlane+6;smokePosition=camera.ScreenToWorldPoint(screen);}
+            binding.arrival.transform.position=smokePosition;
+            var smokeMain=binding.arrival.main;smokeMain.cullingMode=ParticleSystemCullingMode.AlwaysSimulate;smokeMain.useUnscaledTime=true;smokeMain.startDelay=0;
+            foreach(var smokeRenderer in binding.arrival.GetComponentsInChildren<ParticleSystemRenderer>(true))smokeRenderer.enabled=true;
             binding.arrival.gameObject.SetActive(true);
             binding.arrival.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             binding.arrival.Play(true);
-            if(dockSound&&audioSource)audioSource.PlayOneShot(dockSound,.3f);
+            if(dockSound&&audioSource)audioSource.PlayOneShot(dockSound,.65f);
         }
         public void Reveal(int slot)
         {
+            if(!parallelWorker&&slot>0){Worker(slot).Reveal(slot);return;}
             activeBows[slot].gameObject.SetActive(true);
             authoredLayout.slots[slot].arrows[activeColors[slot]].gameObject.SetActive(true);
         }
         public void Release(int slot)
         {
+            if(!parallelWorker&&slot>0){if(parallelShooters[slot])parallelShooters[slot].Release(slot);return;}
             if(activeBows[slot])activeBows[slot].gameObject.SetActive(false);
             activeBows[slot]=null;
         }
         public void Launch(int slot,int shotColor,Transform destination)
         {
-            if(Busy||!destination||authoredLayout.IsInFog(destination.position)||!activeBows[slot])return;
+            if(!parallelWorker&&slot>0){var worker=Worker(slot);worker.AllowFogTargets=AllowFogTargets;worker.Launch(slot,shotColor,destination);return;}
+            if(SerialBusy||!destination||(!AllowFogTargets&&authoredLayout.IsInFog(destination.position))||!activeBows[slot])return;
             shooter=slot;color=shotColor;target=destination;weapon=activeBows[slot];
             targetRenderer=target.GetComponent<Renderer>();targetMesh=target.GetComponent<MeshFilter>();
             var binding=authoredLayout.slots[slot];
@@ -123,9 +136,14 @@ namespace WoolGame
         }
         public int Tick(float dt)
         {
-            if(!Busy)return -1;
+            if(!parallelWorker){int first=TickSlot(0,dt);for(int slot=1;slot<parallelShooters.Length;slot++){int hit=TickSlot(slot,dt);if(first<0)first=hit;}return first;}
+            return TickSerial(dt);
+        }
+        int TickSerial(float dt)
+        {
+            if(!SerialBusy)return -1;
             dt=Mathf.Max(0,dt);timer+=dt;
-            if(!target||!target.gameObject.activeInHierarchy||authoredLayout.IsInFog(target.position))
+            if(!target||!target.gameObject.activeInHierarchy||(!AllowFogTargets&&authoredLayout.IsInFog(target.position)))
             {Cancel();return -1;}
             if(stage==ShotStage.Prepare)
             {
@@ -137,10 +155,10 @@ namespace WoolGame
                 if(timer<prepareSeconds)return -1;
                 arrow.SetParent(authoredLayout.environment.transform,true);
                 BeginProjectedFlight();
-                visual.trail.Clear();visual.trail.emitting=true;
+                visual.trail.Clear();visual.trail.emitting=false;visual.trail.Clear();
                 Emit(muzzleEffect,arrow.position-arrow.forward*.35f,ShotColor(),5,.12f);
-                if(shotSound&&audioSource)audioSource.PlayOneShot(shotSound,.5f);
-                ShotsLaunched++;dt=timer-prepareSeconds;timer=0;stage=ShotStage.Travel;
+                if(shotSound&&audioSource)audioSource.PlayOneShot(shotSound,.48f);
+                localShots++;dt=timer-prepareSeconds;timer=0;stage=ShotStage.Travel;
             }
             if(stage==ShotStage.Travel)
             {
@@ -156,7 +174,7 @@ namespace WoolGame
                 if(!AdvanceProjectedFlight(end,dt))return -1;
                 ReturnArrow();
                 PlayHitEffect(end+Vector3.up*.35f,ShotColor());
-                if(hitSound&&audioSource)audioSource.PlayOneShot(hitSound,.35f);
+                if(hitSound&&audioSource)audioSource.PlayOneShot(hitSound,.72f);
                 // Keep the original shot cadence: impact visuals outlive the committed hit.
                 // The visual uses this segment's original FBX mesh, never a gameplay duplicate.
                 if(impactSegment&&impactRenderer)
@@ -169,7 +187,7 @@ namespace WoolGame
                     impactScale=target.lossyScale;impactSegment.transform.localScale=impactScale;
                     impactSegment.gameObject.SetActive(true);impactTime=0;
                 }
-                int result=shooter;Hits++;
+                int result=shooter;localHits++;
                 var recoveryVisual=visual;var loadedArrow=arrow;var recoil=visual.frame.localPosition;
                 Finish();
                 recovering=recoveryVisual;recoveringArrow=loadedArrow;recoveringSlot=result;
@@ -182,6 +200,7 @@ namespace WoolGame
         // Driven by the game controller, including the final hit after the win transition.
         public void TickPresentation(float dt)
         {
+            foreach(var worker in parallelShooters)if(worker)worker.TickPresentation(dt);
             // Editor script reloads can retain the recovery record after its
             // scene transform is replaced. Discard that stale presentation state.
             if(recovering!=null&&!recovering.frame)
@@ -242,7 +261,7 @@ namespace WoolGame
             if(!arrow)return;
             visual.trail.emitting=false;visual.trail.Clear();
             arrow.gameObject.SetActive(false);
-            arrow.SetParent(returnParent,false);WoolSceneRig.SetViewLayer(arrow,"Vehicle View");
+            arrow.SetParent(returnParent,false);WoolSceneRig.SetViewLayer(arrow,"Slot View");
             arrow.localPosition=returnPosition;arrow.localRotation=returnRotation;arrow.localScale=returnScale;
         }
         void Finish()
@@ -253,6 +272,11 @@ namespace WoolGame
         }
         // Cancellation never reports a hit and restores the loaded pose without a return flight.
         public void Cancel()
+        {
+            foreach(var worker in parallelShooters)if(worker)worker.Cancel();
+            CancelLocal();
+        }
+        void CancelLocal()
         {
             if(impactSegment)impactSegment.gameObject.SetActive(false);
             if(recovering!=null)

@@ -11,7 +11,7 @@ namespace WoolGame
         void BindSpecialOffer()
         {
             if(!specialOffer)return;
-            specialOffer.Bind(()=>Show("STORE UNAVAILABLE","Purchases are currently unavailable.\nNo payment has been taken.","BACK",Hide));
+            specialOffer.Bind(()=>BuyShopProduct(WoolIapCatalog.Intro));
         }
         public void ShowSpecialOffer()
         {
@@ -73,5 +73,6 @@ namespace WoolGame
 #endif
     }
 }
+
 
 

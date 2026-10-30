@@ -21,15 +21,15 @@ namespace WoolGame
         Vector3 ProjectedAim(Vector3 destination,Vector3 origin)
         {
             if(!sceneRig||!sceneRig.vehicleCamera)return destination-origin;
-            var camera=sceneRig.vehicleCamera;
+            var camera=sceneRig.SlotCamera;
             return FromScreenUV(camera,ScreenUV(sceneRig.gameCamera,destination),camera.WorldToViewportPoint(origin).z)-origin;
         }
         void BeginProjectedFlight()
         {
             flightProgress=0;
             flightWorldScale=arrow.lossyScale;
-            flightDuration=Mathf.Clamp(Vector3.Distance(arrow.position,target.position)/arrowSpeed,.28f,.65f);
-            flightCamera=sceneRig?sceneRig.vehicleCamera:null;
+            flightDuration=Mathf.Clamp(Vector3.Distance(arrow.position,target.position)/arrowSpeed,.36f,.75f);
+            flightCamera=sceneRig?sceneRig.SlotCamera:null;
             if(flightCamera)
             {
                 flightStartScreen=ScreenUV(flightCamera,arrow.position);
@@ -41,10 +41,12 @@ namespace WoolGame
                     for(int i=1;i<renderers.Length;i++)bounds.Encapsulate(renderers[i].bounds);
                     float pixelsPerUnit=flightCamera.pixelHeight/(2*flightCamera.orthographicSize);
                     float pixels=bounds.size.magnitude*pixelsPerUnit;
-                    flightWorldScale*=36f*(Screen.width/900f)/Mathf.Max(1,pixels);
+                    float referenceWidth=sceneRig.GameplayFrame.width>0?sceneRig.GameplayFrame.width:Screen.width;
+                    flightWorldScale*=92f*(referenceWidth/900f)/Mathf.Max(1,pixels);
                 }
             }
-            WoolSceneRig.SetViewLayer(arrow,"Vehicle View");
+            WoolSceneRig.SetViewLayer(arrow,"Slot View");
+            if(muzzleEffect)WoolSceneRig.SetViewLayer(muzzleEffect.transform,"Slot View");
         }
         bool AdvanceProjectedFlight(Vector3 end,float dt)
         {
@@ -54,17 +56,16 @@ namespace WoolGame
                 return (arrow.position-end).sqrMagnitude<=.0025f;
             }
             // World-space trails cannot span the two camera coordinate systems.
-            visual.trail.emitting=false;
-            visual.trail.Clear();
+            visual.trail.emitting=false;visual.trail.Clear();
             flightProgress=Mathf.Min(1,flightProgress+dt/flightDuration);
             var destination=ScreenUV(sceneRig.gameCamera,end);
             var screen=Vector2.Lerp(flightStartScreen,destination,flightProgress);
-            var camera=screen.y>=sceneRig.gameCamera.rect.yMin?sceneRig.gameCamera:sceneRig.vehicleCamera;
+            var camera=sceneRig.CameraForScreenPoint(new Vector2(screen.x*Screen.width,screen.y*Screen.height));
             if(camera!=flightCamera)
             {
                 // A trail cannot join points expressed in two different projections.
                 visual.trail.Clear();flightCamera=camera;
-                WoolSceneRig.SetViewLayer(arrow,camera==sceneRig.gameCamera?"Rescue View":"Vehicle View");
+                WoolSceneRig.SetViewLayer(arrow,camera==sceneRig.gameCamera?"Rescue View":camera==sceneRig.SlotCamera?"Slot View":"Vehicle View");
             }
             // This is a screen-projected flight between two independent world views.
             // Target depth would bury its early upper-view positions below the ground.
@@ -74,7 +75,7 @@ namespace WoolGame
             var direction=FromScreenUV(camera,destination,depth)-position;
             if(direction.sqrMagnitude>.000001f)arrow.rotation=Quaternion.LookRotation(direction,-camera.transform.forward);
             arrow.position=position;
-            float screenScale=(camera.orthographicSize/camera.rect.height)/(sceneRig.vehicleCamera.orthographicSize/sceneRig.vehicleCamera.rect.height);
+            float screenScale=(camera.orthographicSize/camera.rect.height)/(sceneRig.SlotCamera.orthographicSize/sceneRig.SlotCamera.rect.height);
             var parentScale=arrow.parent.lossyScale;
             var scale=flightWorldScale*screenScale;
             arrow.localScale=new Vector3(scale.x/parentScale.x,scale.y/parentScale.y,scale.z/parentScale.z);

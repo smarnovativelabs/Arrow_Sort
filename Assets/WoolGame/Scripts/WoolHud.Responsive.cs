@@ -13,7 +13,7 @@ namespace WoolGame
             foreach(var graphic in GetComponentsInChildren<Graphic>(true))
             {
                 if(graphic.GetComponent<Button>())continue;
-                bool blocker=graphic.gameObject==modal||graphic.gameObject==menu||graphic.gameObject==launch||graphic.gameObject==profilePanel||graphic.gameObject==dailyPanel||graphic.gameObject==spinPanel;
+                bool blocker=graphic.gameObject==modal||graphic.gameObject==menu||graphic.gameObject==launch||graphic.gameObject==profilePanel||graphic.gameObject==dailyPanel||graphic.gameObject==spinPanel||graphic.gameObject==adLoadingOverlay;
                 bool scroll=graphic.GetComponent<RectMask2D>()||graphic.GetComponent<Mask>()||graphic.GetComponent<ScrollRect>();
                 graphic.raycastTarget=blocker||scroll||graphic.GetComponent<TMPro.TMP_InputField>()||(adPassOffer&&graphic==adPassOffer.dimmer)||(specialOffer&&graphic==specialOffer.dimmer)||(luckySpin&&graphic==luckySpin.dimmer)||(profileView&&graphic==profileView.dimmer);
             }

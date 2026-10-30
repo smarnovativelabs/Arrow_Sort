@@ -14,30 +14,48 @@ namespace WoolGame
         GroundSplinePath route;
         Transform board;
         WoolAuthoredLayout layout;
+        Renderer[] motherGeometry,babyGeometry;
         float distance,target,clock,firstStop,secondStop;
+        float safeDistance,safeTarget;int safeStage;bool safeWalking;
         float motherWait,babyWait,motherJumpTime,babyJumpTime;
         bool motherJumping,babyJumping;
         int motherJumps,babyJumps;
         public bool MotherCaught {get;private set;}
         public bool BabyCaught {get;private set;}
         public bool BothCaught=>MotherCaught&&BabyCaught;
+        public event System.Action DuckCaught;
         bool celebrating;
         public int EscapeStage {get;private set;}
         public bool Walking {get;private set;}
         public float MotherDistance=>distance;
         public float BabyDistance=>Mathf.Min(route.Length,distance+babyLead);
+        public float MotherCaptureDistance=>BodyCentreDistance(motherGeometry,MotherDistance);
+        public float BabyCaptureDistance=>BodyCentreDistance(babyGeometry,BabyDistance);
+        float BodyCentreDistance(Renderer[] geometry,float pathDistance)
+        {
+            if(!route||!board||geometry==null||geometry.Length==0)return pathDistance;
+            var bounds=geometry[0].bounds;
+            for(int i=1;i<geometry.Length;i++)bounds.Encapsulate(geometry[i].bounds);
+            // Imported duck pivots sit at the feet; the visible body can be offset.
+            var offset=board.InverseTransformPoint(bounds.center)-route.Position(pathDistance);
+            return pathDistance+Vector3.Dot(offset,route.Tangent(pathDistance));
+        }
+        public void ShiftRouteOrigin(float delta){firstStop+=delta;secondStop+=delta;distance+=delta;target+=delta;}
         public void ResetForLevel(GroundSplinePath path,Transform world,WoolAuthoredLayout authored)
         {
             route=path;board=world;layout=authored;EscapeStage=0;Walking=false;clock=0;
+            if(motherGeometry==null)motherGeometry=motherModel.GetComponentsInChildren<Renderer>(true);
+            if(babyGeometry==null)babyGeometry=babyModel.GetComponentsInChildren<Renderer>(true);
             float end=Mathf.Max(0,route.Length-babyLead);
-            firstStop=FindClearStop(route.Length*.5f,route.Length*.2f,end-2);
+            firstStop=FindClearStop(route.EntryExtension+route.PlayableLength*.5f,route.EntryExtension+route.PlayableLength*.2f,end-2);
             secondStop=FindClearStop(Mathf.Lerp(firstStop,end,.5f),firstStop+.8f,end-.8f);
             distance=target=firstStop;MotherCaught=BabyCaught=celebrating=false;mother.gameObject.SetActive(true);baby.gameObject.SetActive(true);
             motherJumping=babyJumping=false;motherJumps=babyJumps=0;motherWait=1.3f;babyWait=2.2f;
             gameObject.SetActive(true);mother.localScale=baby.localScale=Vector3.one;
             Present(0);
+            RememberSafePoint();
         }
-        public void Tick(float dt,float dragonDistance,float dragonSpeed)
+        public void Tick(float dt,float dragonDistance,float dragonSpeed,float mouthLead=.35f)
         {
             if(!route)return;
             if(!Walking&&EscapeStage<2&&distance-dragonDistance<=approachDistance)
@@ -52,14 +70,17 @@ namespace WoolGame
                 distance=Mathf.MoveTowards(distance,target,dt*Mathf.Max(walkSpeed,dragonSpeed*4)*.5f);
                 if(Mathf.Abs(distance-target)<.001f){Walking=false;clock=0;motherJumping=babyJumping=false;motherWait=1.1f;babyWait=1.9f;}
             }
-            // The head centre passes halfway across each duck before it disappears.
+            Present(dt);
+            if(!MotherCaught&&!BabyCaught)RememberSafePoint();
+            // The mouth plane reaches the duck's centre: half its body is inside.
             if(EscapeStage==2&&!Walking)
             {
-                if(dragonDistance+.35f>=MotherDistance+.2f){MotherCaught=true;mother.gameObject.SetActive(false);}
-                if(dragonDistance+.35f>=BabyDistance+.2f){BabyCaught=true;baby.gameObject.SetActive(false);}
+                if(!MotherCaught&&dragonDistance+mouthLead>=MotherCaptureDistance){MotherCaught=true;mother.gameObject.SetActive(false);DuckCaught?.Invoke();}
+                if(!BabyCaught&&dragonDistance+mouthLead>=BabyCaptureDistance){BabyCaught=true;baby.gameObject.SetActive(false);DuckCaught?.Invoke();}
             }
-            Present(dt);
         }
+        void RememberSafePoint(){safeDistance=distance;safeTarget=target;safeStage=EscapeStage;safeWalking=Walking;}
+        public void RestoreLastSafePoint(){if(!route)return;distance=safeDistance;target=safeTarget;EscapeStage=safeStage;Walking=safeWalking;MotherCaught=BabyCaught=celebrating=false;clock=0;motherJumping=babyJumping=false;motherWait=1.1f;babyWait=1.9f;gameObject.SetActive(true);mother.gameObject.SetActive(true);baby.gameObject.SetActive(true);mother.localScale=baby.localScale=Vector3.one;Present(0);}
         public void Celebrate(float dt)
         {
             if(!celebrating){clock=0;celebrating=true;}
@@ -80,7 +101,7 @@ namespace WoolGame
         }
         static void Sample(GameObject model,AnimationClip clip,float time)
         {
-            if(model&&clip)clip.SampleAnimation(model,Mathf.Repeat(time,clip.length));
+            if(model&&clip){var driver=model.GetComponent<WoolDuckAnimationDriver>();if(!driver)driver=model.AddComponent<WoolDuckAnimationDriver>();driver.Sample(clip,time);}
         }
         static void Idle(GameObject model,AnimationClip jump,AnimationClip eat,float dt,ref float wait,ref float time,ref bool animating,ref int cycles,float rest)
         {
