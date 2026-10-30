@@ -32,7 +32,7 @@ public sealed class WoolLosePresentation:MonoBehaviour {
  public void Open(bool canContinue,Action resume,Action restart,Action goHome){
  RestoreRetryLabel();
  clock=0;selected=false;continueButton.gameObject.SetActive(canContinue);
- if(offerPage){offerPage.SetActive(canContinue);retryPage.SetActive(!canContinue);if(backdrop)backdrop.color=Color.black;balance.text=WoolCoinText.Format(WoolProgress.Coins);coinButton.interactable=WoolProgress.Coins>=ClearCost;coinButton.onClick.RemoveAllListeners();coinButton.onClick.AddListener(()=>{if(selected)return;selected=true;coinButton.interactable=false;resumeCoins?.Invoke();});cancelOffer.onClick.RemoveAllListeners();cancelOffer.onClick.AddListener(()=>{if(selected)return;offerPage.SetActive(false);retryPage.SetActive(true);if(backdrop)backdrop.color=Color.black;});}
+ if(offerPage){offerPage.SetActive(canContinue);retryPage.SetActive(!canContinue);if(backdrop)backdrop.color=Color.black;balance.text=WoolCoinText.Format(WoolProgress.Coins);coinButton.interactable=true;coinButton.onClick.RemoveAllListeners();coinButton.onClick.AddListener(()=>{if(selected)return;selected=true;coinButton.interactable=false;resumeCoins?.Invoke();});cancelOffer.onClick.RemoveAllListeners();cancelOffer.onClick.AddListener(()=>{if(selected)return;offerPage.SetActive(false);retryPage.SetActive(true);if(backdrop)backdrop.color=Color.black;});}
  Bind(continueButton,resume);Bind(retry,restart);Bind(home,goHome);Fit();
  }
  public Action resumeCoins;
@@ -42,7 +42,7 @@ public sealed class WoolLosePresentation:MonoBehaviour {
  if(background)background.gameObject.SetActive(false);}
  void Update(){Fit();clock+=Mathf.Min(Time.unscaledDeltaTime,.05f);hero.localRotation=Quaternion.Euler(0,0,Mathf.Sin(clock*1.8f)*1.2f);
  if(backdrop)backdrop.color=Color.black;
- if(offerPage&&offerPage.activeSelf){int coins=WoolProgress.Coins;balance.text=WoolCoinText.Format(coins);if(affordability){affordability.text=coins>=ClearCost?"Enough coins to clear slots":"Need "+WoolCoinText.Format(ClearCost-coins)+" more coins";affordability.color=coins>=ClearCost?new Color(.5f,1,.45f):new Color(1,.72f,.42f);}coinButton.interactable=!selected&&coins>=ClearCost;}
+ if(offerPage&&offerPage.activeSelf){int coins=WoolProgress.Coins;balance.text=WoolCoinText.Format(coins);if(affordability){affordability.text=coins>=ClearCost?"Enough coins to clear slots":"Need "+WoolCoinText.Format(ClearCost-coins)+" more coins";affordability.color=coins>=ClearCost?new Color(.5f,1,.45f):new Color(1,.72f,.42f);}coinButton.interactable=!selected;}
  if(animatedCharacters&&characterFrames!=null&&characterFrames.Length>0)animatedCharacters.sprite=characterFrames[(int)(clock*8)%characterFrames.Length];
  if(smilingDragon){smilingDragon.localRotation=Quaternion.Euler(0,0,Mathf.Sin(clock*2.2f)*3);smilingDragon.localScale=new Vector3(1,1+Mathf.Sin(clock*3)*.025f,1);}
  for(int i=0;i<tears.Length;i++){float t=Mathf.Repeat(clock*.5f+i*.25f,1);var im=tears[i];im.rectTransform.anchoredPosition=eyePositions[i%eyePositions.Length]+new Vector2((i%2==0?-1:1)*t*5,-(t<.7f?t/.7f*40:40+Mathf.Pow((t-.7f)/.3f,2)*35));im.rectTransform.localScale=Vector3.one*(.5f+Mathf.Sin(t*Mathf.PI)*.5f);im.color=new Color(.85f,.96f,1,Mathf.Min(1,t*12)*Mathf.Clamp01((1-t)*6)*.88f);}

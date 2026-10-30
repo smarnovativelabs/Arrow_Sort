@@ -7,7 +7,7 @@ namespace WoolGame
     {
         public static bool PermanentNoAds {get{EnsureLoaded();return data.permanentNoAds;}}
         public static bool OwnsProduct(string id){EnsureLoaded();var product=WoolIapCatalog.Find(id);return product!=null&&product.purchaseOnce&&(id==WoolIapCatalog.RemoveAds&&data.permanentNoAds||data.ownedProducts!=null&&data.ownedProducts.Contains(id));}
-        // Called only after a store receipt has been validated. Save the grant and token together.
+        // Called only after a completed store callback and receipt consistency checks. Save the grant and token together.
         internal static bool DeliverPurchase(string productId,string transactionKey,bool restored=false)
         {
             var p=WoolIapCatalog.Find(productId);

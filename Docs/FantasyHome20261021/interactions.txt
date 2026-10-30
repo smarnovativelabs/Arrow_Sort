@@ -1,9 +1,0 @@
-Profile: PASS
-Settings: PASS
-Tasks: PASS
-Lucky Spin: PASS
-Rescue Shop: PASS
-Ad Pass: PASS
-Shop: PASS
-Map: PASS
-Home: PASS

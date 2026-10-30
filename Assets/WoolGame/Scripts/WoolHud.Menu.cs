@@ -108,7 +108,7 @@ namespace WoolGame
             if(homeLock)homeLock.gameObject.SetActive(false);RefreshDifficulty(unlockedLevel);Navigate(2);
         }
         public void CloseMenu(){ResetWalletShop();safe.gameObject.SetActive(true);CloseEngagement();menu.SetActive(false);if(profilePanel)profilePanel.SetActive(false);header.gameObject.SetActive(true);footer.gameObject.SetActive(true);hint.gameObject.SetActive(false);if(bannerArea)bannerArea.gameObject.SetActive(false);}
-        public void ShowShop(){CloseEngagement();if(mapPage)mapPage.gameObject.SetActive(false);if(profilePanel)profilePanel.SetActive(false);homePage.gameObject.SetActive(false);if(cardsPage)cardsPage.gameObject.SetActive(false);shopPage.gameObject.SetActive(true);SelectTab("Shop");}
+        public void ShowShop(){SetDanger(requestedDangerIntensity,requestedDangerTime);CloseEngagement();if(mapPage)mapPage.gameObject.SetActive(false);if(profilePanel)profilePanel.SetActive(false);homePage.gameObject.SetActive(false);if(cardsPage)cardsPage.gameObject.SetActive(false);shopPage.gameObject.SetActive(true);SelectTab("Shop");}
         void ShowCards()
         {
             homePage.gameObject.SetActive(false);shopPage.gameObject.SetActive(false);cardsPage.gameObject.SetActive(true);

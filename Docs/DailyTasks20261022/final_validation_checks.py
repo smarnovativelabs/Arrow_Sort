@@ -1,4 +1,0 @@
-from pathlib import Path
-p=Path('Docs/DailyTasks20261022/ValidateDailyTasks.cs');s=p.read_text(encoding='utf-8').replace('type.GetField("dailyChestCredits").SetValue(campaign,675);','type.GetField("dailyChestCredits").SetValue(campaign,675);type.GetField("dailyChestCollected").SetValue(campaign,false);').replace('"chest awards 500 and consumes 700 credits");','"chest awards 500 and consumes 700 credits");Check(v.chestImage.sprite==v.chestOpen&&v.chestGlow.activeSelf,"collected main chest stays open and shines");')
-s=s.replace('Check(tested>=9,','v.fullBackground.rectTransform.GetWorldCorners(corners);var bgMin=RectTransformUtility.WorldToScreenPoint(null,corners[0]);var bgMax=RectTransformUtility.WorldToScreenPoint(null,corners[2]);Check(bgMin.x<=.5f&&bgMin.y<=.5f&&bgMax.x>=w-.5f&&bgMax.y>=h-.5f,w+"x"+h+" background covers screen including unsafe edges");\n                Check(tested>=9,')
-p.write_text(s,encoding='utf-8')

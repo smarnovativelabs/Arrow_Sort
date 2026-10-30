@@ -22,13 +22,43 @@ public sealed class WoolCoinWallet:MonoBehaviour {
 }
 public sealed partial class WoolHud {
  public WoolCoinWallet HomeWallet=>homeCoins?homeCoins.GetComponentInParent<WoolCoinWallet>(true):null;
- bool walletShopOpen;Button walletShopBack;
+ bool walletShopOpen;Button walletShopBack;System.Action walletShopReturn;
+ bool walletPriorModal,walletPriorHeader,walletPriorFooter,walletPriorUtility,walletPriorHint;
  void ShowWalletShop(){
- if(menu.activeSelf){CloseEngagement();Hide();ShowShop();var shop=shopPage.GetComponent<WoolShopView>();if(shop)shop.FocusCoinPacks();return;}
- bool priorModal=modal.activeSelf;utilityPanel.Hide();modal.SetActive(false);walletShopOpen=true;menu.SetActive(true);header.gameObject.SetActive(false);footer.gameObject.SetActive(false);ShowShop();
- if(!walletShopBack){var root=Rect("Coin shop return controls",transform,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero);var layer=root.gameObject.AddComponent<Canvas>();layer.overrideSorting=true;layer.sortingOrder=510;root.gameObject.AddComponent<GraphicRaycaster>();walletShopBack=ButtonAt("Return from coin shop",root,"BACK TO GAME",new Vector2(340,70),Vector2.zero,null);var im=walletShopBack.GetComponent<Image>();im.sprite=skin[1];im.color=Color.white;}
- var rt=(RectTransform)walletShopBack.transform;rt.anchorMin=rt.anchorMax=new Vector2(.5f,1);rt.anchoredPosition=new Vector2(0,-225);walletShopBack.gameObject.SetActive(true);walletShopBack.onClick.RemoveAllListeners();walletShopBack.onClick.AddListener(()=>{walletShopOpen=false;walletShopBack.gameObject.SetActive(false);CloseMenu();modal.SetActive(priorModal);});var view=shopPage.GetComponent<WoolShopView>();if(view)view.FocusCoinPacks();
+  if(walletShopOpen)return;
+  if(menu.activeSelf){CloseEngagement();Hide();ShowShop();var shop=shopPage.GetComponent<WoolShopView>();if(shop)shop.FocusCoinPacks();return;}
+  ShowGameplayCoinShop();
  }
- void ResetWalletShop(){walletShopOpen=false;if(walletShopBack)walletShopBack.gameObject.SetActive(false);}
+ public void ShowGameplayCoinShop(System.Action onReturn=null){
+  if(walletShopOpen)return;
+  walletPriorModal=modal.activeSelf;walletPriorHeader=header.gameObject.activeSelf;
+  walletPriorFooter=footer.gameObject.activeSelf;walletPriorHint=hint.gameObject.activeSelf;
+  walletPriorUtility=utilityPanel&&utilityPanel.gameObject.activeSelf;walletShopReturn=onReturn;
+  if(utilityPanel)utilityPanel.Hide();modal.SetActive(false);walletShopOpen=true;
+  menu.SetActive(true);header.gameObject.SetActive(false);footer.gameObject.SetActive(false);hint.gameObject.SetActive(false);ShowShop();FitUnifiedNavigation();
+  if(!walletShopBack){
+   var root=Rect("Coin shop return controls",transform,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero);
+   var layer=root.gameObject.AddComponent<Canvas>();layer.overrideSorting=true;layer.sortingOrder=510;
+   root.gameObject.AddComponent<GraphicRaycaster>();
+   walletShopBack=ButtonAt("Close gameplay coin shop",root,"\u00D7",Vector2.one*88,Vector2.zero,CloseGameplayCoinShop);
+   var image=walletShopBack.GetComponent<Image>();image.sprite=skin[3];image.color=Color.white;
+   var label=walletShopBack.GetComponentInChildren<TMP_Text>();label.fontSize=64;label.alignment=TextAlignmentOptions.Center;
+  }
+  var rt=(RectTransform)walletShopBack.transform;rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=new Vector2(.5f,.5f);
+  float scale=GetComponent<Canvas>().scaleFactor;var area=CurrentSafeArea;
+  rt.anchoredPosition=new Vector2(64+area.xMin/Mathf.Max(.01f,scale),-64-(Screen.height-area.yMax)/Mathf.Max(.01f,scale));
+  walletShopBack.gameObject.SetActive(true);walletShopBack.transform.parent.SetAsLastSibling();
+  var view=shopPage.GetComponent<WoolShopView>();if(view)view.FocusCoinPacks();
+ }
+ public void CloseGameplayCoinShop(){
+  if(!walletShopOpen)return;
+  var returned=walletShopReturn;walletShopReturn=null;walletShopOpen=false;
+  walletShopBack.gameObject.SetActive(false);if(utilityPanel)utilityPanel.Hide();menu.SetActive(false);
+  header.gameObject.SetActive(walletPriorHeader);footer.gameObject.SetActive(walletPriorFooter);hint.gameObject.SetActive(walletPriorHint);
+  modal.SetActive(returned==null&&walletPriorModal);
+  if(returned!=null)returned();else if(walletPriorUtility&&utilityPanel)utilityPanel.gameObject.SetActive(true);
+  gameplayInputBlockedThroughFrame=Time.frameCount+1;RefreshWalletLabels();SetDanger(requestedDangerIntensity,requestedDangerTime);
+ }
+ void ResetWalletShop(){walletShopOpen=false;walletShopReturn=null;if(walletShopBack)walletShopBack.gameObject.SetActive(false);}
 }
 }

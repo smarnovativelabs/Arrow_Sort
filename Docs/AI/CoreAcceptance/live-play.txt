@@ -1,6 +1,0 @@
-Level 50 won; elapsed=157.80s, moves=45
-Pool/scene identities preserved: True
-Persistent campaign, currency and legacy statistics unchanged: True
-PASS 1 levels completed through live selection; peak concurrent collectors=2
-Active render samples=3088, max batches=62, max tris=231761, max SetPass=22
-Editor frame ms median=16.79, p95=25.45. Editor measurements are not device profiling.

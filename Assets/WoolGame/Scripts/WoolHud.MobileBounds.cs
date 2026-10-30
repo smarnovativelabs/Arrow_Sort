@@ -10,7 +10,7 @@ namespace WoolGame { public sealed partial class WoolHud {
  }
 
  readonly Vector3[] mobileCorners=new Vector3[4];
- void LateUpdate(){ClampMobileControls();RefreshTutorialOverlays();RefreshGameplayRule();}
+ void LateUpdate(){ClampMobileControls();RefreshTutorialOverlays();RefreshGameplayRule();SetDanger(requestedDangerIntensity,requestedDangerTime);}
  internal void ClampMobileControls(){
  if(header&&header.gameObject.activeInHierarchy&&canvas)foreach(string name in new[]{"Pause","Level","Gameplay speed"}){var rt=header.Find(name) as RectTransform;if(rt&&rt.gameObject.activeInHierarchy)ClampHeaderControl(rt);}
 

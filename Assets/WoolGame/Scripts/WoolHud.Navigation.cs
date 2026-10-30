@@ -12,7 +12,7 @@ namespace WoolGame
             var homeMotion=referenceHome?referenceHome.GetComponent<WoolHomePresentation>():null;
             if(homeMotion&&homeMotion.navigation)homeMotion.navigation.gameObject.SetActive(false);
             if(skywayMap&&skywayMap.navigation)skywayMap.navigation.gameObject.SetActive(false);
-            menuNavigation.SetVisible(menu.activeSelf&&(homePage.gameObject.activeSelf||shopPage.gameObject.activeSelf||(mapPage&&mapPage.gameObject.activeSelf)));
+            menuNavigation.SetVisible(!walletShopOpen&&menu.activeSelf&&(homePage.gameObject.activeSelf||shopPage.gameObject.activeSelf||(mapPage&&mapPage.gameObject.activeSelf)));
         }
 #if UNITY_EDITOR
         public string AuthorUnifiedNavigation(Sprite[] states,Sprite headerFrame)

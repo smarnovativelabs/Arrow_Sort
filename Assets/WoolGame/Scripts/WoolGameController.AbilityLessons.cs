@@ -19,17 +19,8 @@ public sealed partial class WoolGameController {
   }
   hud.PointLevelTutorialAt(center,true,size,pointingAction);
  }
- IEnumerator BeginAbilityLesson(){int kind=Array.IndexOf(WoolBoosters.UnlockLevels,level.Number);if(kind<0||WoolProgress.AbilityLessonSeen(kind)||WoolProgress.HasCompleted(level.Number))yield break;
- if(WoolProgress.AbilityCount(kind)<=0){WoolProgress.CompleteAbilityLesson(kind);if(kind==1)WoolProgress.SetRemovalLessonTargetPending(false);yield break;}
- while(entering||hud.ModalVisible||(kind==2&&VisibleAbilitySections()<Mathf.Min(8,level.Yarn.Count))){if(ended||phase==Phase.Menu)yield break;yield return null;}
- if(WoolProgress.AbilityCount(kind)<=0){WoolProgress.CompleteAbilityLesson(kind);yield break;}lessonKind=kind;
- if(ended)yield break;
- if(kind==1)lessonTarget=FindLessonBlocker();
- paused=true;
- if(kind==1&&WoolProgress.RemovalLessonTargetPending){paused=false;ActivateBooster(1,0,true);paused=true;ShowRemovalLessonTarget();yield break;}
- string[] copy={"Tap to add a slot","Tap to remove a vehicle","Match colours to ready vehicles","Attack wool through the fog"};
- hud.ShowAbilityGuide(kind,copy[kind],()=>{hud.HideAbilityGuide();paused=false;if(kind==0)pendingSlot=4;ActivateBooster(kind,0,true);if(kind==1){WoolProgress.SetRemovalLessonTargetPending(true);paused=true;ShowRemovalLessonTarget();}});
- }
+ // Unlocks remain available without pausing play or telling the player to use an ability.
+ IEnumerator BeginAbilityLesson(){yield break;}
  bool AnyVehicleMovingForLesson(){foreach(var bow in active)if(bow!=null&&!bow.arrived)return true;return false;}
  void DockLessonVehicle(int index,int slot){if(index<0||index>=level.Tiles.Count)return;var tile=level.Tiles[index];tile.selected=true;active[slot]=new ActiveCrossbow{index=index,slot=slot,ammo=tile.ammo,initialAmmo=tile.ammo,arrived=true,arrivalOrder=++collectionSequence};tileViews[index].gameObject.SetActive(false);rig.arrowPool.Dock(slot,tile.color,world.TransformPoint(Slot(slot)));rig.arrowPool.Reveal(slot);UpdateCrossbowCounts();}
  int FindLessonBlocker(){for(int i=0;i<level.Tiles.Count;i++)for(int j=0;j<level.Tiles.Count;j++)if(i!=j&&WoolLevel.BlocksPath(level.Tiles[j],level.Tiles[i],level.Tiles[j].direction))return i;return level.Solution[0];}

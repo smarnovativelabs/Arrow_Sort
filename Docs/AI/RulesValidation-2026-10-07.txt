@@ -1,1 +1,0 @@
-PASS: 200 deterministic levels; tutorial layout/order; full legal escape witnesses; capacity balance; invalid/repeated selection; arbitrary removal; color-preserving sort. 42646 rule assertions.

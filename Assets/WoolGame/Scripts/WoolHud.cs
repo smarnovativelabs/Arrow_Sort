@@ -186,7 +186,7 @@ namespace WoolGame
             primary.onClick.RemoveAllListeners();if(action!=null)primary.onClick.AddListener(()=>action());
             primary.interactable=action!=null;secondary.gameObject.SetActive(other!=null);
             secondaryText.text=other;secondary.onClick.RemoveAllListeners();if(secondaryAction!=null)secondary.onClick.AddListener(()=>secondaryAction());
-            close.gameObject.SetActive(dismissed!=null);close.onClick.RemoveAllListeners();if(dismissed!=null)close.onClick.AddListener(()=>dismissed());ApplyModalSkin();ApplyUnlockPresentation(title,button,other);ApplyServiceMessage(title);FitReleaseUI();
+            close.gameObject.SetActive(dismissed!=null);close.onClick.RemoveAllListeners();if(dismissed!=null)close.onClick.AddListener(()=>dismissed());ApplyModalSkin();ApplyUnlockPresentation(title,button,other);ApplyServiceMessage(title);FitReleaseUI();if(power)modal.GetComponent<Image>().color=new Color(0,0,0,.32f);
         }
         // Offers can live outside Portrait composition, so sibling order alone is insufficient.
         void ApplyServiceMessage(string title)

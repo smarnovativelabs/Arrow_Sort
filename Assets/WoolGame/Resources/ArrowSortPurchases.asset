@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0eef2a206ec1a65408f190d226671b78, type: 3}
   m_Name: ArrowSortPurchases
   m_EditorClassIdentifier: Assembly-CSharp::WoolGame.WoolIapConfiguration
-  productsPublished: 0
+  productsPublished: 1
   googlePlayPublicKey: 

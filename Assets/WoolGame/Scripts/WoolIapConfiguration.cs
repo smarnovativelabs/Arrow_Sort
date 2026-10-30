@@ -3,7 +3,6 @@ namespace WoolGame {
 [CreateAssetMenu(menuName="Arrow Sort/Google Play purchases")]
 public sealed class WoolIapConfiguration:ScriptableObject {
  [Tooltip("Enable after the matching products are active in Google Play Console.")] public bool productsPublished;
- [TextArea(3,8),Tooltip("Google Play Console licensing Base64 RSA public key, not a Firebase API key.")] public string googlePlayPublicKey="";
 }
 public sealed class WoolIapProduct {
  public readonly string id,name,displayPrice,description,tag;public readonly int coins,powers;public readonly bool removeAds,purchaseOnce;

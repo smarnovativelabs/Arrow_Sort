@@ -28,7 +28,7 @@ namespace WoolGame
                     filter.sharedMesh=directionArrow;
                     filter.transform.localScale=Vector3.one;
                     filter.transform.localRotation=Quaternion.identity;
-                    filter.transform.localPosition=new Vector3(body.center.x,body.max.y+.055f,body.center.z);
+                    filter.transform.localPosition=new Vector3(body.center.x,body.max.y-body.size.y*.088f,body.center.z);
                     filter.GetComponent<MeshRenderer>().sharedMaterials=new[]{smallArrowOutline,smallArrowFace};
                 }
             }

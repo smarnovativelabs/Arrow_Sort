@@ -9,7 +9,7 @@ namespace WoolGame
         {
             var data=ScriptableObject.CreateInstance<WoolLevelDefinition>();
             data.hideFlags=HideFlags.DontSave;data.name="Opening level "+number;data.number=number;
-            data.generatorRevision=6;data.route=(Vector3[])route.Clone();
+            data.generatorRevision=9;data.route=(Vector3[])route.Clone();
             data.openSlots=4;data.colorCount=number==1?3:number==2?5:6;data.difficulty=DifficultyFor(number);
             data.boardRotation=0;data.boardScale=1;data.hasRail=false;data.containerPositions=Array.Empty<Vector2>();
             data.advanceSpeed=number==1?.18f:number==2?.22f:.27f;
@@ -36,14 +36,14 @@ namespace WoolGame
                 if(tiles.Count!=target)throw new InvalidOperationException("Opening board vehicle count mismatch.");
                 var witness=MakeWitness(tiles,random,WoolDifficulty.Easy,false,Array.Empty<Vector2>());
                 foreach(var tile in witness)order.Add(tiles.IndexOf(tile));
-                for(int i=0;i<tiles.Count;i++)tiles[i].color=Palette[(i+number)%data.colorCount];
+                for(int i=0;i<order.Count;i++)tiles[order[i]].color=Palette[(i+number)%data.colorCount];
                 data.displayName=number==2?"Practice your rescue":"Ready for a challenge";
                 data.layoutStyle="Opening practice";data.difficultyNote="A solvable "+target+"-vehicle board without depots or rail.";
             }
             var colors=new List<int>();
             foreach(int i in order)tiles[i].ammo=WoolLevel.Capacity(tiles[i].size);
             int batch=number==1?1:3;data.snakeBatchSize=batch;
-            for(int start=0;start<order.Count;start+=batch){int end=Math.Min(order.Count,start+batch);int max=0;for(int j=start;j<end;j++)max=Math.Max(max,tiles[order[j]].ammo);for(int n=0;n<max;n++)for(int j=start;j<end;j++)if(n<tiles[order[j]].ammo)colors.Add(tiles[order[j]].color);}
+            BuildOpeningGroups(colors,tiles,order,batch,number);
             data.vehicles=tiles.ToArray();data.tutorialOrder=order.ToArray();data.yarn=colors.ToArray();
             var rules=new WoolLevel(data);for(int i=0;i<tiles.Count;i++)if(rules.CanSelect(i))data.initialLegalMoves++;
             data.chapterName="Rescue Trail";return data;

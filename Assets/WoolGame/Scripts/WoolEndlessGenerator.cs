@@ -126,29 +126,7 @@ namespace WoolGame
                 if(cars[i].size<WoolSize.Large){int old=cars[i].ammo;cars[i].size++;cars[i].ammo=WoolLevel.Capacity(cars[i].size);total+=cars[i].ammo-old;}
             for(int i=cars.Length-1;total>400;i=(i+cars.Length-1)%cars.Length)
                 if(cars[i].size>WoolSize.Small){int old=cars[i].ammo;cars[i].size--;cars[i].length=Math.Min(cars[i].length,cars[i].source==WoolVehicleSource.Board?Cell*((int)cars[i].size+2)-.09f:cars[i].size==WoolSize.Small?.78f:1.02f);cars[i].ammo=WoolLevel.Capacity(cars[i].size);total+=cars[i].ammo-old;}
-            if(data.number>=5){ApplyFiveSlotChallenge(data,total);return;}
-            int scarce=(data.number%10)*7%10,count=data.difficulty==WoolDifficulty.Hard?3:2;
-            foreach(var car in cars)if(car.color==scarce)car.color=(scarce+1+(data.number%8))%10;
-            cars[order[0]].color=scarce;
-            for(int i=1;i<count;i++)cars[order[order.Length-i]].color=scarce;
-            var regular=new List<int>();int rareAmmo=0;
-            foreach(int index in order){if(cars[index].color==scarce)rareAmmo+=cars[index].ammo;else regular.Add(index);}
-            var result=new List<int>(total);
-            // Challenge levels mix three regular vehicles around held scarce bows.
-            // The support flow supplies an extra slot, or allows the no-ad fallback.
-            int batch=data.number>=5?3:4-count;data.snakeBatchSize=batch;
-            for(int start=0;start<regular.Count;start+=batch)
-            {
-                int end=Math.Min(regular.Count,start+batch);
-                for(int i=start;i<end;i++)result.Add(cars[regular[i]].color);
-                for(int i=end-1;i>=start;i--)for(int a=1;a<cars[regular[i]].ammo;a++)result.Add(cars[regular[i]].color);
-            }
-            // One early unit and one middle unit cannot exhaust even the smallest scarce bow.
-            result.Insert(Math.Min(2,result.Count),scarce);
-            result.Insert(result.Count/2,scarce);
-            for(int i=2;i<rareAmmo;i++)result.Add(scarce);
-            data.yarn=result.ToArray();data.tutorial=false;data.generatorRevision=5;
-            data.difficultyNote="A scarce color uses "+count+" vehicles, with wool at the front, middle and tail. "+(data.number>=5?"Three-vehicle color batches and faster advance require support and careful slot planning.":"Plan around its occupied slot.");
+            ApplyFiveSlotChallenge(data,total);
         }
     }
 }

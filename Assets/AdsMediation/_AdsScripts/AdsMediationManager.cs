@@ -18,6 +18,8 @@ double rewardStartDeadline;
 int rewardRequest;
 string rewardPlacement;
 bool interDisplayed,interLoadInFlight,rewardLoadInFlight;
+// MAX Editor readiness queries are valid only after the first load request.
+bool interRequested,rewardRequested;
 double interStartDeadline,interLoadDeadline,rewardLoadDeadline,nextInterLoadAt,nextRewardLoadAt,nextCacheCheck;
 int interRequest;
 string interPlacement;
@@ -76,8 +78,10 @@ void Initialized(MaxSdkBase.SdkConfiguration sdk){if(ready)return;ready=true;fin
 // MAX owns one ready cache entry per ad unit. Never issue duplicate loads or
 // show a background-loaded ad without a fresh explicit show request.
 bool CanStartPreload(bool busy,bool loading,double next,double now)=>ready&&!busy&&!loading&&now>=next&&Application.internetReachability!=NetworkReachability.NotReachable;
-void LoadInter(){double now=Time.realtimeSinceStartupAsDouble;if(!CanStartPreload(interBusy,interLoadInFlight,nextInterLoadAt,now)||isAdsRemoved||WoolGame.WoolProgress.NoAdsActive||string.IsNullOrEmpty(Inter)||MaxSdk.IsInterstitialReady(Inter))return;interLoadInFlight=true;interLoadDeadline=now+45;try{MaxSdk.LoadInterstitial(Inter);}catch(Exception e){Debug.LogWarning("MAX background interstitial load: "+e.Message);ScheduleInterRetry(now);}}
-void LoadReward(){double now=Time.realtimeSinceStartupAsDouble;if(!CanStartPreload(rewardBusy,rewardLoadInFlight,nextRewardLoadAt,now)||string.IsNullOrEmpty(Reward)||MaxSdk.IsRewardedAdReady(Reward))return;rewardLoadInFlight=true;rewardLoadDeadline=now+45;try{MaxSdk.LoadRewardedAd(Reward);}catch(Exception e){Debug.LogWarning("MAX background rewarded load: "+e.Message);ScheduleRewardRetry(now);}}
+bool InterReady()=>interRequested&&!string.IsNullOrEmpty(Inter)&&MaxSdk.IsInterstitialReady(Inter);
+bool RewardReady()=>rewardRequested&&!string.IsNullOrEmpty(Reward)&&MaxSdk.IsRewardedAdReady(Reward);
+void LoadInter(){double now=Time.realtimeSinceStartupAsDouble;if(!CanStartPreload(interBusy,interLoadInFlight,nextInterLoadAt,now)||isAdsRemoved||WoolGame.WoolProgress.NoAdsActive||string.IsNullOrEmpty(Inter)||InterReady())return;interLoadInFlight=true;interLoadDeadline=now+45;try{interRequested=true;MaxSdk.LoadInterstitial(Inter);}catch(Exception e){Debug.LogWarning("MAX background interstitial load: "+e.Message);ScheduleInterRetry(now);}}
+void LoadReward(){double now=Time.realtimeSinceStartupAsDouble;if(!CanStartPreload(rewardBusy,rewardLoadInFlight,nextRewardLoadAt,now)||string.IsNullOrEmpty(Reward)||RewardReady())return;rewardLoadInFlight=true;rewardLoadDeadline=now+45;try{rewardRequested=true;MaxSdk.LoadRewardedAd(Reward);}catch(Exception e){Debug.LogWarning("MAX background rewarded load: "+e.Message);ScheduleRewardRetry(now);}}
 void InterLoaded(string id,MaxSdkBase.AdInfo info){if(id==Inter){interLoadInFlight=false;interRetry=0;nextInterLoadAt=0;Debug.Log("MAX interstitial loaded.");}}
 void RewardLoaded(string id,MaxSdkBase.AdInfo info){if(id==Reward){rewardLoadInFlight=false;rewardRetry=0;nextRewardLoadAt=0;Debug.Log("MAX rewarded loaded.");}}
 void ScheduleInterRetry(double now){interLoadInFlight=false;nextInterLoadAt=now+Mathf.Pow(2,Mathf.Min(6,++interRetry));}
@@ -88,7 +92,7 @@ void MaintainAdCache(){double now=Time.realtimeSinceStartupAsDouble;if(interLoad
 public void CheckForConsent(){InitializeMediationAds();}
 public bool IsAdsInitialized()=>ready;
 public bool GetInitializationResponse()=>finished;
-public bool CanShowInterstitial()=>ready&&!isAdsRemoved&&!WoolGame.WoolProgress.NoAdsActive&&!rewardBusy&&!interBusy&&interAdDelayTimer<=0&&MaxSdk.IsInterstitialReady(Inter);
+public bool CanShowInterstitial()=>ready&&!isAdsRemoved&&!WoolGame.WoolProgress.NoAdsActive&&!rewardBusy&&!interBusy&&interAdDelayTimer<=0&&InterReady();
 public void ShowInterstitial(){if(!CanShowInterstitial())return;BeginInterRequest();try{MaxSdk.ShowInterstitial(Inter,interPlacement);}catch(Exception e){Debug.LogException(e);OnInterstitialClosed();LoadInter();}}
 void BeginInterRequest(){interBusy=true;interDisplayed=false;interPlacement="level_complete_"+(++interRequest);interStartDeadline=Time.realtimeSinceStartupAsDouble+RewardedStartTimeoutSeconds;interAdDelayTimer=InterstitialInterval;AdLoadingChanged?.Invoke(true);}
 bool CurrentInter(string id,MaxSdkBase.AdInfo info)=>interBusy&&id==Inter&&(info==null||string.IsNullOrEmpty(info.Placement)||info.Placement==interPlacement);
@@ -101,7 +105,7 @@ public void OnInterstitialClosed(){if(!interBusy)return;interBusy=false;interDis
 public void ShowRewardedVideo(RewardedVieoResponse success=null,RewardedVieoResponse failure=null,RewardedVieoResponse unavailable=null){
 if(rewardBusy||interBusy){failure?.Invoke("An ad is already open.");return;}
 if(DemoRewardsEnabled){(unavailable??failure)?.Invoke("No rewarded video is available.");return;}
-if(!ready||!MaxSdk.IsRewardedAdReady(Reward)){InitializeMediationAds();LoadReward();(unavailable??failure)?.Invoke("No video available. Please try again shortly.");return;}
+if(!ready||!RewardReady()){InitializeMediationAds();LoadReward();(unavailable??failure)?.Invoke("No video available. Please try again shortly.");return;}
 BeginRewardRequest(success,failure,unavailable);
 try{MaxSdk.ShowRewardedAd(Reward,rewardPlacement);}catch(Exception e){Debug.LogException(e);FinishReward("No video available. Please try again.",true);}}
 void BeginRewardRequest(RewardedVieoResponse success,RewardedVieoResponse failure,RewardedVieoResponse unavailable){

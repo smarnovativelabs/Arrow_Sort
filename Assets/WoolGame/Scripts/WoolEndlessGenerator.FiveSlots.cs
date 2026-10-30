@@ -2,26 +2,52 @@ using System;
 using System.Collections.Generic;
 namespace WoolGame {
 public static partial class WoolEndlessGenerator {
-    // Two early bows keep ammunition until the tail. Each following group
-    // needs three distinct bows, then releases all three before the next group.
-    // Following the legal vehicle witness therefore uses at most five slots.
-    static void ApplyFiveSlotChallenge(WoolLevelDefinition data,int total){
+    // Early blocker colours keep part of their ammunition until the tail.
+    // The legal exit witness remains available; extra slots/removal/sort/amplify
+    // can relieve the resulting occupancy without an ability instruction.
+    static void ApplyFiveSlotChallenge(WoolLevelDefinition data,int total) {
         var cars=data.vehicles;var order=data.tutorialOrder;
-        int first=(int)((uint)data.number*7u%10u),second=(first+3)%10;
-        var regularColors=new List<int>(8);for(int c=0;c<10;c++)if(c!=first&&c!=second)regularColors.Add(c);
-        cars[order[0]].color=first;cars[order[1]].color=second;
-        for(int i=2;i<order.Length;i++)cars[order[i]].color=regularColors[(int)(((uint)(i-2)*3u+(uint)data.number)%8u)];
-        var yarn=new List<int>(total){first,second};
-        for(int start=2;start<order.Length;start+=3){
-            int end=Math.Min(start+3,order.Length),ammo=0;
-            for(int i=start;i<end;i++)ammo=Math.Max(ammo,cars[order[i]].ammo);
-            for(int unit=0;unit<ammo;unit++)for(int i=start;i<end;i++)if(unit<cars[order[i]].ammo)yarn.Add(cars[order[i]].color);
+        int held=data.number<5?1:data.number<10?3:4;
+        int first=(int)((uint)data.number*7u%10u);
+        var reserved=new HashSet<int>();
+        for(int i=0;i<held;i++){int color=(first+i*3)%10;reserved.Add(color);cars[order[i]].color=color;}
+        var regular=new List<int>();for(int c=0;c<10;c++)if(!reserved.Contains(c))regular.Add(c);
+        for(int i=held;i<order.Length;i++)
+            cars[order[i]].color=regular[(int)(((uint)(i-held)+(uint)data.number)%(uint)regular.Count)];
+        var yarn=new List<int>(total);
+        for(int i=0;i<held;i++)AppendColorRun(yarn,cars[order[i]].color,2);
+        var random=new Random(unchecked(data.number*104729+653));
+        for(int start=held;start<order.Length;start+=3) {
+            int count=Math.Min(3,order.Length-start);var remaining=new int[count];
+            for(int j=0;j<count;j++)remaining[j]=cars[order[start+j]].ammo;
+            // Open all three bows before finishing their ammunition.
+            for(int j=0;j<count;j++){AppendColorRun(yarn,cars[order[start+j]].color,2);remaining[j]-=2;}
+            bool pending=true;
+            while(pending){pending=false;for(int j=0;j<count;j++)if(remaining[j]>0){
+                int take=2*(1+random.Next(remaining[j]/2));
+                AppendColorRun(yarn,cars[order[start+j]].color,take);
+                remaining[j]-=take;if(remaining[j]>0)pending=true;
+            }}
         }
-        for(int a=1;a<cars[order[0]].ammo;a++)yarn.Add(first);
-        for(int a=1;a<cars[order[1]].ammo;a++)yarn.Add(second);
-        data.yarn=yarn.ToArray();data.requiredSlots=5;data.openSlots=4;data.snakeBatchSize=3;data.tutorial=false;data.generatorRevision=8;
-        data.difficultyNote=string.Empty;
+        for(int i=0;i<held;i++)AppendColorRun(yarn,cars[order[i]].color,cars[order[i]].ammo-2);
+        data.yarn=yarn.ToArray();data.requiredSlots=held+3;data.openSlots=4;
+        data.snakeBatchSize=3;data.tutorial=false;data.generatorRevision=9;data.difficultyNote=string.Empty;
+    }
+    static void AppendColorRun(List<int> output,int color,int count) {
+        for(int i=0;i<count;i++)output.Add(color);
+    }
+    // Split every vehicle's even ammunition into visible even colour groups.
+    static void BuildOpeningGroups(List<int> output,List<WoolTile> tiles,List<int> order,int batch,int number) {
+        var random=new Random(unchecked(number*104729+17));
+        for(int start=0;start<order.Count;start+=batch){
+            int count=Math.Min(batch,order.Count-start);var remaining=new int[count];
+            for(int j=0;j<count;j++)remaining[j]=tiles[order[start+j]].ammo;
+            bool pending=true;while(pending){pending=false;for(int j=0;j<count;j++)if(remaining[j]>0){
+                int take=number==1?remaining[j]:2*(1+random.Next(remaining[j]/2));
+                AppendColorRun(output,tiles[order[start+j]].color,take);
+                remaining[j]-=take;if(remaining[j]>0)pending=true;
+            }}
+        }
     }
 }
 }
-

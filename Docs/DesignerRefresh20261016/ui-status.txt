@@ -1,8 +1,0 @@
-UI refresh completed 2026-10-16.
-Designer atlas: existing sprite IDs retained; nine-slice borders and uncompressed import configured.
-Saved scene: green plus icons for locked slots 5-7; hides when unlocked. VIP retained.
-Theme: home duck models rendered to transparent art; shop cards, menu buttons, HUD, map nodes, modal panels, tasks, spin and profile use designer atlas.
-Corrected gameplay HUD visibility while viewing menus and map paging button contrast/position.
-Editor checks: phone 720x1280 and tablet 768x1024 captures; slots initially show plus with blank labels, slot 5 hides plus after unlocking; unlock dialog verified.
-Unity final checked ground truth: compilationFailed=false, consoleErrors=0, consoleWarnings=0. Historical CLI log contains old errors and capture timeouts.
-No device build or payment backend validation performed. Existing store-unavailable behavior retained.

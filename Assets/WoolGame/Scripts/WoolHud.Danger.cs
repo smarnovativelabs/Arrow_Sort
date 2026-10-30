@@ -5,8 +5,11 @@ namespace WoolGame
     public sealed partial class WoolHud
     {
         [SerializeField] Image dangerBorder;
+        float requestedDangerIntensity,requestedDangerTime;
         public void SetDanger(float intensity,float time)
         {
+            requestedDangerIntensity=intensity;requestedDangerTime=time;
+            if((menu&&menu.activeInHierarchy)||ModalVisible||AdVisible||AbilityGuideVisible)intensity=0;
             if(!dangerBorder)return;
             dangerBorder.gameObject.SetActive(intensity>.01f);
             if(intensity<=.01f)return;

@@ -267,6 +267,7 @@ namespace WoolGame
         {
             if(WoolProgress.IsLoaded)money=WoolProgress.Coins;
             bool suspended=paused||transition||removeMode||(hud&&(hud.ModalVisible||hud.AdVisible||hud.AbilityGuideVisible));
+            if(hud&&(suspended||ended||level==null||phase==Phase.Menu))hud.SetDanger(0,elapsed);
             if(rig.arrowPool)rig.arrowPool.AllowFogTargets=elapsed<amplifyUntil;
             if(hud)hud.SetAmplifyCountdown(Mathf.Max(0,amplifyUntil-elapsed));
             UpdateTutorialPointer();
@@ -353,7 +354,8 @@ namespace WoolGame
             {yarn[i].gameObject.SetActive(false);yarn.RemoveAt(i);yarnRenderers.RemoveAt(i);yarnAmounts.RemoveAt(i);level.Yarn.RemoveAt(i);removed=true;}
             if(removed){hud.Status(level.Number,money,RemainingYarn,total);SaveTutorialState();}
             PositionYarn();UpdateCrossbowCounts();TickFlame(Mathf.Min(Time.deltaTime,.1f));
-            hud.SetDanger(Mathf.InverseLerp(rig.route.Length*.73f,rig.route.Length-1.25f,headDistance),elapsed);
+            float dangerEnd=rig.duckRescue?rig.duckRescue.MotherDistance-rig.duckRescue.approachDistance-.35f:rig.route.Length-1.25f;
+            hud.SetDanger(!ended&&!suspended?Mathf.InverseLerp(dangerEnd-5f,dangerEnd,headDistance):0,elapsed);
 
             if(definition.tutorial&&tutorialShotSlot<0&&tutorialFeedbackUntil>0&&elapsed>=tutorialFeedbackUntil){tutorialFeedbackUntil=0;UpdateTutorial();}
             if(definition.tutorial&&tutorialHand.gameObject.activeSelf&&tutorialStep<level.Solution.Count)tutorialHand.localPosition=tileViews[level.Solution[tutorialStep]].localPosition+new Vector3(.35f,-.45f+Mathf.Sin(elapsed*5)*.08f,-1);
@@ -563,7 +565,7 @@ namespace WoolGame
         {
             money=WoolProgress.Coins;
             if(kind==0&&(pendingSlot<4||pendingSlot>=8||SlotOpen(pendingSlot)))return;
-            if(money<cost){hud.Show("MORE COINS NEEDED","This power needs "+cost+" coins. You have "+money+".","BACK",()=>{paused=false;hud.Hide();OfferBoosterForSlot(kind,kind==0?pendingSlot:-1);},"HOME",OpenHome);return;}
+            if(money<cost){int returnSlot=kind==0?pendingSlot:-1;hud.ShowGameplayCoinShop(()=>{paused=false;hud.Hide();OfferBoosterForSlot(kind,returnSlot);});return;}
             if(spendUnlockPower&&kind!=1&&!WoolProgress.UseAbility(kind)){paused=false;hud.Hide();return;}
             paused=false;hud.Hide();
             rig.arrowPool.Cancel();ClearProjectileTargets();
@@ -584,7 +586,8 @@ namespace WoolGame
         void RemoveBox(int index)
         {
             money=WoolProgress.Coins;
-            if(!removeMode||transition||money<pendingRemoveCost||(pendingRemoveOwned&&WoolProgress.AbilityCount(1)<=0)||index<0||index>=level.Tiles.Count||level.Tiles[index].selected)return;
+            if(!removeMode||transition||(pendingRemoveOwned&&WoolProgress.AbilityCount(1)<=0)||index<0||index>=level.Tiles.Count||level.Tiles[index].selected)return;
+            if(money<pendingRemoveCost){bool wasPaused=paused;paused=true;hud.ShowGameplayCoinShop(()=>{paused=wasPaused;});return;}
             float available=0;for(int i=0;i<level.Yarn.Count;i++)if(level.Yarn[i]==level.Tiles[index].color)available+=yarnAmounts[i];if(available+.0001f<level.Tiles[index].ammo)return;
             if(pendingRemoveOwned)WoolProgress.UseAbility(1);pendingRemoveOwned=false;hud.RefreshAbilityInventory();
             contactMoves[index]=null;level.Tiles[index].probing=false;
@@ -670,7 +673,7 @@ namespace WoolGame
         void Lose(string reason)
         {
             if(ended)return;
-            if(attemptStarted)WoolProgress.MarkFailed(level.Number);ended=true;defeatDistance=headDistance;phase=Phase.Lost;gameAudio.PlayOutcome(false);
+            if(attemptStarted)WoolProgress.MarkFailed(level.Number);ended=true;hud.SetDanger(0,elapsed);defeatDistance=headDistance;phase=Phase.Lost;gameAudio.PlayOutcome(false);
             KittenCaught(reason);
         }
         void UpdateDragonAnimation(bool suspended)
@@ -768,7 +771,7 @@ namespace WoolGame
                 if(transition||revived||phase!=Phase.Lost)return;
                 money=WoolProgress.Coins;
                 money=WoolProgress.Coins;
-                if(money<WoolLosePresentation.ClearCost){ShowDefeat(reason);return;}
+                if(money<WoolLosePresentation.ClearCost){hud.ShowGameplayCoinShop(()=>ShowDefeat(reason));return;}
                 money-=WoolLosePresentation.ClearCost;Save();
                 BeginAnimatedRevive();
             });
