@@ -11,7 +11,7 @@ namespace WoolGame
         [Min(.1f)] public float approachDistance=2.4f;
         [Min(.1f)] public float babyLead=.9f;
         [Min(.1f)] public float walkSpeed=3;
-        GroundSplinePath route;
+        WoolHud headerHud;Camera duckCamera;GroundSplinePath route;
         Transform board;
         WoolAuthoredLayout layout;
         Renderer[] motherGeometry,babyGeometry;
@@ -43,11 +43,11 @@ namespace WoolGame
         public void ShiftRouteOrigin(float delta){firstStop+=delta;secondStop+=delta;distance+=delta;target+=delta;}
         public void ResetForLevel(GroundSplinePath path,Transform world,WoolAuthoredLayout authored)
         {
-            route=path;board=world;layout=authored;EscapeStage=0;Walking=false;clock=0;
+            headerHud=FindFirstObjectByType<WoolHud>();var rig=FindFirstObjectByType<WoolSceneRig>();duckCamera=rig?rig.gameCamera:Camera.main;route=path;board=world;layout=authored;EscapeStage=0;Walking=false;clock=0;
             if(motherGeometry==null)motherGeometry=motherModel.GetComponentsInChildren<Renderer>(true);
             if(babyGeometry==null)babyGeometry=babyModel.GetComponentsInChildren<Renderer>(true);
             float end=Mathf.Max(0,route.Length-babyLead);
-            firstStop=FindClearStop(route.EntryExtension+route.PlayableLength*.5f,route.EntryExtension+route.PlayableLength*.2f,end-2);
+            firstStop=FindClearStop(route.EntryExtension+route.PlayableLength*.5f+.65f,route.EntryExtension+route.PlayableLength*.2f,end-2);
             secondStop=FindClearStop(Mathf.Lerp(firstStop,end,.5f),firstStop+.8f,end-.8f);
             distance=target=firstStop;MotherCaught=BabyCaught=celebrating=false;mother.gameObject.SetActive(true);baby.gameObject.SetActive(true);
             motherJumping=babyJumping=false;motherJumps=babyJumps=0;motherWait=1.3f;babyWait=2.2f;
@@ -118,6 +118,14 @@ namespace WoolGame
         }
         public bool ClearStandingPoint(float d)
         {
+                        if(headerHud&&duckCamera&&board&&route){
+                for(int duck=0;duck<2;duck++){
+                    var position=board.TransformPoint(route.Position(Mathf.Min(route.Length,d+(duck==0?0:babyLead))));
+                    var feet=duckCamera.WorldToScreenPoint(position);var head=duckCamera.WorldToScreenPoint(position+Vector3.up*1.3f);
+                    float radius=Mathf.Max(24,Mathf.Abs(head.y-feet.y)*.55f);
+                    if(headerHud.GameplayHeaderOverlaps(Rect.MinMaxRect(Mathf.Min(feet.x,head.x)-radius,Mathf.Min(feet.y,head.y)-12,Mathf.Max(feet.x,head.x)+radius,Mathf.Max(feet.y,head.y)+12)))return false;
+                }
+            }
             if(!layout||!layout.fogBoundary)return true;
             // Leave room for both silhouettes at the soft edge, not just their pivots.
             float edge=layout.fogBoundary.position.z+.8f;

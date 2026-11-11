@@ -3,6 +3,7 @@ using UnityEngine.UI;
 namespace WoolGame
 {
     // A screen-edge warning with a transparent center; independent of sprite padding/aspect.
+    [RequireComponent(typeof(CanvasRenderer))]
     public sealed class WoolDangerVignette : MaskableGraphic
     {
         protected override void OnPopulateMesh(VertexHelper vh)

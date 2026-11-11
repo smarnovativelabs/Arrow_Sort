@@ -37,7 +37,7 @@ namespace WoolGame
         void ApplyModalSkin()
         {
             if(skin==null||skin.Length<9)return;
-            Paint(modalCard.GetComponent<Image>(),0);Paint(primary.GetComponent<Image>(),1);Paint(secondary.GetComponent<Image>(),1);Paint(close.GetComponent<Image>(),3);
+            Paint(modalCard.GetComponent<Image>(),0);if(unlockPresentation&&unlockPresentation.card){var reference=unlockPresentation.card.GetComponent<Image>();if(reference){modalCard.GetComponent<Image>().sprite=reference.sprite;modalCard.GetComponent<Image>().type=Image.Type.Sliced;}}Paint(primary.GetComponent<Image>(),1);Paint(secondary.GetComponent<Image>(),1);Paint(close.GetComponent<Image>(),3);
             modalTitle.color=WoolArt.Hex("59361E");modalBody.color=WoolArt.Hex("74513C");
         }
         void Paint(Image image,int sprite){if(!image||skin==null||skin.Length<9)return;image.sprite=skin[sprite];image.type=Image.Type.Sliced;image.color=Color.white;}

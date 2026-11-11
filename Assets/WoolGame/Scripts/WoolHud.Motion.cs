@@ -17,7 +17,7 @@ namespace WoolGame
                 var dim=root.gameObject.AddComponent<Image>();dim.color=new Color(0,0,0,.6f);dim.raycastTarget=true;
                 var panel=Panel("Video loading card",root,new Vector2(.5f,.5f),new Vector2(520,180),Vector2.zero,Color.white);
                 var face=panel.GetComponent<Image>();face.sprite=Resources.Load<Sprite>("WoolButtons/Card");face.type=Image.Type.Sliced;face.raycastTarget=false;
-                var caption=Label("Loading video caption",panel,"Loading video...",38,new Vector2(480,140),Vector2.zero,new Color(.13f,.23f,.22f));caption.raycastTarget=false;
+                var caption=Label("Loading video caption",panel,"Loading ad...",38,new Vector2(480,140),Vector2.zero,new Color(.13f,.23f,.22f));caption.raycastTarget=false;
                 adLoadingOverlay=root.gameObject;
             }
             if(adLoadingOverlay){adLoadingOverlay.SetActive(loading);if(loading)adLoadingOverlay.transform.SetAsLastSibling();}

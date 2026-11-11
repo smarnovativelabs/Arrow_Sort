@@ -5,7 +5,13 @@ namespace WoolGame {
 public sealed class WoolRailGuide:MonoBehaviour {
  public RectTransform bubble;public TMP_Text label;public WoolRailGuideTail tail;
  WoolVehicleSources source;Camera view;Action finished;float elapsed;bool completing;
- public void RefreshCopy(){label.text=WoolWarehouseTutorial.TunnelExplanation;label.fontSize=36;label.textWrappingMode=TextWrappingModes.Normal;label.rectTransform.sizeDelta=new Vector2(640,180);bubble.sizeDelta=new Vector2(670,215);((RectTransform)label.transform.parent).sizeDelta=new Vector2(656,201);}
+ public void RefreshCopy(){
+  bubble.sizeDelta=new Vector2(670,215);
+  var face=(RectTransform)label.transform.parent;face.anchorMin=face.anchorMax=face.pivot=Vector2.one*.5f;face.anchoredPosition=Vector2.zero;face.sizeDelta=new Vector2(656,201);
+  var textRect=label.rectTransform;textRect.anchorMin=Vector2.zero;textRect.anchorMax=Vector2.one;textRect.pivot=Vector2.one*.5f;textRect.offsetMin=new Vector2(24,16);textRect.offsetMax=new Vector2(-24,-16);textRect.localScale=Vector3.one;textRect.localRotation=Quaternion.identity;
+  label.text=WoolWarehouseTutorial.TunnelExplanation;label.alignment=TextAlignmentOptions.Center;label.margin=Vector4.zero;label.fontSize=36;label.enableAutoSizing=true;label.fontSizeMin=30;label.fontSizeMax=36;label.textWrappingMode=TextWrappingModes.Normal;label.overflowMode=TextOverflowModes.Truncate;
+ }
+
  public void Open(WoolVehicleSources target,Camera camera,Action complete){source=target;view=camera;finished=complete;elapsed=WoolProgress.RailTutorialElapsed;completing=false;RefreshCopy();gameObject.SetActive(true);transform.SetAsLastSibling();Position();}
  public void Close(){gameObject.SetActive(false);}
  void OnDisable(){if(Application.isPlaying&&!completing&&source)WoolProgress.SaveRailTutorialElapsed(elapsed);}

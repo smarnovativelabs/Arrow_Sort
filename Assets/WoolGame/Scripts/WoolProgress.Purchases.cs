@@ -20,10 +20,10 @@ namespace WoolGame
                 bool grant=!restored&&(!p.purchaseOnce||!OwnsProduct(productId))&&(!p.removeAds||!data.removeAdsBonusGranted);
                 if(grant)
                 {
-                    if(data.coins>int.MaxValue-p.coins||data.removePowers>int.MaxValue-p.powers||data.sortPowers>int.MaxValue-p.powers||data.boostPowers>int.MaxValue-p.powers||UnlockPowerCount>int.MaxValue-p.powers)
+                    if(data.coins>int.MaxValue-p.coins||data.removePowers>int.MaxValue-p.removePowers||data.sortPowers>int.MaxValue-p.sortPowers||data.boostPowers>int.MaxValue-p.fogPowers||UnlockPowerCount>int.MaxValue-p.unlockPowers)
                         throw new InvalidOperationException("Wallet or inventory limit reached.");
                     data.coins+=p.coins;data.collectedCoins+=p.coins;RecordDailyCoins(p.coins);
-                    if(p.powers>0){if(data.spin==null)data.spin=new WoolSpinState();data.spin.unlockPowers+=p.powers;data.removePowers+=p.powers;data.sortPowers+=p.powers;data.boostPowers+=p.powers;}
+                    if(data.spin==null)data.spin=new WoolSpinState();data.spin.unlockPowers+=p.unlockPowers;data.removePowers+=p.removePowers;data.sortPowers+=p.sortPowers;data.boostPowers+=p.fogPowers;
                 }
                 if(p.removeAds){data.permanentNoAds=true;if(grant)data.removeAdsBonusGranted=true;}
                 if(p.purchaseOnce&&!data.ownedProducts.Contains(productId))data.ownedProducts.Add(productId);

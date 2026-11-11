@@ -19,7 +19,7 @@ namespace WoolGame
             }
             foreach(var button in GetComponentsInChildren<Button>(true))
             {
-                var graphic=button.GetComponent<Image>();if(!graphic)continue;
+                Graphic graphic=button.GetComponent<Image>();if(!graphic)graphic=button.GetComponent<Graphic>();if(!graphic)continue;
                 if(!graphic.enabled){graphic.enabled=true;graphic.color=Color.clear;}
                 graphic.raycastTarget=true;button.targetGraphic=graphic;
             }

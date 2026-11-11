@@ -54,7 +54,7 @@ namespace WoolGame
             Array.Sort(ranked,(a,b)=>lengths[a].CompareTo(lengths[b]));
             int shortCount=Mathf.Max(1,paths.Length/3);
             int selected;
-            if(number<=8)selected=difficulty==WoolDifficulty.Hard?ranked[(number/5)%shortCount]:ranked[shortCount+(number-1)%(paths.Length-shortCount)];
+            if(number<=8)selected=difficulty>=WoolDifficulty.Hard?ranked[(number/5)%shortCount]:ranked[shortCount+(number-1)%(paths.Length-shortCount)];
             else {
                 // Visit every authored path equally, alternating shorter and longer routes.
                 // Shift each cycle so hard levels are not tied to one route-length group.
@@ -68,8 +68,12 @@ namespace WoolGame
             for(int i=0;i<points.Length;i++)
             {
                 points[i]=gameplayWorld.InverseTransformPoint(path.road.transform.TransformPoint(path.points[i]));
-                if(i>0)distances[i]=distances[i-1]+Vector3.Distance(points[i-1],points[i]);
             }
+            // Birth happens far beyond every supported camera, not behind an onscreen UI.
+            // The playable route and its endpoint retain their authored geometry.
+            if(path.entryTailLength>0&&points.Length>1)
+                points[0]=gameplayWorld.InverseTransformPoint(path.road.transform.TransformPoint(path.points[1])+Vector3.back*40);
+            for(int i=1;i<points.Length;i++)distances[i]=distances[i-1]+Vector3.Distance(points[i-1],points[i]);
             route.UseBaked(points,distances,path.entryTailLength>0?Vector3.Distance(points[0],points[1]):0);
         }
     }

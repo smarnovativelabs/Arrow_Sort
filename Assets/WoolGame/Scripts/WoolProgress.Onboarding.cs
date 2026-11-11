@@ -6,11 +6,36 @@ namespace WoolGame
 
     public static partial class WoolProgress
     {
+        public const int DailyTasksUnlockLevel=5,LuckySpinUnlockLevel=10;
+        public static bool DailyTasksUnlocked=>HasCompleted(DailyTasksUnlockLevel);
+        public static bool LuckySpinUnlocked=>HasCompleted(LuckySpinUnlockLevel);
+        public static bool FeatureTutorialOnly {get{EnsureLoaded();return data.featureTutorialOnly;}}
+        public static bool TryBeginFeatureTutorial()
+        {
+            EnsureLoaded();if(OnboardingStep!=WoolOnboardingStep.Complete)return false;
+            if(HasCompleted(3)&&!data.profileIntroDone){
+                var remaining=RemainingProfileStep;
+                if(remaining!=WoolOnboardingStep.Complete){data.onboardingStep=(int)remaining;data.featureTutorialOnly=true;Save();return true;}
+                data.profileIntroDone=true;Save();
+            }
+            if(DailyTasksUnlocked&&!data.tasksIntroDone)data.onboardingStep=(int)WoolOnboardingStep.HomeTasks;
+            else if(LuckySpinUnlocked&&!data.spinIntroDone)data.onboardingStep=(int)WoolOnboardingStep.Spin;
+            else return false;
+            data.featureTutorialOnly=true;Save();return true;
+        }
+        public static void FinishFeatureTutorial(){EnsureLoaded();data.featureTutorialOnly=false;data.onboardingStep=(int)WoolOnboardingStep.Complete;Save();}
         public static WoolOnboardingStep OnboardingStep { get { EnsureLoaded();return System.Enum.IsDefined(typeof(WoolOnboardingStep),data.onboardingStep)?(WoolOnboardingStep)data.onboardingStep:WoolOnboardingStep.Complete; } }
         public static bool OnboardingSpinTaken { get { EnsureLoaded();return data.onboardingSpinTaken; } }
         public static void InitializeOnboarding()
         {
-            EnsureLoaded();if(data.onboardingKnown)return;
+            EnsureLoaded();
+            if(!data.profileTutorialPolicyKnown){
+                data.profileTutorialPolicyKnown=true;
+                // Old completed introductions already included the profile steps.
+                if(data.onboardingKnown&&(OnboardingStep==WoolOnboardingStep.Complete||OnboardingStep==WoolOnboardingStep.Shop||OnboardingStep==WoolOnboardingStep.Finished))data.profileIntroDone=true;
+                Save();
+            }
+            if(data.onboardingKnown)return;
             // Missing fields in an established save must not enroll an existing player.
             data.onboardingKnown=true;
             data.onboardingStep=(int)(data.hasStarted||data.levels.Count>0?WoolOnboardingStep.Complete:WoolOnboardingStep.Gameplay);
@@ -20,6 +45,8 @@ namespace WoolGame
         public static void AdvanceOnboarding(WoolOnboardingStep step)
         {
             EnsureLoaded();if(!data.onboardingKnown||Order(step)<=Order(OnboardingStep))return;
+            if(OnboardingStep==WoolOnboardingStep.TasksMeter)data.tasksIntroDone=true;
+            if(OnboardingStep==WoolOnboardingStep.Spin)data.spinIntroDone=true;
             data.onboardingStep=(int)step;Save();
         }
         static int Order(WoolOnboardingStep step)

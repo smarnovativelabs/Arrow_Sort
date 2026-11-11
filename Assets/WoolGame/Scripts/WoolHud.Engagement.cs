@@ -48,6 +48,7 @@ namespace WoolGame
         public void CloseEngagement(){if(utilityPanel)utilityPanel.Hide();if(dailyPanel)dailyPanel.SetActive(false);if(spinPanel)spinPanel.SetActive(false);if(adPassOffer)adPassOffer.Hide();if(specialOffer)specialOffer.Hide();if(luckySpin)luckySpin.gameObject.SetActive(false);if(profileView)profileView.gameObject.SetActive(false);}
         public void ShowDailyTasks()
         {
+            if(!WoolProgress.DailyTasksUnlocked)return;
             CloseEngagement();Hide();if(profilePanel)profilePanel.SetActive(false);if(!dailyPanel)return;
             dailyPanel.SetActive(true);dailyPanel.transform.SetAsLastSibling();FitAuthoredPanels();RefreshDaily();
         }
@@ -64,6 +65,7 @@ namespace WoolGame
         }
         public void ShowDailySpin()
         {
+            if(!WoolProgress.LuckySpinUnlocked)return;
             WoolProgress.RecordDailySpinOpened();
             if(luckySpin){CloseEngagement();Hide();if(profilePanel)profilePanel.SetActive(false);luckySpin.Show();return;}
             CloseEngagement();Hide();if(profilePanel)profilePanel.SetActive(false);if(!spinPanel)return;

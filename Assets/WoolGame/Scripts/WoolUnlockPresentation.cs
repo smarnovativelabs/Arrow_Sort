@@ -10,14 +10,14 @@ public sealed class WoolUnlockPresentation:MonoBehaviour {
  public TMP_Text heading,description,coinLabel,videoLabel; public TMP_Text walletLabel; public RectTransform wallet;
  [Header("Editable popup copy")]
  public string[] titles={"Unlock","Remove","Sort","Boost"};
- [TextArea] public string[] descriptions={"Unlock a new slot","Remove any box","Refresh the dragon body colors","Attack the dragon under fog"};
- public string freeCaption="Free";
+ [TextArea] public string[] descriptions={"Unlock a new slot","Remove any box","Refresh the dragon body colors","Clear the top fog to unlock full-screen attacks"};
+ public string freeCaption="Watch Video";
  public float pulseAmount=.025f,glowSpeed=10;
  float clock;Vector2 lastSize; int lastBalance=-1;
  Vector2[] paymentPositions,paymentSizes;
  void ResetPaymentLayout(){if(paymentPositions==null){paymentPositions=new Vector2[buttons.Length];paymentSizes=new Vector2[buttons.Length];for(int i=0;i<buttons.Length;i++){paymentPositions[i]=buttons[i].anchoredPosition;paymentSizes[i]=buttons[i].sizeDelta;}}for(int i=0;i<buttons.Length;i++){buttons[i].gameObject.SetActive(true);buttons[i].anchoredPosition=paymentPositions[i];buttons[i].sizeDelta=paymentSizes[i];}}
- public void RewardedSlotOffer(){buttons[0].gameObject.SetActive(false);buttons[1].anchoredPosition=new Vector2(0,buttons[1].anchoredPosition.y);buttons[1].sizeDelta=new Vector2(560,120);videoLabel.text="WATCH VIDEO";videoLabel.rectTransform.anchoredPosition=Vector2.zero;videoLabel.rectTransform.sizeDelta=new Vector2(510,82);if(videoIcon)videoIcon.SetActive(false);WoolGlossyButton.Style(buttons[1].GetComponent<Button>());}
- public void Configure(int kind,bool owned=false){ResetPaymentLayout();RefreshBalance();heading.text=titles[kind];description.text=descriptions[kind];coinLabel.text=owned?"Use":WoolCoinText.Format(WoolBoosters.Prices[kind]);videoLabel.text=owned?"Cancel":freeCaption;if(paymentIcon)paymentIcon.sprite=owned?abilityIcons[kind]:coinSprite;if(videoIcon)videoIcon.SetActive(!owned);var caption=videoLabel.rectTransform;caption.anchorMin=caption.anchorMax=caption.pivot=new Vector2(.5f,.5f);caption.anchoredPosition=new Vector2(owned?0:34,0);caption.sizeDelta=new Vector2(owned?260:175,82);videoLabel.alignment=TextAlignmentOptions.Center;videoLabel.margin=Vector4.zero;ability.sprite=abilityIcons[kind];ability.preserveAspect=true;lastSize=Vector2.zero;Fit();foreach(var button in buttons)if(button)WoolGlossyButton.Style(button.GetComponent<Button>());}
+ public void RewardedSlotOffer(){coinLabel.GetComponentInParent<Button>(true).gameObject.SetActive(false);buttons[1].anchoredPosition=new Vector2(0,buttons[1].anchoredPosition.y);buttons[1].sizeDelta=new Vector2(560,120);videoLabel.text="WATCH VIDEO";videoLabel.rectTransform.anchoredPosition=Vector2.zero;videoLabel.rectTransform.sizeDelta=new Vector2(510,82);if(videoIcon)videoIcon.SetActive(false);WoolGlossyButton.Style(buttons[1].GetComponent<Button>());}
+ public void Configure(int kind,bool owned=false){ResetPaymentLayout();RefreshBalance();heading.text=kind==3?"Boost":titles[kind];description.text=kind==3?"Clear the top fog to unlock full-screen attacks":descriptions[kind];coinLabel.text=owned?"Use":WoolCoinText.Format(WoolBoosters.Prices[kind]);videoLabel.text=owned?"Cancel":freeCaption;if(paymentIcon)paymentIcon.sprite=owned?abilityIcons[kind]:coinSprite;if(videoIcon)videoIcon.SetActive(!owned);var caption=videoLabel.rectTransform;caption.anchorMin=caption.anchorMax=caption.pivot=new Vector2(.5f,.5f);caption.anchoredPosition=new Vector2(owned?0:34,0);caption.sizeDelta=new Vector2(owned?260:175,82);videoLabel.alignment=TextAlignmentOptions.Center;videoLabel.margin=Vector4.zero;ability.sprite=abilityIcons[kind];ability.preserveAspect=true;lastSize=Vector2.zero;Fit();foreach(var button in buttons)if(button)WoolGlossyButton.Style(button.GetComponent<Button>());}
  void RefreshBalance(){int balance=WoolProgress.Coins;if(walletLabel&&(lastBalance!=balance||walletLabel.text.Length==0)){walletLabel.text=WoolCoinText.Format(balance);lastBalance=balance;}}
  void OnEnable(){clock=0;lastSize=Vector2.zero;lastBalance=-1;RefreshBalance();Fit();}
  void OnDisable(){if(buttons!=null)foreach(var b in buttons)if(b)b.localScale=Vector3.one;}
@@ -27,8 +27,18 @@ public sealed class WoolUnlockPresentation:MonoBehaviour {
 public sealed partial class WoolHud {
  [SerializeField] WoolUnlockPresentation unlockPresentation;Color unlockPreviousBackdrop;
  void RestoreUnlockPresentation(){if(!unlockPresentation)return;bool was=unlockPresentation.gameObject.activeSelf;unlockPresentation.gameObject.SetActive(false);if(was)modal.GetComponent<Image>().color=unlockPreviousBackdrop;modalCard.gameObject.SetActive(true);}
- void ApplyUnlockPresentation(string title,string first,string other){int k=Array.IndexOf(WoolBoosters.Names,title);if(title=="UNLOCK SLOT")k=0;if(!unlockPresentation||k<0)return;unlockPresentation.Configure(k,first.StartsWith("USE POWER"));unlockPreviousBackdrop=modal.GetComponent<Image>().color;modal.GetComponent<Image>().color=Color.black;close.gameObject.SetActive(false);modalCard.gameObject.SetActive(false);unlockPresentation.gameObject.SetActive(true);}
- void BindUnlockPresentation(){if(!unlockPresentation)return;foreach(var b in unlockPresentation.GetComponentsInChildren<Button>(true)){b.onClick.RemoveAllListeners();if(b.name=="Unlock with coins")b.onClick.AddListener(()=>primary.onClick.Invoke());else if(b.name=="Unlock with video")b.onClick.AddListener(()=>secondary.onClick.Invoke());else b.onClick.AddListener(()=>close.onClick.Invoke());}}
+ void ApplyUnlockPresentation(string title,string first,string other){int k=Array.IndexOf(WoolBoosters.Names,title);if(title=="UNLOCK SLOT")k=0;if(!unlockPresentation||k<0)return;unlockPresentation.Configure(k,first.StartsWith("USE POWER"));if(first=="WATCH VIDEO")unlockPresentation.RewardedSlotOffer();unlockPreviousBackdrop=modal.GetComponent<Image>().color;modal.GetComponent<Image>().color=Color.black;close.gameObject.SetActive(false);modalCard.gameObject.SetActive(false);unlockPresentation.gameObject.SetActive(true);}
+ void BindUnlockPresentation(){
+  if(!unlockPresentation)return;
+  var coinButton=unlockPresentation.coinLabel.GetComponentInParent<Button>(true);var adButton=unlockPresentation.videoLabel.GetComponentInParent<Button>(true);
+  foreach(var b in unlockPresentation.GetComponentsInChildren<Button>(true)){
+   b.onClick.RemoveAllListeners();for(int i=0;i<b.onClick.GetPersistentEventCount();i++)b.onClick.SetPersistentListenerState(i,UnityEngine.Events.UnityEventCallState.Off);
+   if(b==coinButton)b.onClick.AddListener(()=>{if(primaryText.text!="WATCH VIDEO"&&primary.interactable)primary.onClick.Invoke();});
+   else if(b==adButton)b.onClick.AddListener(()=>{if(primaryText.text=="WATCH VIDEO"){if(primary.interactable)primary.onClick.Invoke();}else if(secondary.interactable)secondary.onClick.Invoke();});
+   else b.onClick.AddListener(()=>close.onClick.Invoke());
+  }
+ }
+
 #if UNITY_EDITOR
  public void AuthorLayeredAbilities(Sprite frame,Sprite[] sprites) {
  var p=unlockPresentation;if(!p)throw new InvalidOperationException("Missing authored popup");

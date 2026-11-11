@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 namespace WoolGame {
+[RequireComponent(typeof(CanvasRenderer))]
 public sealed class WoolLoseButtonFace:MaskableGraphic {
  public Color top=new Color(1,.81f,.12f),bottom=new Color(1,.43f,.015f);
  protected override void OnPopulateMesh(VertexHelper vh){

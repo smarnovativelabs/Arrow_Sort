@@ -8,9 +8,10 @@ namespace WoolGame
     public sealed class WoolSpecialOffer : MonoBehaviour
     {
         [Header("Editable offer copy")]
-        [SerializeField,Min(0)] int bonusCoins=2000;
-        [SerializeField] string displayPrice="Rs450.00";
-        [SerializeField,Min(0)] int unlockCount=1,removeCount=1,sortCount=1,amplifyCount=1;
+        int bonusCoins=2000;
+        public WoolIapConfiguration offerSettings;
+        string displayPrice="Rs450.00";
+        int unlockCount=1,removeCount=1,sortCount=1,amplifyCount=1;
         [SerializeField,Range(0,1f)] float backdropAlpha=.8f;
         [Header("Authored UI")]
         public RectTransform card;
@@ -22,8 +23,8 @@ namespace WoolGame
         RectTransform root,canvasRect;
         Vector2 lastSize,lastCanvasSize;
         Rect lastSafe;float refreshAt;
-        public int BonusCoins {get=>bonusCoins;set{bonusCoins=Mathf.Max(0,value);RefreshCopy();}}
-        public string DisplayPrice {get=>displayPrice;set{displayPrice=value??"";RefreshCopy();}}
+        public int BonusCoins {get=>bonusCoins;set{bonusCoins=Mathf.Max(0,value);if(!offerSettings)offerSettings=Resources.Load<WoolIapConfiguration>("ArrowSortPurchases");if(offerSettings)offerSettings.rescueShopCoins=bonusCoins;RefreshCopy();}}
+        public string DisplayPrice {get=>displayPrice;set{displayPrice=value??"";if(!offerSettings)offerSettings=Resources.Load<WoolIapConfiguration>("ArrowSortPurchases");if(offerSettings)offerSettings.rescueShopDisplayPrice=displayPrice;RefreshCopy();}}
         public bool Visible=>gameObject.activeSelf;
         void Awake(){BindButtons();}
         void OnEnable(){RefreshCopy();Fit();}
@@ -38,8 +39,9 @@ namespace WoolGame
         public void Hide(){gameObject.SetActive(false);}
         void RefreshCopy()
         {
+            if(!offerSettings)offerSettings=Resources.Load<WoolIapConfiguration>("ArrowSortPurchases");
             var shared=WoolIapCatalog.Find(WoolIapCatalog.Intro);
-            if(shared!=null){bonusCoins=shared.coins;displayPrice=shared.displayPrice;unlockCount=removeCount=sortCount=amplifyCount=shared.powers;}
+            if(shared!=null){bonusCoins=shared.coins;displayPrice=shared.displayPrice;unlockCount=shared.unlockPowers;removeCount=shared.removePowers;sortCount=shared.sortPowers;amplifyCount=shared.fogPowers;}
             // Cream reward cells need dark lettering even after a global font refresh.
             foreach(var label in new[]{rewardLabel,unlockLabel,removeLabel,sortLabel,amplifyLabel})
                 if(label){label.color=new Color(.28f,.12f,.035f,1);label.fontStyle=FontStyles.Normal;}
@@ -49,7 +51,14 @@ namespace WoolGame
                 if(heading)
                 {
                     var label=heading.GetComponent<TMP_Text>();
-                    if(label){label.text="Special <color=#FFE56E>Offer</color>";label.color=Color.white;label.fontSize=98;label.fontSizeMax=98;label.fontSizeMin=72;label.enableAutoSizing=true;label.characterSpacing=0;}
+                    if(label){
+                        label.text="Rescue <color=#FFE56E>Shop</color>";label.color=Color.white;label.fontStyle=FontStyles.Normal;
+                        label.fontSize=102;label.fontSizeMax=102;label.fontSizeMin=80;label.enableAutoSizing=true;label.characterSpacing=0;
+                        label.alignment=TextAlignmentOptions.Center;label.textWrappingMode=TextWrappingModes.NoWrap;
+                        label.outlineColor=new Color(.28f,.07f,.025f,1);label.outlineWidth=.20f;
+                        var rect=label.rectTransform;rect.anchorMin=rect.anchorMax=new Vector2(.5f,1);rect.pivot=new Vector2(.5f,1);
+                        rect.anchoredPosition=new Vector2(0,-42);rect.sizeDelta=new Vector2(700,130);
+                    }
                 }
             }
             if(rewardLabel)rewardLabel.text=WoolCoinText.Format(bonusCoins);

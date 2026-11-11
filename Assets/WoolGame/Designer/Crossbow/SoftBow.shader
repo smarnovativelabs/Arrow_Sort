@@ -8,6 +8,7 @@ Shader "WoolGame/Soft Bow"
         _ShadeStrength("Soft shading", Range(0,1)) = 0.32
         _Highlight("Satin highlight", Range(0,1)) = 0.16
         _Rim("Edge light", Range(0,1)) = 0.12
+        _RailWhite("White center rail on base mesh", Range(0,1)) = 0
     }
     SubShader
     {
@@ -26,10 +27,10 @@ Shader "WoolGame/Soft Bow"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseMap_ST;
                 half4 _BaseColor;
-                half _ShadeStrength, _Highlight, _Rim;
+                half _ShadeStrength, _Highlight, _Rim, _RailWhite;
             CBUFFER_END
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; float2 palette : TEXCOORD2; };
-            struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float3 normalWS : TEXCOORD1; float3 positionWS : TEXCOORD2; float row : TEXCOORD3; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; float2 palette : TEXCOORD2; float2 railPosition : TEXCOORD3; };
+            struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float3 normalWS : TEXCOORD1; float3 positionWS : TEXCOORD2; float row : TEXCOORD3; float3 localPosition : TEXCOORD4; };
             Varyings Vert(Attributes v)
             {
                 Varyings o;
@@ -37,7 +38,7 @@ Shader "WoolGame/Soft Bow"
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
-                o.row = v.palette.x;
+                o.row = v.palette.x;o.localPosition=float3(v.railPosition.x,0,v.railPosition.y);
                 return o;
             }
             half4 Frag(Varyings i) : SV_Target
@@ -57,7 +58,21 @@ Shader "WoolGame/Soft Bow"
                 // UV3 stores the same color index used by vehicles; ramp rows come from the snake atlas.
                 half rampShade = lerp(.45h + .05h * diffuse, .99h, saturate(spec + rim));
                 half3 matched = SAMPLE_TEXTURE2D(_TailRamp, sampler_TailRamp, float2(rampShade, i.row)).rgb;
-                return half4(lerp(base * shade + spec + rim, matched * shade, colored), 1);
+                half3 neutralCenter=lerp(half3(.84h,.82h,.72h),half3(1,.98h,.9h),saturate(diffuse*.8h+spec));
+                                half3 result=lerp(neutralCenter,matched*shade,colored);
+                half rail=(1-smoothstep(.158h,.172h,abs(i.localPosition.x)))*smoothstep(-.72h,-.69h,i.localPosition.z)*(1-smoothstep(.68h,.72h,i.localPosition.z));
+                result=lerp(result,result*.78h,_RailWhite);
+                                // Recessed neutral channel, bright side rails, and pale lower stop.
+                half x=abs(i.localPosition.x);
+                half channel=1-smoothstep(.139h,.151h,x);
+                half edgeShadow=smoothstep(.10h,.14h,x);
+                half3 channelColor=lerp(half3(.58h,.55h,.47h),half3(.36h,.34h,.29h),edgeShadow*.65h);
+                half3 railColor=lerp(half3(.74h,.76h,.73h),half3(.98h,.99h,.95h),saturate(diffuse*.8h+.2h));
+                half3 centerArea=lerp(railColor,channelColor,channel);
+                half bottomStop=1-smoothstep(-.69h,-.63h,i.localPosition.z);
+                centerArea=lerp(centerArea,half3(.83h,.85h,.81h),bottomStop);
+                result=lerp(result,centerArea,rail*_RailWhite);
+                return half4(result,1);
             }
             ENDHLSL
         }

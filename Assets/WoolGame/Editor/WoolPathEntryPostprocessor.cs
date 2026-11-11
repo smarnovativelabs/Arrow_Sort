@@ -5,18 +5,18 @@ using System.Collections.Generic;
 namespace WoolGame.Editor {
 // Bake only the eight FBX road entry caps. No mesh vertex access is needed in a player.
 public sealed class WoolPathEntryPostprocessor:AssetPostprocessor {
- public override uint GetVersion(){return 3;}
+ public override uint GetVersion(){return 5;}
  void OnPostprocessModel(GameObject root){
   if(assetPath!="Assets/Art/Fbx/Level 1 to 8.fbx")return;
   foreach(var filter in root.GetComponentsInChildren<MeshFilter>(true)){
-   Extend(filter.sharedMesh,"Dragon_Path_L1",932,new Vector3(0f,-1.46929036E-09f,-0.0336134434f),new[]{0,1,458,459,460,461,462,463,465,466,566,567,699,700,702,704});
-   Extend(filter.sharedMesh,"Dragon_Path_L2",936,new Vector3(0.00371975568f,-1.46292367E-09f,-0.033467792f),new[]{0,1,2,3,4,5,458,459,460,461,462,463,464,465,466,467,468,469,470,471,585,586,587,588,702,703,704,705,706,708,710,712});
-   Extend(filter.sharedMesh,"Dragon_Path_L3",1472,new Vector3(0f,-1.46929036E-09f,-0.0336134434f),new[]{0,1,730,731,732,733,734,735,737,738,921,922,1105,1106,1108,1110});
-   Extend(filter.sharedMesh,"Dragon_Path_L4",1472,new Vector3(0f,-1.46929036E-09f,-0.0336134434f),new[]{0,1,730,731,732,733,734,735,737,738,921,922,1105,1106,1108,1110});
-   Extend(filter.sharedMesh,"Dragon_Path_L5",1000,new Vector3(0f,-1.46929036E-09f,-0.0336134434f),new[]{1,2,251,252,502,504,506,508});
-   ExtrudeEntry(filter.sharedMesh,"Dragon_Path_L6",new Vector3(.009806991f,-1.424446E-09f,-.0325875245f));
-   ExtrudeEntry(filter.sharedMesh,"Dragon_Path_L7",new Vector3(.009807431f,-1.4244419E-09f,-.03258743f));
-   Extend(filter.sharedMesh,"Dragon_Path_L8",700,new Vector3(0.00369092752f,-1.46302193E-09f,-0.033470042f),new[]{1,2,176,177,352,354,356,358});
+   Extend(filter.sharedMesh,"Dragon_Path_L1",932,new Vector3(0,0,-.4f),new[]{0,1,458,459,460,461,462,463,465,466,566,567,699,700,702,704});
+   Extend(filter.sharedMesh,"Dragon_Path_L2",936,new Vector3(0,0,-.4f),new[]{0,1,2,3,4,5,458,459,460,461,462,463,464,465,466,467,468,469,470,471,585,586,587,588,702,703,704,705,706,708,710,712});
+   Extend(filter.sharedMesh,"Dragon_Path_L3",1472,new Vector3(0,0,-.4f),new[]{0,1,730,731,732,733,734,735,737,738,921,922,1105,1106,1108,1110});
+   Extend(filter.sharedMesh,"Dragon_Path_L4",1472,new Vector3(0,0,-.4f),new[]{0,1,730,731,732,733,734,735,737,738,921,922,1105,1106,1108,1110});
+   Extend(filter.sharedMesh,"Dragon_Path_L5",1000,new Vector3(0,0,-.4f),new[]{1,2,251,252,502,504,506,508});
+   ExtrudeEntry(filter.sharedMesh,"Dragon_Path_L6",new Vector3(0,0,-.4f));
+   ExtrudeEntry(filter.sharedMesh,"Dragon_Path_L7",new Vector3(0,0,-.4f));
+   Extend(filter.sharedMesh,"Dragon_Path_L8",700,new Vector3(0,0,-.4f),new[]{1,2,176,177,352,354,356,358});
   }
  }
  static void Extend(Mesh mesh,string expected,int count,Vector3 delta,int[] indices){

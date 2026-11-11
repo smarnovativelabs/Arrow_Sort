@@ -56,7 +56,7 @@ namespace WoolGame
         public float ApproachSpeedMultiplier=>entering?2:1;
         public const float VehicleSpeedMultiplier=.9f;
         bool paused,ended,transition,removeMode,winBonusClaimed,revived,attemptStarted,newCompletion;
-        int gameplaySpeed=1;
+        int gameplaySpeed=1;bool speedTrialUsed,speedAdUnlocked;float speedTrialRemaining;
         public int GameplaySpeed=>gameplaySpeed;
         public float SnakeDangerSpeedMultiplier
         {
@@ -147,7 +147,7 @@ namespace WoolGame
             #if UNITY_EDITOR
             if(openInspectorLevelOnPlay){OpenInspectorLevel();yield break;}
 #endif
-            if(!automatedInput&&WoolProgress.OnboardingStep!=WoolOnboardingStep.Complete)
+            if(!automatedInput)
             {
                 var guide=GetComponent<WoolOnboarding>();if(!guide)guide=gameObject.AddComponent<WoolOnboarding>();
                 guide.Begin(this,hud);
@@ -190,7 +190,7 @@ namespace WoolGame
         WoolLevelDefinition ResolveLevel(int number)
         {
             if(generatedDefinition){Destroy(generatedDefinition);generatedDefinition=null;}
-            if(number<=3||number==4||number==6||number==8){generatedDefinition=WoolEndlessGenerator.Generate(number,rig.levels[1].route);return generatedDefinition;}
+            if(number<=10){generatedDefinition=WoolEndlessGenerator.Generate(number,rig.levels[1].route);return generatedDefinition;}
             if(number<=rig.levels.Length&&rig.levels[number-1]&&WoolEndlessGenerator.MechanicsAllowed(rig.levels[number-1])&&rig.levels[number-1].manuallyAuthored&&rig.levels[number-1].vehicles.Length>=50&&rig.levels[number-1].vehicles.Length<=70)
             {generatedDefinition=Instantiate(rig.levels[number-1]);WoolEndlessGenerator.ApplyChallenge(generatedDefinition);return generatedDefinition;}
             var manual=Resources.Load<WoolLevelDefinition>("LevelOverrides/Level"+number);
@@ -203,7 +203,9 @@ namespace WoolGame
             if(gameAudio)gameAudio.SetGameplayMusic(true);
             if(!Application.isPlaying||!hud||!rig||rig.levels.Length==0||number<1||number>WoolEndlessGenerator.MaxLevel)return;
             if(!automatedInput&&!WoolProgress.IsUnlocked(number))return;
-            gameAudio.Play(WoolGameAudio.Cue.Start);StopAllCoroutines();hud.HideGameplayRule();SetSortWhite(0);if(flame)flame.ResetBreath();rig.kitten.gameObject.SetActive(true);hud.EndLaunch();hud.SetDanger(0,0);definition=ResolveLevel(number);definition.boardRotation=0;definition.advanceSpeed*=1.1475f*(number>=5?1.16f:1);
+            gameAudio.Play(WoolGameAudio.Cue.Start);StopAllCoroutines();hud.HideGameplayRule();SetSortWhite(0);if(flame)flame.ResetBreath();rig.kitten.gameObject.SetActive(true);hud.EndLaunch();hud.SetDanger(0,0);definition=ResolveLevel(number);
+            var portraitSafe=WoolHud.CurrentSafeArea;WoolEndlessGenerator.ReflowForPortrait(definition,portraitSafe.height/Mathf.Max(1,portraitSafe.width));
+            definition.boardRotation=0;definition.advanceSpeed*=1.1475f*(number>=5?1.16f:1);
             // Keep the generated packing compact without stretching vehicle models.
             // Definitions are generated or cloned by ResolveLevel; source assets stay intact.
             if(!definition.tutorial)
@@ -226,8 +228,8 @@ namespace WoolGame
             elapsed=amplifyUntil=0;collectionSequence=0;grace=0;paused=ended=transition=removeMode=false;
             tutorialShotSlot=-1;tutorialFeedbackUntil=0;
             pendingRemoveOwned=false;pendingRemoveCost=0;
-            tutorialStep=sortUses=0;unlockedSlotMask=15|(rig.vipSlotEntitled?16:0);pendingSlot=-1;returningDragon=false;dragonAttackTime=2f;dragonNearDuck=dragonFireStarted=false;gameplaySpeed=1;hud.SetGameplaySpeed(1);phase=Phase.Ready;
-            challengeSupportCompleted=number<=4||rig.vipSlotEntitled;
+            tutorialStep=sortUses=0;unlockedSlotMask=15|(rig.vipSlotEntitled?16:0);pendingSlot=-1;returningDragon=false;dragonAttackTime=2f;dragonNearDuck=dragonFireStarted=false;gameplaySpeed=1;speedTrialUsed=speedAdUnlocked=false;speedTrialRemaining=0;hud.SetSpeedUnlocked(false);hud.SetSpeedTrialCountdown(0,false);hud.SetSpeedAdRequired(false);hud.SetGameplaySpeed(1);phase=Phase.Ready;
+            challengeSupportCompleted=number<=10||rig.vipSlotEntitled;
             entryTarget=definition.tutorial?rig.route.Length-1.25f:rig.route.Length*definition.initialHeadProgress;
             if(!definition.tutorial)
             {
@@ -249,6 +251,7 @@ namespace WoolGame
             if(!vehicleSources)vehicleSources=gameObject.GetComponent<WoolVehicleSources>()??gameObject.AddComponent<WoolVehicleSources>();
             vehicleSources.Load(rig,level,definition);
             rig.CompactParking(vehicleSources,definition.tutorial);rig.ApplyLayout(definition.tutorial);
+            var instancing=rig.GetComponent<WoolSnakeInstancing>();if(instancing)instancing.RefreshVehicles();
             rig.kitten.localPosition=OnPath(rig.route.Length-.7f)+new Vector3(0,0,-.4f);
             kittenStart=rig.kitten.localPosition;dragonHead.gameObject.SetActive(true);dragonHead.localScale=dragonScale;
             if(rig.duckRescue){rig.kitten.gameObject.SetActive(false);rig.duckRescue.ResetForLevel(rig.route,world,rig.authoredLayout);}
@@ -262,6 +265,7 @@ namespace WoolGame
             if(definition.containerPositions!=null&&definition.containerPositions.Length>0&&!WoolProgress.WarehouseTutorialSeen)hud.ShowWarehouseTutorial();
             else if(definition.hasRail&&!WoolProgress.RailTutorialSeen)hud.ShowRailTutorial();
             hud.SetAbilityLevels(number);StartCoroutine(BeginGameplayRulesThenAbility());
+            var announcement=hud.GetComponent<WoolDifficultyAnnouncement>();if(!announcement)announcement=hud.gameObject.AddComponent<WoolDifficultyAnnouncement>();announcement.Show(number);
         }
         void Update()
         {
@@ -270,6 +274,7 @@ namespace WoolGame
             if(hud&&(suspended||ended||level==null||phase==Phase.Menu))hud.SetDanger(0,elapsed);
             if(rig.arrowPool)rig.arrowPool.AllowFogTargets=elapsed<amplifyUntil;
             if(hud)hud.SetAmplifyCountdown(Mathf.Max(0,amplifyUntil-elapsed));
+            hud.SetSpeedTrialCountdown(speedTrialRemaining,speedTrialUsed&&!speedAdUnlocked&&speedTrialRemaining>0);
             UpdateTutorialPointer();
             if(phase==Phase.Won&&!transition&&rig.duckRescue&&!hud.AdVisible)rig.duckRescue.Celebrate(Mathf.Min(Time.unscaledDeltaTime,.1f));
             if(!suspended&&rig.arrowPool)rig.arrowPool.TickPresentation(Mathf.Min(Time.deltaTime,.1f)*gameplaySpeed);
@@ -278,6 +283,7 @@ namespace WoolGame
             if(level==null||phase==Phase.Menu)return;rig.FitCamera();
             if(removeMode&&!paused&&!transition&&!hud.ModalVisible&&!hud.AdVisible&&!hud.AbilityGuideVisible){PollVehiclePointer();return;}
             if(phase==Phase.Menu||suspended||ended)return;
+            if(!speedAdUnlocked&&gameplaySpeed==2){speedTrialRemaining-=Time.unscaledDeltaTime;if(speedTrialRemaining<=0){gameplaySpeed=1;hud.SetGameplaySpeed(1);hud.SetSpeedAdRequired(true);}}
             // Entry retains its authored two-times approach; user speed applies after entry.
             float dt=Mathf.Min(Time.deltaTime,.1f)*(entering?1:gameplaySpeed);elapsed+=dt;
             if(Time.unscaledTime>=nextDailySave){WoolProgress.Flush();nextDailySave=Time.unscaledTime+10;}
@@ -288,7 +294,7 @@ namespace WoolGame
                     headDistance=Mathf.MoveTowards(headDistance,entryTarget,dt*Mathf.Max(4.5f,entryTarget/2.4f));
                     if(headDistance>=entryTarget){entering=false;phase=Phase.Playing;UpdateTutorial();}
                 }
-                else { grace-=dt;if(grace<=0)headDistance+=dt*definition.advanceSpeed*SnakeDangerSpeedMultiplier; }
+                else headDistance+=dt*definition.advanceSpeed*SnakeDangerSpeedMultiplier;
                 if(definition.tutorial)headDistance=Mathf.Min(headDistance,rig.route.Length-1.5f);
                 if(rig.duckRescue)rig.duckRescue.Tick(dt,headDistance,definition.advanceSpeed*SnakeDangerSpeedMultiplier,.35f+Mathf.Abs(dragonHead.localScale.x)*(rig.models?rig.models.mouthOffset.x:.65f));
                 if(!definition.tutorial&&(rig.duckRescue?rig.duckRescue.BothCaught:headDistance>=rig.route.Length-.7f)){Lose("The dragon caught the duck family at the end of the path. Try a different box order.");return;}
@@ -529,8 +535,8 @@ namespace WoolGame
                 if(displayedCounts[i]==value)continue;displayedCounts[i]=value;
                 rig.counts[i].fontSize=value<=-2?16f:12f;
                 bool plus=rig.slotUnlockIcons!=null&&i<rig.slotUnlockIcons.Length&&rig.slotUnlockIcons[i];
-                if(plus)rig.slotUnlockIcons[i].SetActive(false);
-                rig.counts[i].text=value==-3?"VIP":value==-2?"AD +":value<0?"":value.ToString();
+                if(plus)rig.slotUnlockIcons[i].SetActive(value==-2);
+                rig.counts[i].text=value==-3?"VIP":value==-2?"Unlock":value<0?"":value.ToString();
                 rig.RefreshSlotLabelLayout();
             }
         }
@@ -539,9 +545,9 @@ namespace WoolGame
         {
             if(level==null||kind<0||kind>=4||ended||paused||transition||removeMode||phase==Phase.Menu)return;
             if(!WoolBoosters.Available(kind,level.Number)){hud.Hint(WoolBoosters.Names[kind]+" unlocks at level "+WoolBoosters.UnlockLevels[kind]+".");return;}
-            if(definition.tutorial){hud.Hint("First, learn to rescue the family with the highlighted vehicles.");return;}
+            if(TutorialGuidance){hud.Hint("First, learn to rescue the family with the highlighted vehicles.");return;}
             if(kind==0&&unlockedSlotMask==255){hud.Hint("All eight slots are unlocked.");return;}
-            if(kind==3&&elapsed<amplifyUntil){hud.Hint("Amplify is already active.");return;}
+            if(kind==3&&elapsed<amplifyUntil){hud.Hint("Boost is already active.");return;}
             if(kind==1&&level.Tiles.TrueForAll(tile=>tile.selected)){hud.Hint("All boxes have already left the board.");return;}
             removeMode=false;paused=true;
             if(kind==0)
@@ -606,7 +612,11 @@ namespace WoolGame
         void ToggleGameplaySpeed()
         {
             if(level==null||ended||paused||transition||phase==Phase.Menu)return;
-            gameplaySpeed=gameplaySpeed==1?2:1;hud.SetGameplaySpeed(gameplaySpeed);
+                        if(speedAdUnlocked){gameplaySpeed=gameplaySpeed==1?2:1;hud.SetGameplaySpeed(gameplaySpeed);return;}
+            if(gameplaySpeed==2){gameplaySpeed=1;speedTrialRemaining=0;hud.SetSpeedTrialCountdown(0,false);hud.SetGameplaySpeed(1);hud.SetSpeedAdRequired(true);return;}
+            if(!speedTrialUsed){speedTrialUsed=true;speedTrialRemaining=300;gameplaySpeed=2;hud.SetGameplaySpeed(2);return;}
+            transition=true;
+            WoolServices.EnsureAds().ShowRewardedVideo(message=>{if(!this)return;transition=false;speedAdUnlocked=true;hud.SetSpeedUnlocked(true);gameplaySpeed=2;hud.SetSpeedAdRequired(false);hud.SetGameplaySpeed(2);},message=>{if(!this)return;transition=false;hud.Hint("Watch the full ad to unlock speed switching");},message=>{if(!this)return;transition=false;hud.Hint("Ad unavailable. Please try again later");});
         }
         void TogglePause(){if(ended||transition)return;paused=true;hud.ShowAudioSettings(()=>{paused=false;hud.Hide();},OpenHome);}
         void RequestRestart(){if(transition)return;paused=true;hud.Show("TRY A NEW APPROACH?","Restart this level with all your crossbows restored.","RESTART LEVEL",()=>{if(attemptStarted)WoolProgress.MarkFailed(level.Number);RestartCurrentLevel();},"KEEP PLAYING",()=>{paused=false;hud.Hide();});}
@@ -640,12 +650,12 @@ namespace WoolGame
         {
             if(level.Number==1&&WoolProgress.OnboardingStep==WoolOnboardingStep.Gameplay)WoolProgress.AdvanceOnboarding(WoolOnboardingStep.Coins);
             money=WoolProgress.Coins;
-            int earned=WoolProgress.CanClaimCompletionReward(level.Number)?50:0;
-            Action map=()=>{if(WoolProgress.OnboardingStep==WoolOnboardingStep.Coins)WoolProgress.AdvanceOnboarding(WoolOnboardingStep.Map);OpenHome();hud.ShowMap();};
+            int earned=WoolProgress.CanClaimCompletionReward(level.Number)?WoolProgress.CompletionReward(level.Number):0;
+            Action map=()=>{if(WoolProgress.OnboardingStep==WoolOnboardingStep.Coins)WoolProgress.AdvanceOnboarding(WoolOnboardingStep.Shop);OpenHome();if(WoolProgress.OnboardingStep==WoolOnboardingStep.Shop||level.Number==3)return;if(level.Number!=WoolProgress.DailyTasksUnlockLevel&&level.Number!=WoolProgress.LuckySpinUnlockLevel)hud.ShowMap();};
             Action<Action> collect=destination=>{
                 if(transition)return;
                 transition=true;
-                int collected=WoolProgress.ClaimCompletionReward(level.Number)?50:0;
+                int collected=WoolProgress.ClaimCompletionReward(level.Number)?WoolProgress.CompletionReward(level.Number):0;
                 money=WoolProgress.Coins;
                 if(collected>0)gameAudio.Play(WoolGameAudio.Cue.Coin);
                 hud.FlyWinCoins(collected,WoolProgress.Coins,()=>{transition=false;destination();});
@@ -659,9 +669,9 @@ namespace WoolGame
                             winBonusClaimed=true;money=WoolProgress.Coins;transition=true;
                             gameAudio.Play(WoolGameAudio.Cue.Coin);
                             hud.Status(level.Number,money,RemainingYarn,total);
-                            hud.FlyWinCoins(earned+50,money,()=>{transition=false;map();},true);
+                            hud.FlyWinCoins(earned*3,money,()=>{transition=false;map();},true);
                         }else ShowWinReward();
-                    },ShowWinReward);
+                    },ShowWinReward,earned,"level reward");
                 },()=>{if(!transition)map();});
         }
         void OfferFreeCoins()
@@ -818,7 +828,18 @@ namespace WoolGame
                     if(yarnAmounts[i]<=.00001f){level.Yarn.RemoveAt(i);yarnAmounts.RemoveAt(i);}
                 }
                 tileViews[bow.index].gameObject.SetActive(false);
+                // Revive removes even vehicles interrupted before docking.
+                var removedTile=level.Tiles[bow.index];removedTile.leaving=false;removedTile.probing=false;removedTile.carried=false;removedTile.motionX=removedTile.motionY=0;
                 active[slot]=null;
+            }
+            // Restore interrupted collision probes before accepting new input.
+            for(int i=0;i<contactMoves.Length;i++) {
+                var move=contactMoves[i];if(move==null)continue;
+                if(i<tileViews.Count&&tileViews[i]&&!level.Tiles[i].selected){
+                    tileViews[i].localPosition=move.start;tileViews[i].localRotation=move.rotation;
+                    var tile=level.Tiles[i];tile.probing=false;tile.carried=move.wasCarried;tile.motionX=tile.motionY=0;
+                }
+                contactMoves[i]=null;
             }
             revived=true;ended=paused=transition=removeMode=false;phase=Phase.Playing;grace=0;
             entering=false;returningDragon=false;dragonNearDuck=dragonFireStarted=false;dragonAttackTime=2;
@@ -829,7 +850,7 @@ namespace WoolGame
             hud.Status(level.Number,money,RemainingYarn,total);gameAudio.Play(WoolGameAudio.Cue.Booster);
             if(RemainingYarn==0)Win();
         }
-        void WatchReward(Action earned,Action returnToOffer=null,int rewardCoinValue=50,string rewardPurpose="reward")
+        void WatchReward(Action earned,Action returnToOffer=null,int rewardCoinValue=50,string rewardPurpose="reward",bool allowChallengeFallback=true)
         {
             transition=true;bool settled=false,challengeFallback=false;
             var ads=WoolServices.EnsureAds();
@@ -843,6 +864,7 @@ namespace WoolGame
             },message=>
             {
                 if(!this||settled)return;settled=true;transition=false;
+                if(!allowChallengeFallback){hud.Show("VIDEO UNAVAILABLE",message,"BACK",BackToRewardOffer);return;}
                 int coins=WoolProgress.GrantUnavailableAdCoins(rewardCoinValue);money=WoolProgress.Coins;
                 challengeFallback=AllowChallengeAdFallback();
                 if(coins>0)gameAudio.Play(WoolGameAudio.Cue.Coin);

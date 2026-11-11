@@ -8,7 +8,7 @@ namespace WoolGame {
  public TMP_Text title,coinAmount,priceText; public TMP_Text[] counts; public Button purchase;
  public void Refresh(){
  var product=WoolIapCatalog.Find(productId);
- if(product!=null){bundleName=product.name;coins=product.coins;price=Application.isPlaying&&WoolPurchases.Current?WoolPurchases.Current.Price(productId)??product.displayPrice:product.displayPrice;abilities=new[]{product.powers,product.powers,product.powers,product.powers};}
+ if(product!=null){bundleName=product.name;coins=product.coins;price=Application.isPlaying&&WoolPurchases.Current?WoolPurchases.Current.Price(productId)??product.displayPrice:product.displayPrice;abilities=new[]{product.unlockPowers,product.removePowers,product.sortPowers,product.fogPowers};}
  if(title)title.text=bundleName;if(coinAmount)coinAmount.text=WoolCoinText.Format(coins);
  bool owned=Application.isPlaying&&product!=null&&product.purchaseOnce&&WoolProgress.OwnsProduct(productId);if(purchase)purchase.interactable=!owned;
  if(priceText){priceText.text=owned?"OWNED":price;priceText.textWrappingMode=TextWrappingModes.NoWrap;priceText.enableAutoSizing=true;priceText.fontSizeMin=18;priceText.fontSizeMax=38;priceText.overflowMode=TextOverflowModes.Truncate;}
@@ -19,13 +19,13 @@ public sealed class WoolShopView:MonoBehaviour {
  public WoolHud owner;public RectTransform masthead,viewport,content,design;public WoolMenuNavigation navigation;
  public ScrollRect scroll;public TMP_Text balance,claimText;public Button dailyClaim;public WoolShopOffer[] offers;
  public float designHeight=2810;public const float DesignHeight=2575;float refreshAt;Vector2 lastSize;Rect lastSafe;int lastBalance=-1;
- void OnEnable(){if(owner&&balance){var wallet=balance.GetComponentInParent<WoolCoinWallet>(true);if(wallet)wallet.MatchAppearance(owner.HomeWallet);}Bind();Fit(true);Refresh();}
+ void OnEnable(){if(owner&&balance){var wallet=balance.GetComponentInParent<WoolCoinWallet>(true);if(wallet)wallet.MatchAppearance(owner.HomeWallet);}Bind();Fit(true);Refresh();if(offers!=null)foreach(var offer in offers)WoolGlossyButton.HomeAction(offer.purchase);WoolGlossyButton.HomeAction(dailyClaim);if(masthead)foreach(var button in masthead.GetComponentsInChildren<Button>(true))if(button.name.StartsWith("Browse "))WoolGlossyButton.HomeAction(button);}
  void OnDisable(){if(dailyClaim)dailyClaim.onClick.RemoveListener(Claim);}
  void Bind(){if(dailyClaim){dailyClaim.onClick.RemoveListener(Claim);dailyClaim.onClick.AddListener(Claim);}if(offers!=null)foreach(var offer in offers){offer.Refresh();offer.purchase.onClick.RemoveAllListeners();offer.purchase.onClick.AddListener(()=>owner.BuyShopProduct(offer.productId));}}
  public void FocusBundles(){Fit(true);scroll.verticalNormalizedPosition=1;}
  public void FocusDailyGift(){Fit(true);scroll.verticalNormalizedPosition=0;}
  public void FocusCoinPacks(){Fit(true);Canvas.ForceUpdateCanvases();float offset=(3130-80)*design.localScale.x;content.sizeDelta=new Vector2(content.sizeDelta.x,Mathf.Max(content.sizeDelta.y,viewport.rect.height+offset));float travel=content.rect.height-viewport.rect.height;scroll.verticalNormalizedPosition=travel>0?Mathf.Clamp01(1-offset/travel):1;}
- void Claim(){if(WoolProgress.ClaimShopDailyGift()){var audio=FindFirstObjectByType<WoolGameAudio>();if(audio)audio.Play(WoolGameAudio.Cue.Coin);owner.RefreshShopBalance();Refresh();}}
+ void Claim(){if(WoolProgress.ClaimShopDailyGift()){var audio=FindFirstObjectByType<WoolGameAudio>();if(audio)audio.Play(WoolGameAudio.Cue.Coin);owner.RefreshShopBalance();Refresh();var guide=FindFirstObjectByType<WoolOnboarding>();if(guide)guide.ShopGiftCollected();}}
  public void Refresh(){if(offers!=null)foreach(var offer in offers)offer.Refresh();int coins=WoolProgress.Coins;if(balance&&lastBalance!=coins){lastBalance=coins;balance.text=WoolCoinText.Format(coins);}if(dailyClaim){bool can=WoolProgress.CanClaimShopDailyGift;dailyClaim.interactable=can;claimText.text=can?"CLAIM FREE":"CLAIMED";}}
  void LateUpdate(){Fit(false);if(Time.unscaledTime>=refreshAt){refreshAt=Time.unscaledTime+1;Refresh();}}
  public void Fit(bool force){var root=(RectTransform)transform;if(!viewport||!design||root.rect.width<=0)return;var size=root.rect.size;var safe=Screen.safeArea;if(!force&&size==lastSize&&safe==lastSafe)return;lastSize=size;lastSafe=safe;

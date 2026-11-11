@@ -102,7 +102,7 @@ namespace WoolGame
             modal.SetActive(false); RefreshSafeArea();
         }
 
-        void Update() { if(lastSafe!=CurrentSafeArea||lastWidth!=Screen.width||lastHeight!=Screen.height) RefreshSafeArea(); }
+        void Update() { UpdatePurchaseSuccess();if(lastSafe!=CurrentSafeArea||lastWidth!=Screen.width||lastHeight!=Screen.height) RefreshSafeArea(); }
         void RefreshSafeArea() { ApplyPortraitFrame(Screen.width,Screen.height,CurrentSafeArea);if(compactDesignHeight>0)ApplyCompactGameplayFrame(WoolSceneRig.CompactPortraitFrame(CurrentSafeArea,compactDesignHeight),compactDesignHeight,Screen.width,Screen.height); }
         internal static Rect CurrentSafeArea
         {
@@ -182,11 +182,11 @@ namespace WoolGame
             modalBody.enableAutoSizing=true;modalBody.fontSizeMin=18;modalBody.fontSizeMax=26;
             boosterPicture.gameObject.SetActive(power);if(power)boosterIcon.sprite=icons[booster];
             close.GetComponent<RectTransform>().anchoredPosition=new Vector2(265,power?321:220);
-            modal.SetActive(true);modal.transform.SetAsLastSibling();modalTitle.text=title;modalBody.text=body;primaryText.text=button;
+            modal.SetActive(true);modal.transform.SetAsLastSibling();modalTitle.text=title=="Amplify"?"Boost":title;modalBody.text=body;primaryText.text=button;
             primary.onClick.RemoveAllListeners();if(action!=null)primary.onClick.AddListener(()=>action());
             primary.interactable=action!=null;secondary.gameObject.SetActive(other!=null);
             secondaryText.text=other;secondary.onClick.RemoveAllListeners();if(secondaryAction!=null)secondary.onClick.AddListener(()=>secondaryAction());
-            close.gameObject.SetActive(dismissed!=null);close.onClick.RemoveAllListeners();if(dismissed!=null)close.onClick.AddListener(()=>dismissed());ApplyModalSkin();ApplyUnlockPresentation(title,button,other);ApplyServiceMessage(title);FitReleaseUI();if(power)modal.GetComponent<Image>().color=new Color(0,0,0,.32f);
+            close.gameObject.SetActive(dismissed!=null);close.onClick.RemoveAllListeners();if(dismissed!=null)close.onClick.AddListener(()=>dismissed());ApplyModalSkin();ApplyUnlockPresentation(title,button,other);ApplyServiceMessage(title);FitReleaseUI();modal.GetComponent<Image>().color=Color.black;
         }
         // Offers can live outside Portrait composition, so sibling order alone is insufficient.
         void ApplyServiceMessage(string title)
@@ -201,7 +201,7 @@ namespace WoolGame
             }
             if(!serviceMessage)return;
             if(!modal.GetComponent<GraphicRaycaster>())modal.AddComponent<GraphicRaycaster>();
-            modal.GetComponent<Image>().color=new Color(0,0,0,.65f);
+            modal.GetComponent<Image>().color=Color.black;
             modalCard.sizeDelta=new Vector2(680,490);
             modalTitle.text=title=="STORE UNAVAILABLE"?"Shop unavailable":"Video unavailable";
             modalTitle.rectTransform.anchoredPosition=new Vector2(0,145);

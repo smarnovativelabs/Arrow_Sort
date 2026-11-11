@@ -21,6 +21,7 @@ namespace WoolGame
         public WoolMapNodeGraphic arrivalRing;
         public RectTransform sleepMarks;
         public float artAspect=.5628f;
+        public float FixedHeaderHeight=>Mathf.Min(((RectTransform)transform).rect.width*.73f,((RectTransform)transform).rect.height*.40f);
         int pageStart=1,presented,frameMode;
         float width,height,clock,modeClock;
         bool travelling;
@@ -28,13 +29,11 @@ namespace WoolGame
         int requestedPageStart;
         Coroutine transition;
         Vector2 duckPoint;
+        Button mapPlay;TMP_Text mapPlayLabel;
         static readonly Color Green=new Color(.36f,.77f,.16f,1),Grey=new Color(.66f,.65f,.70f,1);
         // Pixel-aligned stops from the supplied 941 x 1672 skyway artwork, bottom to top.
-        public static readonly Vector2[] Stops={
-            new Vector2(.373f,.212f),new Vector2(.502f,.295f),new Vector2(.697f,.354f),
-            new Vector2(.736f,.444f),new Vector2(.541f,.504f),new Vector2(.353f,.562f),
-            new Vector2(.520f,.623f),new Vector2(.721f,.657f),new Vector2(.765f,.728f),
-            new Vector2(.600f,.774f),new Vector2(.359f,.819f)};
+        public Sprite unlockedMarker,lockedMarker,playButtonSprite;public Sprite currentMarker;public Image[] markerArt;
+        public static readonly Vector2[] Stops={new Vector2(.32f,.25f),new Vector2(.46f,.315f),new Vector2(.60f,.36f),new Vector2(.72f,.43f),new Vector2(.55f,.485f),new Vector2(.34f,.55f),new Vector2(.50f,.595f),new Vector2(.72f,.628f),new Vector2(.66f,.686f),new Vector2(.49f,.715f),new Vector2(.28f,.749f)};
         public bool IsTravelling=>travelling;
         public int VisiblePageStart=>pageStart;
         public int PresentedLevel=>presented;
@@ -42,6 +41,8 @@ namespace WoolGame
         void Awake(){BindButtons();}
         void BindButtons()
         {
+            EnsureMapPlay();
+            if(duck){var duckButton=duck.GetComponent<Button>();if(!duckButton)duckButton=duck.gameObject.AddComponent<Button>();duck.raycastTarget=true;duckButton.targetGraphic=duck;duckButton.transition=Selectable.Transition.None;duckButton.onClick.RemoveListener(StartDuckLevel);duckButton.onClick.AddListener(StartDuckLevel);}
             for(int i=0;i<nodes.Length;i++)
             {
                 int slot=i;nodes[i].onClick.RemoveAllListeners();
@@ -51,6 +52,21 @@ namespace WoolGame
             next.onClick.RemoveAllListeners();next.onClick.AddListener(()=>ChangePage(1));
             home.onClick.RemoveAllListeners();home.onClick.AddListener(owner.SkywayHome);
             shop.onClick.RemoveAllListeners();shop.onClick.AddListener(owner.SkywayShop);
+        }
+        void StartDuckLevel(){
+            if(!owner||!WoolProgress.IsUnlocked(WoolProgress.CurrentLevel))return;
+            // Map travel is presentation: starting the unlocked level can skip it.
+            if(travelling&&!paging)WoolProgress.MarkMapPresented(WoolProgress.MapDestinationLevel);
+            owner.OpenSkywayLevel(WoolProgress.CurrentLevel);
+        }
+        void EnsureMapPlay(){
+            if(mapPlay)return;
+            var go=new GameObject("Map Play",typeof(RectTransform),typeof(Image),typeof(Button));go.transform.SetParent(transform,false);
+            mapPlay=go.GetComponent<Button>();mapPlay.targetGraphic=go.GetComponent<Image>();mapPlay.targetGraphic.raycastTarget=true;mapPlay.onClick.AddListener(StartDuckLevel);
+            var label=new GameObject("Caption",typeof(RectTransform),typeof(TextMeshProUGUI));label.transform.SetParent(go.transform,false);
+            mapPlayLabel=label.GetComponent<TextMeshProUGUI>();mapPlayLabel.font=pageLabel.font;mapPlayLabel.text="PLAY";mapPlayLabel.fontSize=42;mapPlayLabel.alignment=TextAlignmentOptions.Center;mapPlayLabel.raycastTarget=false;
+            var rect=mapPlayLabel.rectTransform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=rect.offsetMax=Vector2.zero;
+            ((RectTransform)go.transform).sizeDelta=new Vector2(480,100);var playStyle=WoolGlossyButton.Style(mapPlay);if(playStyle)playStyle.tone=WoolGlossyButton.Tone.Green;
         }
         void OnDisable()
         {
@@ -90,8 +106,12 @@ namespace WoolGame
             float navHeight=navWidth*(214f/941f);
             navigation.anchorMin=navigation.anchorMax=new Vector2(.5f,0);navigation.pivot=new Vector2(.5f,0);
             navigation.sizeDelta=new Vector2(navWidth,navHeight);navigation.anchoredPosition=Vector2.zero;
-            // The scrolling map itself reaches every screen edge; controls remain in the safe parent.
-            WoolCanvasArt.FillCanvas(viewport);
+            if(mapPlay){var playRect=(RectTransform)mapPlay.transform;playRect.anchorMin=playRect.anchorMax=new Vector2(.5f,0);playRect.pivot=new Vector2(.5f,0);playRect.sizeDelta=new Vector2(navWidth*.54f,navWidth*.135f);playRect.anchoredPosition=new Vector2(0,navHeight+24);mapPlayLabel.fontSize=navWidth*.052f;}
+            // Play floats above the scrolling map; only bottom navigation reserves space.
+            // Its raycast target and last-sibling order consume taps over obscured nodes.
+            viewport.anchorMin=Vector2.zero;viewport.anchorMax=Vector2.one;viewport.pivot=new Vector2(.5f,.5f);viewport.localScale=Vector3.one;viewport.offsetMin=new Vector2(0,navHeight);viewport.offsetMax=Vector2.zero;
+            scroll.horizontal=false;scroll.vertical=true;scroll.movementType=ScrollRect.MovementType.Clamped;
+            var touchSurface=viewport.GetComponent<Image>();if(touchSurface)touchSurface.raycastTarget=true;
             float w=viewport.rect.width,h=viewport.rect.height;
             if(Mathf.Abs(w-width)<.1f&&Mathf.Abs(h-height)<.1f)return;
             width=w;height=h;
@@ -104,16 +124,20 @@ namespace WoolGame
                     image.preserveAspect=false;image.rectTransform.anchorMin=Vector2.zero;image.rectTransform.anchorMax=Vector2.one;
                     image.rectTransform.offsetMin=image.rectTransform.offsetMax=Vector2.zero;
                 }
-            if(pageLabel){var caption=(RectTransform)pageLabel.transform.parent;caption.anchorMin=caption.anchorMax=new Vector2(.5f,1);caption.pivot=new Vector2(.5f,1);caption.anchoredPosition=new Vector2(0,-22);caption.sizeDelta=new Vector2(Mathf.Min(w-240,520),106);}
-            for(int side=0;side<2;side++){var arrow=(RectTransform)(side==0?previous:next).transform;arrow.anchorMin=arrow.anchorMax=new Vector2(side,1);arrow.pivot=new Vector2(side,1);arrow.anchoredPosition=new Vector2(side==0?22:-22,-22);arrow.sizeDelta=new Vector2(90,90);}
-            float artWidth=Mathf.Max(w,h*artAspect);
+            if(pageLabel){var caption=(RectTransform)pageLabel.transform.parent;caption.anchorMin=caption.anchorMax=new Vector2(.5f,1);caption.pivot=new Vector2(.5f,1);caption.anchoredPosition=new Vector2(0,-130);caption.sizeDelta=new Vector2(Mathf.Min(w-240,520),106);}
+            for(int side=0;side<2;side++){var arrow=(RectTransform)(side==0?previous:next).transform;arrow.anchorMin=arrow.anchorMax=new Vector2(side,1);arrow.pivot=new Vector2(side,1);arrow.anchoredPosition=new Vector2(side==0?22:-22,-130);arrow.sizeDelta=new Vector2(90,90);}
+            float artWidth=w;
             float ah=artWidth/Mathf.Max(.1f,artAspect);
-            content.sizeDelta=new Vector2(w,Mathf.Max(h,ah));content.localScale=Vector3.one;
-            artwork.sizeDelta=new Vector2(artWidth,ah);artwork.anchoredPosition=Vector2.zero;artwork.localScale=Vector3.one;
+            // At the bottom of the map, the first marker clears the floating Play
+            // button, including its pulse. This is content padding, not a fixed panel.
+            float firstMarkerCenter=24+w*(.135f*1.035f+.0625f+.025f);
+            float mapBottomPadding=firstMarkerCenter-Stops[0].y*ah;
+            content.sizeDelta=new Vector2(w,Mathf.Max(h+w*.35f,ah+mapBottomPadding+w*.04f));content.localScale=Vector3.one;
+            artwork.sizeDelta=new Vector2(artWidth,ah);artwork.anchoredPosition=new Vector2(0,mapBottomPadding);artwork.localScale=Vector3.one;
             for(int i=0;i<nodes.Length;i++)
             {
                 var rt=(RectTransform)nodes[i].transform;
-                rt.anchorMin=rt.anchorMax=Stops[i];rt.anchoredPosition=Vector2.zero;rt.sizeDelta=new Vector2(w*.115f,w*.095f);
+                rt.anchorMin=rt.anchorMax=Stops[i];rt.anchoredPosition=Vector2.zero;rt.sizeDelta=new Vector2(w*.14f,w*.125f);
                 numbers[i].enableAutoSizing=true;numbers[i].fontSizeMin=w*.018f;numbers[i].fontSizeMax=w*.042f;numbers[i].fontSize=w*.042f;
             }
             duck.rectTransform.sizeDelta=Vector2.one*w*.20f;
@@ -130,10 +154,11 @@ namespace WoolGame
                 faces[i].face=unlocked?Green:Grey;faces[i].SetVerticesDirty();
                 numbers[i].text=level.ToString();numbers[i].color=Color.white;
                 numbers[i].outlineWidth=.14f;numbers[i].outlineColor=unlocked?new Color(.12f,.36f,.06f,1):new Color(.31f,.30f,.36f,1);
+                if(markerArt!=null&&i<markerArt.Length&&markerArt[i]){markerArt[i].sprite=WoolProgress.HasCompleted(level)?unlockedMarker:unlocked?(currentMarker?currentMarker:unlockedMarker):lockedMarker;faces[i].color=Color.clear;}
                 nodes[i].interactable=unlocked&&!travelling;nodes[i].transform.localScale=Vector3.one;
             }
             RefreshPageButtons();
-            pageLabel.text="LEVELS "+pageStart+" - "+Mathf.Min(pageStart+Stops.Length-1,WoolProgress.TotalLevels);
+            pageLabel.text="Levels "+pageStart+" – "+Mathf.Min(pageStart+Stops.Length-1,WoolProgress.TotalLevels);
             SetStatus();
         }
         void SetStatus()
@@ -142,15 +167,17 @@ namespace WoolGame
         }
         void Update()
         {
-            Fit();float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);clock+=dt;modeClock+=dt;
+            Fit();if(mapPlay){mapPlay.transform.SetAsLastSibling();mapPlay.interactable=WoolProgress.IsUnlocked(WoolProgress.CurrentLevel);mapPlay.transform.localScale=Vector3.one*(1+.035f*Mathf.Sin(clock*2.4f));mapPlayLabel.text="Level "+WoolProgress.CurrentLevel;var playStyle=mapPlay.GetComponent<WoolGlossyButton>();if(playStyle){playStyle.tone=WoolGlossyButton.Tone.Green;playStyle.enabled=true;}mapPlayLabel.rectTransform.offsetMin=mapPlayLabel.rectTransform.offsetMax=Vector2.zero;}float dt=Mathf.Min(Time.unscaledDeltaTime,.1f);clock+=dt;modeClock+=dt;
             if(duck&&duck.gameObject.activeSelf)
             {
-                Sprite[] frames=frameMode==1?walkFrames:frameMode==2?happyFrames:idleFrames;
-                // A still resting pose keeps the map calm; animate only actual travel/reward.
-                if(frames!=null&&frames.Length>0)duck.sprite=frames[frameMode==0?0:Mathf.FloorToInt(modeClock*(frameMode==1?8:6))%frames.Length];
+                Sprite[] frames=frameMode==1?walkFrames:frameMode==2?happyFrames:(happyFrames!=null&&happyFrames.Length>1?happyFrames:walkFrames);
+                // Keep the duck alive at every stop as well as during travel.
+                if(frames!=null&&frames.Length>0)duck.sprite=frames[Mathf.FloorToInt(modeClock*(frameMode==1?6:frameMode==2?6:4))%frames.Length];
             }
             if(!travelling)
             {
+                if(duck)duck.rectTransform.anchoredPosition=Vector2.zero;
+                int current=presented-pageStart;if(current>=0&&current<Stops.Length){arrivalRing.gameObject.SetActive(true);arrivalRing.rectTransform.anchorMin=arrivalRing.rectTransform.anchorMax=Stops[current];arrivalRing.rectTransform.anchoredPosition=Vector2.zero;arrivalRing.rectTransform.localScale=Vector3.one*(1.08f+.04f*Mathf.Sin(clock*2));arrivalRing.color=new Color(1,.89f,.24f,.7f);arrivalRing.SetVerticesDirty();}
                 int index=WoolProgress.CurrentLevel-pageStart;
                 if(index>=0&&index<nodes.Length)nodes[index].transform.localScale=Vector3.one*(1+.012f*Mathf.Sin(clock*1.4f));
             }
@@ -171,7 +198,7 @@ namespace WoolGame
         {
             float travel=content.rect.height-viewport.rect.height;
             scroll.StopMovement();
-            if(travel>.1f)scroll.verticalNormalizedPosition=Mathf.Clamp01((y*artwork.rect.height-viewport.rect.height*.46f)/travel);
+            if(travel>.1f)scroll.verticalNormalizedPosition=Mathf.Clamp01((artwork.anchoredPosition.y+y*artwork.rect.height-viewport.rect.height*.46f)/travel);
             else scroll.verticalNormalizedPosition=0;
         }
         IEnumerator TravelTo(int target)
@@ -232,7 +259,7 @@ namespace WoolGame
         void RefreshPageButtons()
         {
             int target=paging?requestedPageStart:pageStart;
-            previous.gameObject.SetActive(target>1);next.gameObject.SetActive(target+Stops.Length<=WoolProgress.TotalLevels);
+            previous.gameObject.SetActive(true);next.gameObject.SetActive(target+Stops.Length<=WoolProgress.TotalLevels);
             previous.interactable=(!travelling||paging)&&target>1;
             next.interactable=(!travelling||paging)&&target+Stops.Length<=WoolProgress.TotalLevels;
         }

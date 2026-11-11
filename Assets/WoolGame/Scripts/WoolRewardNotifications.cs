@@ -16,9 +16,10 @@ namespace WoolGame {
    var label=new GameObject("Ready",typeof(RectTransform),typeof(TextMeshProUGUI));var lr=(RectTransform)label.transform;lr.SetParent(rt,false);lr.anchorMin=Vector2.zero;lr.anchorMax=Vector2.one;lr.offsetMin=lr.offsetMax=Vector2.zero;badge.label=label.GetComponent<TMP_Text>();badge.label.font=TMP_Settings.defaultFontAsset;badge.label.fontSize=34;badge.label.fontStyle=FontStyles.Bold;badge.label.alignment=TextAlignmentOptions.Center;badge.label.color=Color.white;badge.label.raycastTarget=false;
   }
  }
+ [RequireComponent(typeof(CanvasRenderer))]
  public sealed class WoolRewardBadge:MaskableGraphic {
   public int kind;public TMP_Text label;float next;
-  public static bool DailyReady(){for(int i=0;i<WoolProgress.DailyTargets.Length;i++)if(!WoolProgress.DailyClaimed(i)&&WoolProgress.DailyCount(i)>=WoolProgress.DailyTargets[i])return true;for(int i=0;i<4;i++)if(!WoolProgress.DailyGiftClaimed(i)&&WoolProgress.DailyCredits>=(i+1)*25)return true;return WoolProgress.DailyChestCredits>=700&&!WoolProgress.DailyChestCollected;}
+  public static bool DailyReady(){if(!WoolProgress.DailyTasksUnlocked)return false;for(int i=0;i<WoolProgress.DailyTargets.Length;i++)if(!WoolProgress.DailyClaimed(i)&&WoolProgress.DailyCount(i)>=WoolProgress.DailyTargets[i])return true;for(int i=0;i<4;i++)if(!WoolProgress.DailyGiftClaimed(i)&&WoolProgress.DailyCredits>=(i+1)*25)return true;return WoolProgress.DailyChestCredits>=700&&!WoolProgress.DailyChestCollected;}
   protected override void OnEnable(){base.OnEnable();Refresh();}
   void Update(){if(Time.unscaledTime<next)return;next=Time.unscaledTime+.2f;Refresh();}
   void Refresh(){if(!label)return;int spins=WoolProgress.ReadySpinNotifications;bool ready=kind==0?spins>0:kind==1?WoolProgress.CanClaimShopDailyGift:kind==2?DailyReady():spins>0||DailyReady();canvasRenderer.SetAlpha(ready?1:0);label.enabled=ready;label.text=kind==0?Mathf.Min(99,spins).ToString():"!";}

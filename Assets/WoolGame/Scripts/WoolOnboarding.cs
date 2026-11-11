@@ -27,9 +27,12 @@ namespace WoolGame
 
         public void Begin(WoolGameController controller,WoolHud owner)
         {
-            game=controller;hud=owner;suspended=false;
+            game=controller;hud=owner;suspended=false;enabled=true;
             if(!overlay)Build();
             shown=(WoolOnboardingStep)(-1);
+            if(Step==WoolOnboardingStep.Profile||Step==WoolOnboardingStep.Name||Step==WoolOnboardingStep.Avatar){
+                if(WoolProgress.HasCompleted(3))WoolProgress.ResumeProfileIntro();else WoolProgress.AdvanceOnboarding(WoolOnboardingStep.Complete);
+            }
             if(Step==WoolOnboardingStep.Gameplay)
             {
                 if(WoolProgress.HasCompleted(1)){WoolProgress.AdvanceOnboarding(WoolOnboardingStep.Coins);game.ResumeOnboardingReward();}
@@ -42,13 +45,16 @@ namespace WoolGame
 
         void Update()
         {
-            if(!hud||suspended||Step==WoolOnboardingStep.Complete)return;
+            if(!hud||suspended)return;
+            if(Step==WoolOnboardingStep.Complete){var home=hud.FindHomeTutorialButton("Tasks");if(home&&home.gameObject.activeInHierarchy&&WoolProgress.TryBeginFeatureTutorial())Present();else return;}
             if(Time.unscaledTime>=pollAt){pollAt=Time.unscaledTime+.1f;Tick();}
 
         }
         void LateUpdate(){if(overlay&&overlay.gameObject.activeSelf)Layout();}
         void Tick()
         {
+            if((Step==WoolOnboardingStep.HomeTasks||Step==WoolOnboardingStep.Login||Step==WoolOnboardingStep.TasksMeter)&&!WoolProgress.DailyTasksUnlocked){Advance(WoolOnboardingStep.Profile);return;}
+            if(Step==WoolOnboardingStep.Spin&&!WoolProgress.LuckySpinUnlocked){Advance(WoolOnboardingStep.Profile);return;}
             if(shown!=Step)Present();
             switch(Step)
             {
@@ -77,12 +83,12 @@ namespace WoolGame
                     else if(WoolProgress.DailyCredits>=25&&!WoolProgress.DailyGiftClaimed(0))
                     {
                         message.text="Tap your gift to collect coins";
-                        target=(RectTransform)(hud.TutorialTasks.preview.activeSelf?hud.TutorialTasks.previewCollect:hud.TutorialTasks.gifts[0]).transform;
+                        target=hud.TutorialTasks.preview.activeSelf?(RectTransform)hud.TutorialTasks.previewCollect.transform:hud.TutorialTasks.giftArt[0].rectTransform;
                     }
                     else
                     {
                         target=null;message.text="Play daily. Earn more gifts!";
-                        SetNext("TRY A SPIN",()=>Advance(WoolOnboardingStep.Spin));
+                        SetNext(WoolProgress.LuckySpinUnlocked?"TRY A SPIN":"CONTINUE",()=>Advance(WoolProgress.LuckySpinUnlocked?WoolOnboardingStep.Spin:WoolOnboardingStep.Profile));
                     }
                     break;
                 case WoolOnboardingStep.Spin:
@@ -96,8 +102,9 @@ namespace WoolGame
                     {message.text="Tap SPIN for a reward";next.gameObject.SetActive(false);}
                     break;
                 case WoolOnboardingStep.Shop:
-                    if(!WoolProgress.CanClaimShopDailyGift&&Time.unscaledTime-stepAt>.5f)
-                    {target=null;message.text="50 coins! All yours";SetNext("LET'S PLAY",()=>Advance(WoolOnboardingStep.Finished));}
+                    if(!WoolProgress.CanClaimShopDailyGift){FinishIntroHome();break;}
+                    target=hud.TutorialShop.gameObject.activeInHierarchy?(RectTransform)hud.TutorialShop.dailyClaim.transform:(RectTransform)hud.TutorialShopTab.transform;
+                    if(hud.TutorialShop.gameObject.activeInHierarchy){hud.TutorialShop.FocusDailyGift();message.text="Tap CLAIM FREE for 50 coins";}
                     break;
                 case WoolOnboardingStep.Profile:
                     if(hud.TutorialProfile.editScreen.activeInHierarchy)Advance(WoolOnboardingStep.Name);
@@ -123,19 +130,31 @@ namespace WoolGame
                     if(!editor.editScreen.activeInHierarchy&&editor.AvatarSelectionVersion<=avatarSelectionAt){hud.ShowTutorialProfile();editor.nameButton.onClick.Invoke();}
                     if(editor.AvatarSelectionVersion>avatarSelectionAt)
                     {
-                        if(!editor.editScreen.activeInHierarchy){Advance(WoolOnboardingStep.Shop);break;}
+                        if(!editor.editScreen.activeInHierarchy){FinishProfileHome();break;}
                         target=(RectTransform)editor.save.transform;message.text="Tap SAVE PROFILE";
                     }
                     break;
             }
         }
-        void Advance(WoolOnboardingStep step){WoolProgress.AdvanceOnboarding(step);Present();}
+        public void ShopGiftCollected(){if(Step==WoolOnboardingStep.Shop)FinishIntroHome();}
+        void FinishIntroHome(){WoolProgress.AdvanceOnboarding(WoolOnboardingStep.Complete);overlay.gameObject.SetActive(false);hud.CloseEngagement();game.OpenHome();shown=(WoolOnboardingStep)(-1);}
+        void FinishProfileHome(){WoolProgress.FinishProfileIntro();overlay.gameObject.SetActive(false);hud.CloseEngagement();game.OpenHome();shown=(WoolOnboardingStep)(-1);}
+        void Advance(WoolOnboardingStep step){
+            if(step==WoolOnboardingStep.Profile&&!WoolProgress.FeatureTutorialOnly){FinishIntroHome();return;}
+            if(step==WoolOnboardingStep.Avatar&&WoolProgress.ProfileAvatarComplete){FinishProfileHome();return;}
+            if(step==WoolOnboardingStep.Name&&WoolProgress.ProfileNameComplete){step=WoolOnboardingStep.Avatar;if(WoolProgress.ProfileAvatarComplete){FinishProfileHome();return;}}
+            WoolProgress.AdvanceOnboarding(step);
+            if(WoolProgress.FeatureTutorialOnly&&step==WoolOnboardingStep.Profile){WoolProgress.FinishFeatureTutorial();overlay.gameObject.SetActive(false);hud.CloseEngagement();game.OpenHome();shown=(WoolOnboardingStep)(-1);return;}
+            Present();
+        }
         void ShowGameplayIntro()
         {
             overlay.gameObject.SetActive(false);game.SetOnboardingPause(false);
         }
         void Present()
         {
+            if((Step==WoolOnboardingStep.HomeTasks||Step==WoolOnboardingStep.Login||Step==WoolOnboardingStep.TasksMeter)&&!WoolProgress.DailyTasksUnlocked){Advance(WoolOnboardingStep.Profile);return;}
+            if(Step==WoolOnboardingStep.Spin&&!WoolProgress.LuckySpinUnlocked){Advance(WoolOnboardingStep.Profile);return;}
             shown=Step;stepAt=Time.unscaledTime;target=null;next.gameObject.SetActive(false);
             overlay.gameObject.SetActive(Step!=WoolOnboardingStep.Gameplay&&Step!=WoolOnboardingStep.Complete);
             switch(Step)
@@ -161,17 +180,15 @@ namespace WoolGame
                     hud.ShowDailySpin();heading.text="Try your luck";message.text="Tap SPIN. Win a free reward!";
                     target=(RectTransform)hud.TutorialSpin.spin.transform;break;
                 case WoolOnboardingStep.Shop:
-                    hud.CloseEngagement();hud.ShowShop();Canvas.ForceUpdateCanvases();hud.TutorialShop.Fit(true);
-                    hud.TutorialShop.scroll.verticalNormalizedPosition=0;
-                    heading.text="One last daily gift";message.text="Tap CLAIM FREE for 50 coins";
-                    target=(RectTransform)hud.TutorialShop.dailyClaim.transform;break;
+                    hud.CloseEngagement();heading.text="Your shop gift";message.text="Tap Shop to collect your free reward";
+                    target=(RectTransform)hud.TutorialShopTab.transform;break;
                 case WoolOnboardingStep.Profile:
                     hud.ShowTutorialProfile();heading.text="Your rescue story";message.text="Make it yours. Tap your name";
                     target=(RectTransform)hud.TutorialProfile.nameButton.transform;break;
                 case WoolOnboardingStep.Name:
                     hud.ShowTutorialProfile();hud.TutorialProfile.nameButton.onClick.Invoke();
                     heading.text="Choose your name";message.text="Type your name";
-                    observedNameText=hud.TutorialProfile.nameInput.text;lastNameEditAt=Time.unscaledTime;
+                    StartCoroutine(FocusName());observedNameText=hud.TutorialProfile.nameInput.text;lastNameEditAt=Time.unscaledTime;
                     target=hud.TutorialProfile.nameInput.GetComponent<RectTransform>();break;
                 case WoolOnboardingStep.Avatar:
                     if(!hud.TutorialProfile.editScreen.activeInHierarchy){hud.ShowTutorialProfile();hud.TutorialProfile.nameButton.onClick.Invoke();}
@@ -180,27 +197,28 @@ namespace WoolGame
                     target=hud.TutorialProfile.choices[0].transform.parent as RectTransform;break;
                 case WoolOnboardingStep.Finished:
                     heading.text="You're ready to rescue!";message.text="Your next rescue awaits!";
-                    SetNext("LET'S PLAY",()=>{WoolProgress.AdvanceOnboarding(WoolOnboardingStep.Complete);overlay.gameObject.SetActive(false);hud.CloseEngagement();game.OpenHome();enabled=false;});break;
-                case WoolOnboardingStep.Complete: enabled=false;break;
+                    SetNext("LET'S PLAY",()=>{WoolProgress.AdvanceOnboarding(WoolOnboardingStep.Complete);overlay.gameObject.SetActive(false);hud.CloseEngagement();game.OpenHome();});break;
+                case WoolOnboardingStep.Complete: overlay.gameObject.SetActive(false);break;
             }
             if(overlay.gameObject.activeSelf)Layout();
         }
+        System.Collections.IEnumerator FocusName(){yield return null;Canvas.ForceUpdateCanvases();var input=hud.TutorialProfile.nameInput;input.shouldHideSoftKeyboard=false;input.Select();input.ActivateInputField();}
         void Suspend(){suspended=true;overlay.gameObject.SetActive(false);hud.CloseEngagement();game.OpenHome();}
         void SetNext(string caption,UnityEngine.Events.UnityAction action)
         {
             if(next.gameObject.activeSelf&&nextText.text==caption)return;
-            nextText.text=caption;next.onClick.RemoveAllListeners();next.onClick.AddListener(action);next.gameObject.SetActive(true);
+            nextText.text=caption;WoolGlossyButton.HomeAction(next);next.onClick.RemoveAllListeners();next.onClick.AddListener(action);next.gameObject.SetActive(true);
         }
         void Build()
         {
             overlay=Rect("First rescue tutorial",hud.transform);overlay.anchorMin=Vector2.zero;overlay.anchorMax=Vector2.one;overlay.offsetMin=overlay.offsetMax=Vector2.zero;
             // A nested canvas keeps the guide above every existing modal without rebuilding the HUD.
             var canvas=overlay.gameObject.AddComponent<Canvas>();canvas.overrideSorting=true;canvas.sortingOrder=300;overlay.gameObject.AddComponent<GraphicRaycaster>();
-            for(int i=0;i<4;i++){blockers[i]=Image("Tutorial dimmer "+i,overlay,new Color(.035f,.035f,.08f,.72f),true);edges[i]=Image("Highlight "+i,overlay,new Color(1,.83f,.24f),false);}
+            for(int i=0;i<4;i++){blockers[i]=Image("Tutorial dimmer "+i,overlay,new Color(.015f,.015f,.025f,.96f),true);edges[i]=Image("Highlight "+i,overlay,new Color(1,.83f,.24f),false);}
             bubble=Rect("Tutorial message",overlay);var panel=bubble.gameObject.AddComponent<Image>();panel.sprite=hud.SkywayPanelSprite;panel.type=UnityEngine.UI.Image.Type.Sliced;panel.color=WoolArt.Hex("FFF1CE");panel.raycastTarget=true;
             var border=bubble.gameObject.AddComponent<Outline>();border.effectColor=WoolArt.Hex("C99332");border.effectDistance=new Vector2(3,-3);
             heading=Text("Step",bubble,30,WoolArt.Hex("59361E"));heading.fontStyle=FontStyles.Bold;message=Text("Instruction",bubble,29,WoolArt.Hex("74513C"));
-            var button=Image("Tutorial continue",bubble,new Color(.20f,.58f,.34f),true);button.sprite=hud.SkywayPanelSprite;button.type=UnityEngine.UI.Image.Type.Sliced;next=button.gameObject.AddComponent<Button>();next.targetGraphic=button;
+            var button=Image("Tutorial continue",bubble,new Color(.20f,.58f,.34f),true);button.sprite=hud.SkywayPanelSprite;button.type=UnityEngine.UI.Image.Type.Sliced;button.color=WoolArt.Hex("247339");next=button.gameObject.AddComponent<Button>();next.targetGraphic=button;
             next.gameObject.AddComponent<WoolButtonAudio>().Initialize(next,FindFirstObjectByType<WoolGameAudio>());
             nextText=Text("Caption",button.transform,27,Color.white);nextText.alignment=TextAlignmentOptions.Center;
             arrow=Text("Tap cue",overlay,25,new Color(1,.9f,.4f));arrow.text="TAP HERE";arrow.alignment=TextAlignmentOptions.Center;
@@ -230,6 +248,7 @@ namespace WoolGame
                         b=Vector2.Max(b,(Vector2)overlay.InverseTransformPoint(corners[2])-r.min);
                     }
                 }
+                if(Step==WoolOnboardingStep.Map){var inset=(b-a)*new Vector2(.08f,.16f);a+=inset;b-=inset;}
                 hole=UnityEngine.Rect.MinMaxRect(Mathf.Clamp(a.x-10,0,w),Mathf.Clamp(a.y-10,0,h),Mathf.Clamp(b.x+10,0,w),Mathf.Clamp(b.y+10,0,h));
             }
             Place(blockers[0].rectTransform,0,0,hole.xMin,h);Place(blockers[1].rectTransform,hole.xMax,0,w-hole.xMax,h);
@@ -243,13 +262,14 @@ namespace WoolGame
             Place(bubble,(safeMin.x+safeMax.x-bw)*.5f,y,bw,bh);
             Place(heading.rectTransform,28*scale,bh-56*scale,bw-56*scale,44*scale);heading.fontSize=36*scale;
             Place(message.rectTransform,28*scale,next.gameObject.activeSelf?106*scale:22*scale,bw-56*scale,112*scale);message.fontSize=52*scale;message.fontStyle=FontStyles.Bold;
-            Place((RectTransform)next.transform,24*scale,18*scale,bw-48*scale,70*scale);Stretch(nextText.rectTransform);nextText.fontSize=40*scale;
+            nextText.fontSize=40*scale;float buttonWidth=Mathf.Min(bw-48*scale,nextText.GetPreferredValues(nextText.text).x+80*scale);Place((RectTransform)next.transform,(bw-buttonWidth)*.5f,18*scale,buttonWidth,70*scale);Stretch(nextText.rectTransform);
             arrow.gameObject.SetActive(false);
             bool showHand=(Step!=WoolOnboardingStep.Name||Time.unscaledTime-lastNameEditAt>=3f)&&(hasTarget||next.gameObject.activeSelf);
             pointingHand.gameObject.SetActive(showHand);
             if(showHand){
                 bool fromBelow=hole.center.y>h*.4f;
                 var tip=new Vector2(hole.center.x,fromBelow?hole.yMin-16:hole.yMax+16);
+                if(Step==WoolOnboardingStep.TasksMeter&&target==hud.TutorialTasks.giftArt[0].rectTransform){tip=hole.center;fromBelow=true;}
                 if(next.gameObject.activeSelf&&(!hasTarget||Step==WoolOnboardingStep.Name)){((RectTransform)next.transform).GetWorldCorners(corners);tip=(Vector2)overlay.InverseTransformPoint((corners[0]+corners[3])*.5f)-r.min+Vector2.down*16;fromBelow=true;}
                 pointingHand.anchorMin=pointingHand.anchorMax=Vector2.zero;pointingHand.pivot=new Vector2(.5f,.5f);pointingHand.sizeDelta=new Vector2(165,185);pointingHand.anchoredPosition=tip;
 

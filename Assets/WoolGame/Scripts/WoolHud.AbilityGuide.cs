@@ -15,7 +15,7 @@ public sealed partial class WoolHud {
  Button levelPointerTap;WoolAbilitySpotlight levelSpotlight;Action levelTapAction;
  Camera GuideCamera=>canvas&&canvas.renderMode!=RenderMode.ScreenSpaceOverlay?canvas.worldCamera:null;
  public bool AbilityGuideVisible=>abilityGuide&&abilityGuide.activeSelf;
- public void SetAbilityLevels(int stage){abilityStage=stage;if(!footer)return;for(int k=0;k<4;k++){var b=footer.Find(WoolBoosters.Names[k]);if(!b)continue;foreach(var shine in b.GetComponentsInChildren<Coffee.UIEffects.UIShiny>(true))shine.enabled=false;bool available=WoolBoosters.Available(k,stage);b.GetComponent<Button>().interactable=available;var shade=b.GetComponent<CanvasGroup>();if(!shade)shade=b.gameObject.AddComponent<CanvasGroup>();shade.alpha=available?1:.8f;if(abilityStrip&&k<abilityStrip.counts.Length&&abilityStrip.counts[k])abilityStrip.counts[k].text=available?(WoolProgress.AbilityCount(k)>0?WoolProgress.AbilityCount(k).ToString():"+"):"Lv "+WoolBoosters.UnlockLevels[k];}}
+ public void SetAbilityLevels(int stage){abilityStage=stage;if(!footer)return;for(int k=0;k<4;k++){var b=footer.Find(WoolBoosters.Names[k]);if(!b)continue;foreach(var shine in b.GetComponentsInChildren<Coffee.UIEffects.UIShiny>(true))shine.enabled=false;bool available=WoolBoosters.Available(k,stage);b.GetComponent<Button>().interactable=available;var caption=b.Find("Label");if(caption){var text=caption.GetComponent<TMP_Text>();if(text)text.text=new[]{"SLOT","REMOVE","SORT","BOOST"}[k];}var shade=b.GetComponent<CanvasGroup>();if(!shade)shade=b.gameObject.AddComponent<CanvasGroup>();shade.alpha=available?1:.8f;if(abilityStrip&&k<abilityStrip.counts.Length&&abilityStrip.counts[k])abilityStrip.counts[k].text=available?abilityStrip.BadgeText(k):"Lv "+WoolBoosters.UnlockLevels[k];}}
  void BuildAbilityGuide(){
  if(abilityGuide)return;
  var root=Rect("Guided ability spotlight",transform,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero);abilityGuide=root.gameObject;
@@ -38,7 +38,7 @@ public sealed partial class WoolHud {
  Vector2 GuidePoint(Vector2 screen){var parent=abilityGuide?(RectTransform)abilityGuide.transform:(RectTransform)transform;RectTransformUtility.ScreenPointToLocalPointInRectangle(parent,screen,GuideCamera,out var p);return p;}
  public void ShowAbilityGuide(int kind,string message,Action use){
  BuildAbilityGuide();guideTarget=footer.Find(WoolBoosters.Names[kind]) as RectTransform;guideWorldTarget=null;
- guideTitle.text=WoolBoosters.Names[kind].ToUpperInvariant()+"  ·  FREE TRY";
+ guideTitle.text=(kind==3?"BOOST":WoolBoosters.Names[kind].ToUpperInvariant())+"  ·  FREE TRY";
  guideIcon.sprite=unlockPresentation.abilityIcons[kind];guideIcon.gameObject.SetActive(true);
  PlaceGuide(Vector2.zero,message,use,new Vector2(150,150));
  }
@@ -109,7 +109,7 @@ public sealed partial class WoolHud {
  var ring=Rect("Effect at its real destination",root,new Vector2(.5f,.5f),new Vector2(.5f,.5f),new Vector2(290,290),point);ring.gameObject.AddComponent<WoolAbilityGlow>().raycastTarget=false;root.gameObject.AddComponent<WoolAbilityFocus>().halo=ring;
  float width=Mathf.Min(820,root.rect.width-72);var card=Panel("Power purpose",root,new Vector2(.5f,.5f),new Vector2(width,152),new Vector2(0,root.rect.height*.23f),Color.white);card.GetComponent<Image>().raycastTarget=false;if(skin!=null&&skin.Length>0)card.GetComponent<Image>().sprite=skin[0];
  var icon=Panel("Power illustration",card,new Vector2(.5f,.5f),new Vector2(110,110),new Vector2(-width*.5f+80,0),Color.white);icon.GetComponent<Image>().sprite=unlockPresentation.abilityIcons[kind];icon.GetComponent<Image>().preserveAspect=true;icon.GetComponent<Image>().raycastTarget=false;
- string[] titles={"SLOT READY!","VEHICLE REMOVED!","COLOURS GROUPED!","SHOOT THROUGH FOG: 12s"};
+ string[] titles={"SLOT READY!","VEHICLE REMOVED!","COLOURS GROUPED!","BOOST: 12s"};
  var title=Label("Power result",card,titles[kind],44,new Vector2(width-190,110),new Vector2(65,0),WoolArt.Hex("59361E"));title.enableAutoSizing=false;title.fontStyle=FontStyles.Bold;
  }
  public void HideAbilityEffect(){if(abilityEffect){Destroy(abilityEffect);abilityEffect=null;}}

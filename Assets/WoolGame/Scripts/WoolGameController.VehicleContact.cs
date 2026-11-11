@@ -44,7 +44,7 @@ namespace WoolGame
                 var tile=level.Tiles[i];var actor=tileViews[i];
                 if(!move.returning)
                 {
-                    if(!level.TryGetBlocker(i,out _,out float gap))
+                    if(!level.TryGetBlocker(i,out int blocker,out float gap))
                     {
                         contactMoves[i]=null;tile.probing=false;
                         bool moved;continuingContact=true;
@@ -58,6 +58,9 @@ namespace WoolGame
                         move.offset+=step;actor.localPosition=move.start+move.direction*move.offset;UpdateVehicleOffset(i);
                         if(remaining<=dt*14+.0001f)
                         {
+                            // A departing vehicle is clearing this lane. Wait behind it
+                            // and retry selection once clear; it is not a blocked move.
+                            if(blocker>=0&&level.Tiles[blocker].selected&&level.Tiles[blocker].leaving)continue;
                             move.returning=true;move.returnFrom=move.offset;move.hold=.07f;VehicleContacts++;
                             float half=tile.length*VehicleBoardScale*.5f;
                             var contact=rig.world.TransformPoint(actor.localPosition+move.direction*half);

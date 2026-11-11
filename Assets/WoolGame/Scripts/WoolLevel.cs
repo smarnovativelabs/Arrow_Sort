@@ -281,7 +281,7 @@ public void SortColors(int use,List<float> remainingAmounts=null,IList<int> prio
         public static readonly string[] Names={"Unlock","Remove","Sort","Amplify"};
         public static readonly int[] Prices={800,600,700,500};
         public static readonly int[] UnlockLevels={2,4,6,8};
-        public static bool Available(int kind,int level)=>kind>=0&&kind<4&&level>=UnlockLevels[kind];
-        public static readonly string[] Descriptions={"Open one locked slot so another crossbow can join this level.","Choose any vehicle. Remove it and clear its matching amount of dragon wool.","Reshuffle dragon colours into short groups of 2, 4, 6, 8 or 10. A ready crossbow colour comes first.","Reach matching wool through the fog for 12 seconds. Watch the countdown on this button."};
+        public static bool Available(int kind,int level)=>kind>=0&&kind<4&&(level>=UnlockLevels[kind]||(WoolProgress.IsLoaded&&WoolProgress.CurrentLevel>=UnlockLevels[kind]));
+        public static readonly string[] Descriptions={"Open one extra slot.","Remove a vehicle and its matching colours.","Group matching snake colours.","Clear the top fog to unlock full-screen attacks"};
     }
 }

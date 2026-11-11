@@ -28,6 +28,7 @@ namespace WoolGame
         {
             flightProgress=0;
             flightWorldScale=arrow.lossyScale;
+            if(sceneRig)arrow.SetParent(sceneRig.transform,true); // Flight rotates under a uniform parent, without bow-rig shear.
             flightDuration=Mathf.Clamp(Vector3.Distance(arrow.position,target.position)/arrowSpeed,.36f,.75f);
             flightCamera=sceneRig?sceneRig.SlotCamera:null;
             if(flightCamera)

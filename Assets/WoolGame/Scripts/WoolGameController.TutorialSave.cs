@@ -55,7 +55,7 @@ namespace WoolGame
             tutorialStep=state.step;tutorialShotSlot=state.waitingShot;collectionSequence=state.sequence;
             elapsed=state.elapsed;tutorialFeedbackUntil=state.feedbackRemaining>0?elapsed+state.feedbackRemaining:0;
             headDistance=Mathf.Clamp(state.head+rig.route.EntryExtension,definition.tutorial?entryTarget:0,definition.tutorial?rig.route.Length-1.5f:rig.route.Length);entering=false;phase=Phase.Playing;
-            unlockedSlotMask=state.unlockedMask;sortUses=state.sortCount;grace=state.grace;amplifyUntil=elapsed+state.amplifyRemaining;
+            unlockedSlotMask=state.unlockedMask;sortUses=state.sortCount;grace=0;amplifyUntil=elapsed+state.amplifyRemaining;
             level.Yarn.Clear();level.Yarn.AddRange(state.colors);yarnAmounts.Clear();yarnAmounts.AddRange(state.amounts);
             SyncYarnViews();
             for(int i=0;i<level.Tiles.Count;i++)if(state.selected[i]){level.Tiles[i].selected=true;tileViews[i].gameObject.SetActive(false);}

@@ -99,7 +99,7 @@ namespace WoolGame
                 string id=ProductId(order),token=Validate(order,id);WoolProgress.DeliverPurchase(id,token);
                 // Confirm only after the durable reward/transaction save succeeds.
                 store.ConfirmPurchase(order);
-            }catch(Exception e){busy=false;buying=null;Debug.LogWarning("Purchase left pending: "+e.GetType().Name);Tell("PURCHASE PENDING","Your purchase could not be verified yet. Reopen the game to retry. No unverified reward was granted.");}
+            }catch(Exception e){busy=false;buying=null;Debug.LogWarning("Purchase left pending: "+e);Tell("PURCHASE PENDING","Your purchase could not be verified yet. Reopen the game to retry. No unverified reward was granted.");}
         }
         void Confirmed(Order order){if(order is FailedOrder failed){Failed(failed);return;}bool notify=buying!=null;busy=false;buying=null;ApplyNoAds();if(notify){
 #if UNITY_EDITOR
@@ -118,7 +118,7 @@ namespace WoolGame
         }
         void PurchasesFailed(PurchasesFetchFailureDescription failure){bool notify=restoring;restoring=busy=false;if(notify)Tell("RESTORE UNAVAILABLE","The store could not retrieve your purchases. Please try again.");}
         void ApplyNoAds(){if(WoolProgress.PermanentNoAds&&AdsMediation.AdsMediationManager.instance)AdsMediation.AdsMediationManager.instance.OnRemoveAds();}
-        void Tell(string title,string body){Message?.Invoke(title,body);}
+        void Tell(string title,string body){if(Message==null)return;foreach(Action<string,string> listener in Message.GetInvocationList())try{listener(title,body);}catch(Exception e){Debug.LogException(e);}}
         void OnDestroy(){if(instance!=this)return;instance=null;if(store==null)return;store.OnStoreConnected-=Connected;store.OnStoreDisconnected-=Disconnected;store.OnProductsFetched-=ProductsFetched;store.OnProductsFetchFailed-=ProductsFailed;store.OnPurchasePending-=Pending;store.OnPurchaseConfirmed-=Confirmed;store.OnPurchaseFailed-=Failed;store.OnPurchaseDeferred-=Deferred;store.OnPurchasesFetched-=PurchasesFetched;store.OnPurchasesFetchFailed-=PurchasesFailed;store.OnAuthAccountChanged-=AccountChanged;}
     }
 }

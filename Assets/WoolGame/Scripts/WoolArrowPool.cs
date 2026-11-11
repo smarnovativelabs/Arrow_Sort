@@ -109,6 +109,9 @@ namespace WoolGame
         {
             if(!parallelWorker&&slot>0){Worker(slot).Reveal(slot);return;}
             activeBows[slot].gameObject.SetActive(true);
+            var loadedVisual=authoredLayout.slots[slot].visuals[activeColors[slot]];
+            SampleBow(loadedVisual,.7916667f);SetString(loadedVisual,drawDistance);
+            authoredLayout.slots[slot].arrows[activeColors[slot]].localPosition=loadedVisual.loadedPosition-Vector3.forward*drawDistance;
             authoredLayout.slots[slot].arrows[activeColors[slot]].gameObject.SetActive(true);
         }
         public void Release(int slot)
@@ -126,13 +129,13 @@ namespace WoolGame
             var binding=authoredLayout.slots[slot];
             visual=binding.visuals[color];arrow=binding.arrows[color];
             if(recovering==visual){recovering=null;recoveringArrow=null;visual.frame.localPosition=Vector3.zero;}
-            returnParent=arrow.parent;returnPosition=arrow.localPosition;
+            returnParent=arrow.parent;returnPosition=visual.loadedPosition;
             returnRotation=arrow.localRotation;returnScale=arrow.localScale;
             var aim=ProjectedAim(target.position,weapon.position);aim.y=0;
             if(aim.sqrMagnitude>.0001f)weapon.rotation=Quaternion.LookRotation(aim,Vector3.up);
             arrow.gameObject.SetActive(true);
             timer=flightTime=0;stage=ShotStage.Prepare;
-            SampleBow(visual,0);
+            SampleBow(visual,.7916667f);
         }
         public int Tick(float dt)
         {
@@ -149,9 +152,9 @@ namespace WoolGame
             {
                 float t=Mathf.Clamp01(timer/prepareSeconds);
                 visual.frame.localScale=visual.animationRoot?Vector3.one:new Vector3(1-.035f*t,1,1-.07f*t);
-                SampleBow(visual,t*.8f);
+                SampleBow(visual,.7916667f);
                 arrow.localPosition=returnPosition-Vector3.forward*(drawDistance*t);
-                SetString(visual,drawDistance*t);
+                SetString(visual,drawDistance);
                 if(timer<prepareSeconds)return -1;
                 arrow.SetParent(authoredLayout.environment.transform,true);
                 BeginProjectedFlight();
@@ -167,7 +170,7 @@ namespace WoolGame
                 visual.frame.localPosition=Vector3.back*(kick*recoilDistance);
                 visual.frame.localScale=Vector3.one;
                 SetString(visual,-.06f*kick);
-                SampleBow(visual,.8f+Mathf.Clamp01(flightTime/recoilSeconds)*.2f);
+                SampleBow(visual,.7916667f+Mathf.Clamp01(flightTime/recoilSeconds)*.0833333f);
                 // Tip is the mesh origin: the impact point and visible arrowhead agree.
                 var bounds=targetRenderer.bounds;
                 var end=new Vector3(bounds.center.x,bounds.max.y+.08f,bounds.center.z);
@@ -201,6 +204,7 @@ namespace WoolGame
         public void TickPresentation(float dt)
         {
             foreach(var worker in parallelShooters)if(worker)worker.TickPresentation(dt);
+            for(int slot=0;slot<activeBows.Length;slot++){if(!activeBows[slot]||!activeBows[slot].gameObject.activeSelf)continue;var loaded=authoredLayout.slots[slot].visuals[activeColors[slot]];if(loaded==visual||loaded==recovering)continue;SampleBow(loaded,.7916667f);SetString(loaded,drawDistance);}
             // Editor script reloads can retain the recovery record after its
             // scene transform is replaced. Discard that stale presentation state.
             if(recovering!=null&&!recovering.frame)
@@ -216,8 +220,10 @@ namespace WoolGame
             {
                 recoveryTime+=dt;float t=Mathf.Clamp01(recoveryTime/recoverySeconds);
                 recovering.frame.localPosition=Vector3.Lerp(recoveryStart,Vector3.zero,t);
-                SetString(recovering,0);
-                SampleBow(recovering,Mathf.Lerp(.9f,authoredLayout.bowAttack?authoredLayout.bowAttack.length:1,t));
+                float reload=Mathf.SmoothStep(0,1,t);
+                SetString(recovering,drawDistance*reload);
+                SampleBow(recovering,.7916667f*reload);
+                if(recoveringArrow){recoveringArrow.gameObject.SetActive(t>.25f);recoveringArrow.localPosition=recovering.loadedPosition-Vector3.forward*(drawDistance*reload);}
                 if(t>=1)
                 {
                     if(recoveringSlot>=0&&recoveringSlot<activeBows.Length&&activeBows[recoveringSlot]&&recoveringArrow)recoveringArrow.gameObject.SetActive(true);
@@ -236,6 +242,7 @@ namespace WoolGame
         }
         static void SetString(WoolBowVisual v,float pull)
         {
+            
             if(!v.bowstring)return;
             v.bowstring.SetPosition(0,new Vector3(-.66f,.15f,.22f));
             v.bowstring.SetPosition(1,new Vector3(0,.15f,-.26f-pull));
@@ -244,7 +251,11 @@ namespace WoolGame
         void SampleBow(WoolBowVisual v,float time)
         {
             if(v!=null&&v.animationRoot&&authoredLayout.bowAttack)
-                authoredLayout.bowAttack.SampleAnimation(v.animationRoot,Mathf.Clamp(time,0,authoredLayout.bowAttack.length));
+                {
+                var driver=v.animationRoot.GetComponent<WoolBowPoseDriver>();
+                if(!driver)driver=v.animationRoot.AddComponent<WoolBowPoseDriver>();
+                driver.Sample(authoredLayout.bowAttack,Mathf.Clamp(time,0,authoredLayout.bowAttack.length));
+                }
         }
         static void Emit(ParticleSystem effect,Vector3 at,Color tint,int count,float size)
         {

@@ -160,7 +160,7 @@ WoolSoundLibrary LoadClips()
         WoolGameAudio gameAudio;
         public void BindAudio(WoolGameAudio audio)
         {
-            gameAudio=audio;
+            gameAudio=audio;ApplyUnifiedWalletFrames();
             foreach(var button in GetComponentsInChildren<Button>(true))BindButtonAudio(button);
             BindMotion();
         }

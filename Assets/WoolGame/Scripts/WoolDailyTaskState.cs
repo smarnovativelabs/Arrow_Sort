@@ -3,7 +3,7 @@ namespace WoolGame {
 [Serializable] public sealed class WoolDailyTaskState {
  public string day;
  public int version,creditOffset,wins,coins,unlocks,removes,sorts,amplifies,spins,videos,claims,gifts;
- public static readonly string[] Titles={"Login daily","Collect 500 coins","Clear 2 levels today","Rescue duck family 1 time","Use \"Extra Slot\" 1 time","Use \"Remove Vehicle\" 1 time","Use \"Rearrange Colors\" 1 time","Use \"Amplify\" 1 time"};
+ public static readonly string[] Titles={"Login daily","Collect 500 coins","Clear 2 levels today","Rescue duck family 1 time","Use \"Extra Slot\" 1 time","Use \"Remove Vehicle\" 1 time","Use \"Rearrange Colors\" 1 time","Use \"Boost\" 1 time"};
  public static readonly int[] Targets={1,500,2,1,1,1,1,1};
  public static readonly int[] Credits={10,15,15,20,10,10,10,10};
  public static readonly int[] GiftCoins={20,30,50,100};

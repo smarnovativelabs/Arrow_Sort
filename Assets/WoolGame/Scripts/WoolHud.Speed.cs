@@ -18,23 +18,42 @@ namespace WoolGame
             gameplaySpeedButton.onClick.AddListener(()=>SpeedPressed?.Invoke());
             SetGameplaySpeed(1);
         }
+        WoolSpeedButtonFace speedFace;WoolRewardVideoIcon speedVideoIcon;bool speedNeedsAd,speedUnlocked;int shownSpeed=1;
+        public void SetSpeedUnlocked(bool value){speedUnlocked=value;SetGameplaySpeed(shownSpeed);}
+        public void SetSpeedAdRequired(bool value){speedNeedsAd=value;SetGameplaySpeed(shownSpeed);}
         public void SetGameplaySpeed(int multiplier)
         {
-            if(gameplaySpeedLabel)gameplaySpeedLabel.text=multiplier==2?"×2":"×1";
+            shownSpeed=multiplier;if(speedFace){speedFace.active=multiplier==2;speedFace.SetVerticesDirty();}if(speedVideoIcon)speedVideoIcon.gameObject.SetActive(speedNeedsAd&&!speedUnlocked);if(gameplaySpeedLabel){gameplaySpeedLabel.rectTransform.offsetMin=new Vector2(speedNeedsAd&&!speedUnlocked?76:8,5);gameplaySpeedLabel.rectTransform.offsetMax=new Vector2(-8,-5);}if(gameplaySpeedLabel){gameplaySpeedLabel.text="2×";gameplaySpeedLabel.alignment=TextAlignmentOptions.Center;}if(gameplaySpeedButton){var face=gameplaySpeedButton.GetComponent<Image>();if(face)face.color=multiplier==2?new Color(.68f,.55f,.34f):Color.white;}
+        }
+        TMP_Text speedTrialTimer;int shownTrialSeconds=-1;
+        public void SetSpeedTrialCountdown(float remaining,bool visible){
+            if(!gameplaySpeedButton)return;
+            if(!speedTrialTimer){
+                var go=new GameObject("Speed trial countdown",typeof(RectTransform),typeof(TextMeshProUGUI));go.transform.SetParent(gameplaySpeedButton.transform,false);
+                speedTrialTimer=go.GetComponent<TextMeshProUGUI>();speedTrialTimer.font=gameplaySpeedLabel.font;speedTrialTimer.fontSize=28;speedTrialTimer.alignment=TextAlignmentOptions.Center;
+                speedTrialTimer.color=WoolArt.Hex("713B19");speedTrialTimer.outlineColor=WoolArt.Hex("FFF1BD");speedTrialTimer.outlineWidth=.12f;speedTrialTimer.raycastTarget=false;
+                var rt=speedTrialTimer.rectTransform;rt.anchorMin=rt.anchorMax=new Vector2(.5f,0);rt.pivot=new Vector2(.5f,1);rt.anchoredPosition=new Vector2(0,-6);rt.sizeDelta=new Vector2(180,40);
+            }
+            speedTrialTimer.gameObject.SetActive(visible);
+            int seconds=Mathf.Max(0,Mathf.CeilToInt(remaining));if(seconds==shownTrialSeconds)return;shownTrialSeconds=seconds;
+            speedTrialTimer.text=(seconds/60).ToString("00")+":"+(seconds%60).ToString("00");
         }
         void StyleGameplaySpeed()
         {
             var legacy=header.Find("Label");
             if(legacy){var text=legacy.GetComponent<TMP_Text>();if(text&&text.text.StartsWith(">>"))legacy.gameObject.SetActive(false);}
             var face=gameplaySpeedButton.GetComponent<UnityEngine.UI.Image>();
-            if(face){face.sprite=null;face.color=Color.clear;face.raycastTarget=true;}
-            gameplaySpeedButton.transition=Selectable.Transition.None;
+            if(face){face.sprite=Resources.Load<Sprite>("WoolButtons/Amber");face.type=Image.Type.Sliced;face.color=Color.white;face.raycastTarget=true;}
+                                    gameplaySpeedButton.transition=Selectable.Transition.None;
+            if(face)face.enabled=false;
+            if(!speedFace){var go=new GameObject("Raised cream speed face",typeof(RectTransform),typeof(WoolSpeedButtonFace));go.transform.SetParent(gameplaySpeedButton.transform,false);go.transform.SetAsFirstSibling();speedFace=go.GetComponent<WoolSpeedButtonFace>();var rt=(RectTransform)go.transform;rt.anchorMin=Vector2.zero;rt.anchorMax=Vector2.one;rt.offsetMin=rt.offsetMax=Vector2.zero;}gameplaySpeedButton.targetGraphic=speedFace;
+            if(!speedVideoIcon){var go=new GameObject("Rewarded video badge",typeof(RectTransform),typeof(WoolRewardVideoIcon));go.transform.SetParent(gameplaySpeedButton.transform,false);speedVideoIcon=go.GetComponent<WoolRewardVideoIcon>();speedVideoIcon.raycastTarget=false;var rt=(RectTransform)go.transform;rt.anchorMin=rt.anchorMax=new Vector2(0,.5f);rt.pivot=new Vector2(.5f,.5f);rt.anchoredPosition=new Vector2(44,0);rt.sizeDelta=new Vector2(53,49);go.SetActive(speedNeedsAd&&!speedUnlocked);}
             if(gameplaySpeedLabel)
             {
                 gameplaySpeedLabel.textWrappingMode=TextWrappingModes.NoWrap;
-                gameplaySpeedLabel.enableAutoSizing=false;gameplaySpeedLabel.fontSize=72;
-                gameplaySpeedLabel.color=new Color(.2f,.27f,.12f,1);gameplaySpeedLabel.outlineColor=Color.white;
-                gameplaySpeedLabel.outlineWidth=.1f;gameplaySpeedLabel.raycastTarget=false;gameplaySpeedButton.GetComponent<RectTransform>().sizeDelta=new Vector2(160,110);gameplaySpeedLabel.rectTransform.anchorMin=Vector2.zero;gameplaySpeedLabel.rectTransform.anchorMax=Vector2.one;gameplaySpeedLabel.rectTransform.offsetMin=Vector2.one*5;gameplaySpeedLabel.rectTransform.offsetMax=-Vector2.one*5;
+                gameplaySpeedLabel.enableAutoSizing=false;gameplaySpeedLabel.fontSize=48;
+                gameplaySpeedLabel.color=WoolArt.Hex("713B19");gameplaySpeedLabel.outlineColor=WoolArt.Hex("FFF1BD");
+                gameplaySpeedLabel.outlineWidth=.1f;gameplaySpeedLabel.raycastTarget=false;gameplaySpeedButton.GetComponent<RectTransform>().sizeDelta=new Vector2(190,100);gameplaySpeedLabel.rectTransform.anchorMin=Vector2.zero;gameplaySpeedLabel.rectTransform.anchorMax=Vector2.one;gameplaySpeedLabel.rectTransform.offsetMin=Vector2.one*5;gameplaySpeedLabel.rectTransform.offsetMax=-Vector2.one*5;
             }
         }
 #if UNITY_EDITOR

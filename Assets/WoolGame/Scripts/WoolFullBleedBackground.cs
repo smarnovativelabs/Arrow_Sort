@@ -41,16 +41,53 @@ namespace WoolGame
         public UnityEngine.UI.Image[] sources;
         public GameObject menuRoot;
         Vector2 lastSize;Sprite lastSprite;
+        RawImage mapContinuation;
+        readonly Vector3[] sourceCorners=new Vector3[4];
+        void ContinueMap(Image source)
+        {
+            // This transform defines the map coordinates; the continuation below is
+            // the sole renderer, including the notch and the area behind the buttons.
+            source.enabled=false;
+            if(!mapContinuation)
+            {
+                var existing=transform.Find("Continuous map through safe edges");
+                if(existing)mapContinuation=existing.GetComponent<RawImage>();
+                else
+                {
+                    var go=new GameObject("Continuous map through safe edges",typeof(RectTransform),typeof(CanvasRenderer),typeof(RawImage));
+                    go.transform.SetParent(transform,false);mapContinuation=go.GetComponent<RawImage>();
+                }
+                mapContinuation.raycastTarget=false;
+            }
+            var map=source.GetComponentInParent<WoolSkywayMap>();
+            if(mapContinuation.transform.parent!=map.transform){mapContinuation.transform.SetParent(map.transform,false);mapContinuation.transform.SetAsFirstSibling();}
+            mapContinuation.enabled=true;
+            WoolCanvasArt.FillCanvas(mapContinuation.rectTransform);
+            mapContinuation.texture=source.sprite.texture;
+            mapContinuation.texture.wrapMode=TextureWrapMode.Clamp;
+            mapContinuation.color=source.color;
+            source.rectTransform.GetWorldCorners(sourceCorners);
+            Vector2 min=mapContinuation.rectTransform.InverseTransformPoint(sourceCorners[0]);
+            Vector2 max=mapContinuation.rectTransform.InverseTransformPoint(sourceCorners[2]);
+            Vector2 span=max-min;
+            if(span.x<=0||span.y<=0)return;
+            var rect=mapContinuation.rectTransform.rect;
+            Vector2 low=(rect.min-min)/span,high=(rect.max-min)/span;
+            var uv=UnityEngine.Sprites.DataUtility.GetOuterUV(source.sprite);
+            mapContinuation.uvRect=Rect.MinMaxRect(uv.x+low.x*(uv.z-uv.x),uv.y+low.y*(uv.w-uv.y),uv.x+high.x*(uv.z-uv.x),uv.y+high.y*(uv.w-uv.y));
+        }
         void LateUpdate()
         {
             if(!surface)return;
             UnityEngine.UI.Image source=null;
             if(sources!=null)foreach(var candidate in sources)
                 if(candidate&&candidate.gameObject.activeInHierarchy&&(candidate.sprite||candidate.color.a>.9f))source=candidate;
+            if(source&&source.sprite&&source.GetComponentInParent<WoolSkywayMap>())
+            {
+                surface.enabled=false;ContinueMap(source);return;
+            }
+            if(mapContinuation)mapContinuation.enabled=false;
             bool visible=source;
-            // The scrolling map already fills the physical canvas. A second, separately
-            // scaled copy behind it makes its paths diverge in the notch and bottom margins.
-            if(source&&source.GetComponentInParent<WoolSkywayMap>())visible=false;
             surface.enabled=visible;
             if(!visible)return;
             var rect=(RectTransform)surface.transform.parent;

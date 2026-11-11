@@ -86,7 +86,11 @@ Shader "WoolGame/Shared Snake Gloss"
                 half3 illumination=.75h+.25h*min(light.color,half3(1.2h,1.2h,1.2h))*diffuse;
                 color*=lerp(illumination,half3(1,1,1),gloss);
                 half3 neutral=detail*_NeutralBrightness;
-                half3 result=lerp(neutral,color,colored);
+                                half3 result=lerp(neutral,color,colored);
+                // Add light using the existing palette hue; do not replace gameplay colors.
+                half rim=pow(1-saturate(dot(n,SafeNormalize(i.viewWS))),2.4h);
+                half3 paletteLight=SAMPLE_TEXTURE2D(_TailRamp,sampler_TailRamp,float2(.92h,i.row)).rgb;
+                result+=colored*(paletteLight*(.22h+rim*.48h)+half3(1,1,1)*reflection*.24h)*_Shine;
                 result=lerp(result,half3(.88h,.95h,1)*( .82h+.18h*diffuse),_SortWhite);
                 return half4(result,1);
             }

@@ -7,9 +7,10 @@ public sealed class WoolCoinWallet:MonoBehaviour {
  public WoolHud owner;public TMP_Text amount;public Button button;public Image coin;public TMP_Text plus;
  void OnEnable(){Bind();Refresh();}
  void Start(){Bind();}
- void Bind(){if(!button||!owner)return;button.onClick.RemoveAllListeners();for(int i=0;i<button.onClick.GetPersistentEventCount();i++)button.onClick.SetPersistentListenerState(i,UnityEngine.Events.UnityEventCallState.Off);button.onClick.AddListener(owner.ShowCoinOptions);}
- void LateUpdate(){Refresh();}
- public void Refresh(){if(!amount)return;amount.text=WoolCoinText.Format(WoolProgress.Coins);amount.color=WoolArt.Hex("693415");var r=(RectTransform)transform;float w=r.rect.width,h=r.rect.height;if(w<=0||h<=0)return;var t=amount.rectTransform;t.anchorMin=t.anchorMax=new Vector2(.5f,.5f);t.pivot=new Vector2(.5f,.5f);t.anchoredPosition=new Vector2(h*.14f,0);t.sizeDelta=new Vector2(Mathf.Max(40,w-h*1.5f),h*.76f);amount.enableAutoSizing=true;amount.fontSizeMax=h*.5f;amount.fontSizeMin=Mathf.Max(18,h*.25f);amount.textWrappingMode=TextWrappingModes.NoWrap;if(coin){coin.rectTransform.anchoredPosition=new Vector2(-w*.5f+h*.47f,0);coin.rectTransform.sizeDelta=Vector2.one*h*.97f;}if(plus){plus.rectTransform.anchoredPosition=new Vector2(w*.5f-h*.32f,0);plus.rectTransform.sizeDelta=new Vector2(h*.45f,h*.75f);plus.fontSize=h*.46f;plus.color=WoolArt.Hex("3BA940");}}
+ bool DisplayOnly=>GetComponentInParent<WoolUtilityPanel>(true);
+ void Bind(){if(!button||!owner)return;button.onClick.RemoveAllListeners();for(int i=0;i<button.onClick.GetPersistentEventCount();i++)button.onClick.SetPersistentListenerState(i,UnityEngine.Events.UnityEventCallState.Off);button.enabled=!DisplayOnly;if(!DisplayOnly)button.onClick.AddListener(owner.ShowCoinOptions);}
+ void LateUpdate(){Refresh();if(DisplayOnly){if(button)button.enabled=false;foreach(var graphic in GetComponentsInChildren<Graphic>(true))graphic.raycastTarget=false;var add=transform.Find("Green wallet plus");if(add)add.gameObject.SetActive(false);}}
+ public void Refresh(){if(!amount)return;amount.text=WoolCoinText.Format(WoolProgress.Coins);amount.color=WoolArt.Hex("693415");var r=(RectTransform)transform;float w=r.rect.width,h=r.rect.height;if(w<=0||h<=0)return;var t=amount.rectTransform;t.anchorMin=t.anchorMax=new Vector2(.5f,.5f);t.pivot=new Vector2(.5f,.5f);t.anchoredPosition=new Vector2(0,0);t.sizeDelta=new Vector2(Mathf.Max(40,w-h*1.9f),h*.76f);amount.enableAutoSizing=true;amount.fontSizeMax=h*.5f;amount.fontSizeMin=Mathf.Max(18,h*.25f);amount.textWrappingMode=TextWrappingModes.NoWrap;if(coin){coin.rectTransform.anchoredPosition=new Vector2(-w*.5f+h*.47f,0);coin.rectTransform.sizeDelta=Vector2.one*h*.97f;}WoolWalletPlus.Apply(r);if(plus){plus.enabled=false;plus.rectTransform.anchoredPosition=new Vector2(w*.5f-h*.32f,0);plus.rectTransform.sizeDelta=new Vector2(h*.45f,h*.75f);plus.fontSize=h*.46f;plus.color=WoolArt.Hex("3BA940");}}
  public void MatchAppearance(WoolCoinWallet source){
   if(!source||source==this)return;var image=GetComponent<Image>();var original=source.GetComponent<Image>();
   if(image&&original){image.enabled=true;image.sprite=original.sprite;image.type=original.type;image.preserveAspect=original.preserveAspect;image.color=original.color;image.raycastTarget=true;}
@@ -21,6 +22,15 @@ public sealed class WoolCoinWallet:MonoBehaviour {
  }
 }
 public sealed partial class WoolHud {
+ void ApplyUnifiedWalletFrames(){
+  var source=HomeWallet;if(!source)return;var reference=source.GetComponent<Image>();
+  foreach(var wallet in GetComponentsInChildren<WoolCoinWallet>(true))wallet.MatchAppearance(source);
+  void Match(RectTransform target){if(!target||!reference)return;var image=target.GetComponent<Image>();if(image){image.sprite=reference.sprite;image.type=Image.Type.Sliced;image.color=Color.white;}WoolWalletPlus.Apply(target);}
+  foreach(var panel in GetComponentsInChildren<WoolWinPresentation>(true))Match(panel.wallet);
+  foreach(var panel in GetComponentsInChildren<WoolLosePresentation>(true))Match(panel.wallet);
+  foreach(var panel in GetComponentsInChildren<WoolUnlockPresentation>(true))Match(panel.wallet);
+  var utility=GetComponentInChildren<WoolUtilityPanel>(true);if(utility&&utility.balance){var wallet=utility.balance.GetComponentInParent<WoolCoinWallet>(true);if(wallet)((RectTransform)wallet.transform).sizeDelta=new Vector2(450,110);}
+ }
  public WoolCoinWallet HomeWallet=>homeCoins?homeCoins.GetComponentInParent<WoolCoinWallet>(true):null;
  bool walletShopOpen;Button walletShopBack;System.Action walletShopReturn;
  bool walletPriorModal,walletPriorHeader,walletPriorFooter,walletPriorUtility,walletPriorHint;

@@ -21,9 +21,37 @@ public sealed class WoolWarehouseTutorial:MonoBehaviour {
   var copy=card.Find("Editable warehouse explanation").GetComponent<TMP_Text>();copy.text=TunnelExplanation;copy.enableAutoSizing=false;copy.fontSize=36;copy.textWrappingMode=TextWrappingModes.Normal;copy.raycastTarget=false;copy.transform.SetAsLastSibling();
   stage.Find("Warehouse container").gameObject.SetActive(!rail);remaining.gameObject.SetActive(!rail);reveal.gameObject.SetActive(!rail);leftTunnel.gameObject.SetActive(rail);rightTunnel.gameObject.SetActive(rail);railTrack.gameObject.SetActive(rail);railArrows.gameObject.SetActive(rail);stage.Find("Rail parking bay").gameObject.SetActive(rail);
   railReveal.gameObject.SetActive(rail);nextVehicle.SetParent(rail?railReveal:reveal,false);nextVehicle.SetAsFirstSibling();
-  continueButton.GetComponentInChildren<TMP_Text>().text="Got it!";continueButton.onClick.RemoveAllListeners();closeButton.onClick.RemoveAllListeners();continueButton.onClick.AddListener(Close);closeButton.onClick.AddListener(Close);
+  continueButton.GetComponentInChildren<TMP_Text>().text="Got it!";WoolGlossyButton.HomeAction(continueButton);continueButton.onClick.RemoveAllListeners();closeButton.onClick.RemoveAllListeners();continueButton.onClick.AddListener(Close);closeButton.onClick.AddListener(Close);
   foreach(var t in card.GetComponentsInChildren<TMP_Text>(true)){t.color=Color.white;if(readableText)t.fontSharedMaterial=readableText;}
-  Fit();Sample(CycleTime);
+  StylePanel();Fit();Sample(CycleTime);
+ }
+ void StylePanel(){
+  frontVehicle.sizeDelta=nextVehicle.sizeDelta=new Vector2(112,140);
+  card.sizeDelta=new Vector2(760,960);Surface(card,WoolSpinSurface.Kind.ReferencePanel);
+  var heading=card.Find("Warehouse heading") as RectTransform;
+  heading.sizeDelta=new Vector2(580,120);heading.anchoredPosition=new Vector2(0,470);Surface(heading,WoolSpinSurface.Kind.Banner);
+  var title=heading.GetComponentInChildren<TMP_Text>();title.rectTransform.anchoredPosition=Vector2.zero;title.rectTransform.sizeDelta=new Vector2(540,90);title.fontSize=52;title.color=WoolArt.Hex("713415");title.fontSharedMaterial=title.font.material;
+  var copy=card.Find("Editable warehouse explanation").GetComponent<TMP_Text>();copy.color=WoolArt.Hex("713415");copy.fontSharedMaterial=copy.font.material;
+  var explanationBackground=card.Find("Explanation ribbon");if(explanationBackground){explanationBackground.gameObject.SetActive(true);Surface((RectTransform)explanationBackground,WoolSpinSurface.Kind.TutorialTeal);((RectTransform)explanationBackground).anchoredPosition=new Vector2(0,300);((RectTransform)explanationBackground).sizeDelta=new Vector2(660,145);copy.color=Color.white;}
+  copy.fontSize=34;copy.enableAutoSizing=true;copy.fontSizeMin=28;copy.fontSizeMax=34;
+  Surface((RectTransform)stage,WoolSpinSurface.Kind.CreamCard);
+  ((RectTransform)continueButton.transform).anchoredPosition=new Vector2(0,-370);((RectTransform)continueButton.transform).sizeDelta=new Vector2(520,110);
+  ((RectTransform)closeButton.transform).anchoredPosition=new Vector2(326,425);
+
+  foreach(var label in stage.GetComponentsInChildren<TMP_Text>(true))if(label!=remaining){label.color=WoolArt.Hex("713415");label.fontSharedMaterial=label.font.material;}
+  if(slotLabel){slotLabel.color=Color.white;slotLabel.fontSharedMaterial=slotLabel.font.material;}
+  var buttonImage=continueButton.GetComponent<Image>();buttonImage.sprite=Resources.Load<Sprite>("WoolButtons/Green");buttonImage.type=Image.Type.Sliced;
+  var previousButtonSurface=continueButton.transform.Find("Crisp panel surface");if(previousButtonSurface)previousButtonSurface.gameObject.SetActive(false);buttonImage.enabled=true;
+  slotImage.sprite=Resources.Load<Sprite>("WoolButtons/Green");slotImage.type=Image.Type.Sliced;slotImage.color=Color.white;
+  var caption=continueButton.GetComponentInChildren<TMP_Text>();caption.fontSize=58;caption.color=Color.white;
+ }
+ static void Surface(RectTransform target,WoolSpinSurface.Kind kind){
+  var image=target.GetComponent<Image>();if(image)image.enabled=false;
+  var old=target.GetComponent<WoolSpinSurface>();if(old)old.enabled=false;
+  var child=target.Find("Crisp panel surface") as RectTransform;
+  if(!child){child=new GameObject("Crisp panel surface",typeof(RectTransform),typeof(CanvasRenderer),typeof(WoolSpinSurface)).GetComponent<RectTransform>();child.SetParent(target,false);}
+  child.anchorMin=Vector2.zero;child.anchorMax=Vector2.one;child.offsetMin=child.offsetMax=Vector2.zero;child.SetAsFirstSibling();
+  var surface=child.GetComponent<WoolSpinSurface>();surface.kind=kind;surface.color=Color.white;surface.raycastTarget=false;surface.SetVerticesDirty();
  }
  void BuildDemo(){
   stage=card.Find("Looping warehouse demo");var depot=stage.Find("Warehouse container").GetComponent<Image>();var panel=stage.GetComponent<Image>().sprite;
@@ -50,11 +78,11 @@ public sealed class WoolWarehouseTutorial:MonoBehaviour {
  void OnApplicationQuit(){if(closeAt>0)SaveElapsed();}
  void LateUpdate(){var root=(RectTransform)transform;var parent=root.parent as RectTransform;if(parent){parent.anchorMin=Vector2.zero;parent.anchorMax=Vector2.one;parent.offsetMin=parent.offsetMax=Vector2.zero;}root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.offsetMin=root.offsetMax=Vector2.zero;}
  void Update(){if(closeAt>0&&Time.unscaledTime>=closeAt){Close();return;}clock=Mathf.Max(0,Time.unscaledTime-(closeAt-10));Sample(CycleTime);Fit();}
- void Fit(){var root=(RectTransform)transform;var area=WoolHud.CurrentSafeArea;float scale=Mathf.Max(.1f,Mathf.Min((root.rect.width-56)/760,(root.rect.height*area.height/Mathf.Max(1,Screen.height)-80)/1240));card.localScale=Vector3.one*scale;card.anchoredPosition=new Vector2(0,-35*scale+(area.center.y/Mathf.Max(1,Screen.height)-.5f)*root.rect.height);var body=card.Find("Editable warehouse explanation") as RectTransform;body.anchoredPosition=new Vector2(0,260);body.sizeDelta=new Vector2(640,165);var demo=card.Find("Looping warehouse demo") as RectTransform;demo.anchoredPosition=new Vector2(0,-80);demo.sizeDelta=new Vector2(630,500);var depot=demo.Find("Warehouse container") as RectTransform;depot.anchoredPosition=new Vector2(0,-130);depot.sizeDelta=new Vector2(160,210);}
+ void Fit(){var root=(RectTransform)transform;var area=WoolHud.CurrentSafeArea;float scale=Mathf.Max(.1f,Mathf.Min((root.rect.width-56)/760,(root.rect.height*area.height/Mathf.Max(1,Screen.height)-80)/1100));card.localScale=Vector3.one*scale;card.anchoredPosition=new Vector2(0,-35*scale+(area.center.y/Mathf.Max(1,Screen.height)-.5f)*root.rect.height);var body=card.Find("Editable warehouse explanation") as RectTransform;body.anchoredPosition=new Vector2(0,300);body.sizeDelta=new Vector2(600,120);var demo=card.Find("Looping warehouse demo") as RectTransform;demo.anchoredPosition=new Vector2(0,-30);demo.sizeDelta=new Vector2(630,470);var depot=demo.Find("Warehouse container") as RectTransform;depot.anchoredPosition=new Vector2(0,-130);depot.sizeDelta=new Vector2(160,210);}
  public void Sample(float time){
   float t=Mathf.Repeat(time,5);frontVehicle.localRotation=nextVehicle.localRotation=Quaternion.identity;
   if(!slotLabel)return;
-  bool free=t>=1.3f;slotLabel.text=free?(t>=3.1f?"SLOT TAKEN":"FREE SLOT"):"SLOTS FULL";slotImage.color=WoolArt.Hex(free?"26855F":"B94B3F");
+  bool free=t>=1.3f;slotLabel.text=free?(t>=3.1f?"SLOT TAKEN":"FREE SLOT"):"SLOTS FULL";slotImage.color=Color.white;
   if(railLesson){
    slot.anchoredPosition=new Vector2(-85,201);
    float slide=Mathf.SmoothStep(0,1,Mathf.InverseLerp(1.3f,2.7f,t));float park=Mathf.SmoothStep(0,1,Mathf.InverseLerp(2.7f,3.25f,t));
@@ -64,11 +92,11 @@ public sealed class WoolWarehouseTutorial:MonoBehaviour {
    handFade.alpha=0;return;
   }
   slot.anchoredPosition=new Vector2(0,201);float depart=Mathf.SmoothStep(0,1,Mathf.InverseLerp(1.3f,2.5f,t));
-  frontVehicle.anchoredPosition=new Vector2(0,45+depart*150);frontFade.alpha=t<2.7f?1-Mathf.InverseLerp(2.4f,2.7f,t):0;
-  float emerge=Mathf.SmoothStep(0,1,Mathf.InverseLerp(2.8f,4.15f,t));nextVehicle.anchoredPosition=new Vector2(0,Mathf.Lerp(-155,45,emerge)-114);nextFade.alpha=t<2.8f?0:1;
+  frontVehicle.anchoredPosition=new Vector2(0,38+depart*150);frontFade.alpha=t<2.7f?1-Mathf.InverseLerp(2.4f,2.7f,t):0;
+  float emerge=Mathf.SmoothStep(0,1,Mathf.InverseLerp(2.8f,4.15f,t));nextVehicle.anchoredPosition=new Vector2(0,Mathf.Lerp(-155,38,emerge)-114);nextFade.alpha=t<2.8f?0:1;
   remaining.text=t<2.8f?"6":"5";remaining.rectTransform.anchoredPosition=new Vector2(0,-142);remaining.fontSize=43;
   phaseLabel.text=t<1.3f?"1  TAP THE FRONT VEHICLE":t<2.8f?"2  IT TAKES A FREE SLOT":"3  THE NEXT VEHICLE COMES OUT";
-  float approach=Mathf.SmoothStep(0,1,t/.7f);hand.anchoredPosition=Vector2.Lerp(new Vector2(180,-55),new Vector2(0,85),approach);handFade.alpha=t<1.4f?1:1-Mathf.InverseLerp(1.4f,1.8f,t);hand.localScale=Vector3.one*(t>.7f&&t<1?1-.09f*Mathf.Sin((t-.7f)/.3f*Mathf.PI):1);
+  float approach=Mathf.SmoothStep(0,1,t/.7f);hand.anchoredPosition=Vector2.Lerp(new Vector2(180,-55),new Vector2(0,85),approach);handFade.alpha=t<.7f?0:t<1.4f?1:1-Mathf.InverseLerp(1.4f,1.8f,t);hand.localScale=Vector3.one*(t>.7f&&t<1?1-.09f*Mathf.Sin((t-.7f)/.3f*Mathf.PI):1);
  }
 }
 public static partial class WoolProgress{

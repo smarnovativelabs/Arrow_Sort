@@ -25,7 +25,13 @@ public sealed class WoolUtilityPanel:MonoBehaviour {
    if(gameplayHome){gameplayHome.gameObject.SetActive(home!=null);if(home!=null){var rt=(RectTransform)gameplayHome.transform;rt.anchoredPosition=new Vector2(180,-390);rt.sizeDelta=new Vector2(320,105);gameplayHome.GetComponentInChildren<TMP_Text>().text="HOME";gameplayHome.onClick.RemoveAllListeners();gameplayHome.onClick.AddListener(()=>{Hide();home();});}}
   }
   var ms=WoolGlossyButton.Style(music);var ss=WoolGlossyButton.Style(sound);if(ms){ms.tone=WoolGlossyButton.Tone.Blue;ms.subtleShine=false;}if(ss){ss.tone=WoolGlossyButton.Tone.Blue;ss.subtleShine=false;}
-  Open();
+  PolishAudioBadges();Open();
+ }
+ void PolishAudioBadges(){
+  foreach(var image in settingsBody.GetComponentsInChildren<Image>(true)){
+   if(image.name!="Icon medallion")continue;
+   image.enabled=false;var background=image.transform.Find("Rounded badge background");if(!background){var go=new GameObject("Rounded badge background",typeof(RectTransform),typeof(WoolSpinSurface));go.transform.SetParent(image.transform,false);go.transform.SetAsFirstSibling();var rt=(RectTransform)go.transform;rt.anchorMin=Vector2.zero;rt.anchorMax=Vector2.one;rt.offsetMin=rt.offsetMax=Vector2.zero;background=go.transform;}var surface=background.GetComponent<WoolSpinSurface>();surface.kind=WoolSpinSurface.Kind.Banner;surface.raycastTarget=false;surface.SetVerticesDirty();
+  }
  }
  public void ShowCoins(Action buy,Action watch,Action changed){
   coinMode=true;closed=null;walletChanged=changed;title.text="Your Coins";settingsBody.SetActive(false);coinsBody.SetActive(true);

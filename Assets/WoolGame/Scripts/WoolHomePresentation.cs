@@ -4,11 +4,14 @@ using UnityEngine.UI;
 namespace WoolGame
 {
     // Presentation only: WoolHud retains all wallet, navigation and level ownership.
+    [DefaultExecutionOrder(500)]
     public sealed class WoolHomePresentation : MonoBehaviour
     {
         public RectTransform background, topBar, hero, actions, levelArea, navigation;
         public RectTransform dragon, mother, leftWing, rightWing, wheel, levelButton, levelName;
         public RectTransform[] actionIcons, actionCards, clouds;
+        public Sprite lockedTasksSprite,lockedSpinSprite;
+        float nextFeatureRefresh;
         RectTransform root;
         Vector2 lastSize;
         Vector3 heroScale;
@@ -29,6 +32,8 @@ namespace WoolGame
             root.sizeDelta=new Vector2(941,height);root.localScale=Vector3.one*scale;
             root.anchoredPosition=Vector2.zero;
             PlaceGroup(topBar,new Vector2(.5f,1),new Vector2(0,-90));
+            AlignHeader();
+
             PlaceGroup(actions,new Vector2(.5f,0),new Vector2(0,558));
             PlaceGroup(levelArea,new Vector2(.5f,0),new Vector2(0,330));
             PlaceGroup(navigation,new Vector2(.5f,0),new Vector2(0,99));
@@ -49,12 +54,44 @@ namespace WoolGame
             }
             lastSize=size;
         }
+        void RefreshFeatureLocks()
+        {
+            if(!actions)return;
+            SetFeatureLock("Tasks",WoolProgress.DailyTasksUnlocked,lockedTasksSprite);
+            SetFeatureLock("Lucky Spin",WoolProgress.LuckySpinUnlocked,lockedSpinSprite);
+        }
+        void SetFeatureLock(string name,bool unlocked,Sprite sprite)
+        {
+            var target=actions.Find(name);if(!target)return;var button=target.GetComponent<Button>();if(button)button.interactable=unlocked;
+            var cover=target.Find("Locked feature artwork") as RectTransform;
+            if(!cover&&sprite){cover=new GameObject("Locked feature artwork",typeof(RectTransform),typeof(Image)).GetComponent<RectTransform>();cover.SetParent(target,false);cover.anchorMin=Vector2.zero;cover.anchorMax=Vector2.one;cover.offsetMin=cover.offsetMax=Vector2.zero;var image=cover.GetComponent<Image>();image.sprite=sprite;image.raycastTarget=false;}
+            var original=target.GetComponent<Image>();if(original)original.enabled=unlocked;
+            foreach(Transform child in target){if(child==cover)continue;var group=child.GetComponent<CanvasGroup>();if(!group)group=child.gameObject.AddComponent<CanvasGroup>();group.alpha=unlocked?1:0;group.blocksRaycasts=unlocked;}
+            if(cover){cover.gameObject.SetActive(!unlocked);cover.SetAsLastSibling();}
+        }
+        void AlignHeader()
+        {
+            if(!topBar)return;
+            HeaderItem("Profile",100,105,120,120);
+            HeaderItem("Wallet",470.5f,105,292,74);
+            HeaderItem("Settings",841,105,110,110);
+            var profile=topBar.Find("Profile");var avatar=profile?profile.Find("Saved duck avatar") as RectTransform:null;
+            if(avatar){avatar.anchorMin=avatar.anchorMax=avatar.pivot=Vector2.one*.5f;avatar.anchoredPosition=Vector2.zero;avatar.sizeDelta=new Vector2(110,110);}
+        }
+        void HeaderItem(string name,float x,float y,float w,float h)
+        {
+            var rt=topBar.Find(name) as RectTransform;if(!rt)return;
+            rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=Vector2.one*.5f;
+            rt.anchoredPosition=new Vector2(x,-y);rt.sizeDelta=new Vector2(w,h);
+        }
         static void PlaceGroup(RectTransform rt,Vector2 anchor,Vector2 position)
         {if(!rt)return;rt.anchorMin=rt.anchorMax=anchor;rt.anchoredPosition=position;}
         void LateUpdate()
         {
             var parent=transform.parent as RectTransform;
             if(parent&&parent.rect.size!=lastSize)Fit();
+            AlignHeader();
+            if(Time.unscaledTime>=nextFeatureRefresh){nextFeatureRefresh=Time.unscaledTime+.25f;RefreshFeatureLocks();}
             clock+=Mathf.Min(Time.unscaledDeltaTime,.1f);
             float t=clock;
             if(background)background.localScale=Vector3.one*(1+.004f*Mathf.Sin(t*.4f));
@@ -71,7 +108,7 @@ namespace WoolGame
                 icon.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*1.7f+i*1.4f)*2.5f);
                 icon.localScale=Vector3.one*(1+.018f*Mathf.Sin(t*2+i));
             }
-            if(levelButton)levelButton.localScale=Vector3.one;
+            if(levelButton)levelButton.localScale=Vector3.one*(1f+.035f*Mathf.Sin(t*2.4f));
             // Keep glyphs at a stable screen size while the button artwork pulses behind them.
             if(levelName&&levelButton)levelName.localScale=Vector3.one/levelButton.localScale.x;
             if(clouds!=null)for(int i=0;i<clouds.Length;i++)if(clouds[i])

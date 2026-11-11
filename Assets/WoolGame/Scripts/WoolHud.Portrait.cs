@@ -26,11 +26,12 @@ namespace WoolGame
             // Gameplay controls float over the scene, as in the portrait reference.
             if(releaseHeaderArt)releaseHeaderArt.gameObject.SetActive(false);
             var headerImage=header.GetComponent<UnityEngine.UI.Image>();if(headerImage)headerImage.enabled=false;
-            EdgeControl(header,"Pause",new Vector2(0,1),new Vector2(92+(portraitSafe.xMin-frame.xMin)/frameScale,-110));
-            EdgeControl(header,"Level",new Vector2(0,1),new Vector2(92+(portraitSafe.xMin-frame.xMin)/frameScale,-205));
+            EdgeControl(header,"Pause",new Vector2(0,1),new Vector2(92+(portraitSafe.xMin-frame.xMin)/frameScale,-60));
+            var settingsRect=header.Find("Pause") as RectTransform;if(settingsRect)settingsRect.sizeDelta=new Vector2(108,108);
+            EdgeControl(header,"Level",new Vector2(0,1),new Vector2(92+(portraitSafe.xMin-frame.xMin)/frameScale,-155));
             var levelPlate=header.Find("Level plate");if(levelPlate)levelPlate.gameObject.SetActive(false);
             foreach(string name in new[]{"Coin plate","Coins"}){var item=header.Find(name);if(item)item.gameObject.SetActive(false);}
-            var speed=header.Find("Gameplay speed");if(speed){speed.gameObject.SetActive(true);EdgeControl(header,"Gameplay speed",Vector2.one,new Vector2(-100+(portraitSafe.xMax-frame.xMax)/frameScale,-110));}
+            var speed=header.Find("Gameplay speed");if(speed){speed.gameObject.SetActive(true);EdgeControl(header,"Gameplay speed",Vector2.one,new Vector2(-100+(portraitSafe.xMax-frame.xMax)/frameScale,-60));}
             meter.gameObject.SetActive(false);progress.gameObject.SetActive(false);
             if(boardCropLeft)boardCropLeft.gameObject.SetActive(false);if(boardCropRight)boardCropRight.gameObject.SetActive(false);
             FitReleaseUI();
@@ -109,7 +110,7 @@ namespace WoolGame
                 header.pivot=new Vector2(.5f,1);header.sizeDelta=new Vector2(0,200);
                 header.anchoredPosition=Vector2.zero;
                 EdgeControl(header,"Pause",new Vector2(0,1),new Vector2(140,-65));
-                EdgeControl(header,"Level",new Vector2(0,1),new Vector2(140,-165));
+                EdgeControl(header,"Level",new Vector2(0,1),new Vector2(140,-150));
                 EdgeControl(header,"Level plate",new Vector2(0,1),new Vector2(70,-160));
                 EdgeControl(header,"Level difficulty",new Vector2(0,1),new Vector2(100,-172));
                 EdgeControl(header,"Coin plate",Vector2.one,new Vector2(-185,-65));

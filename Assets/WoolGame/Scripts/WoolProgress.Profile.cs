@@ -11,11 +11,20 @@ namespace WoolGame
         public static long CoinsCollected {get{EnsureLoaded();return data.collectedCoins;}}
         public static int TodayPlayCount {get{ResolveProfilePlays();return data.profilePlays.Count(WoolTrustedClock.UnixNow);}}
         public static int TodayCompletedCount {get{ResolveProfilePlays();return data.profileCompletions.Count(WoolTrustedClock.UnixNow);}}
+        public static bool ProfileNameComplete=>PlayerName!=UserId&&PlayerName!="Player";
+        public static bool ProfileAvatarComplete {get{EnsureLoaded();return data.profileAvatarSet||AvatarIndex!=0;}}
+        public static bool ProfileVisitComplete {get{EnsureLoaded();return data.profileVisited||ProfileNameComplete||ProfileAvatarComplete;}}
+        public static void RecordProfileVisit(){EnsureLoaded();if(data.profileVisited)return;data.profileVisited=true;Save();}
+        public static void RecordProfileAvatar(){EnsureLoaded();data.profileAvatarSet=true;Save();}
+        public static void ResumeProfileIntro(){EnsureLoaded();var remaining=RemainingProfileStep;if(remaining==WoolOnboardingStep.Complete){FinishProfileIntro();return;}data.onboardingStep=(int)remaining;data.featureTutorialOnly=true;Save();}
+        public static void FinishProfileIntro(){EnsureLoaded();data.profileIntroDone=true;FinishFeatureTutorial();}
+        public static WoolOnboardingStep RemainingProfileStep=>!ProfileVisitComplete?WoolOnboardingStep.Profile:!ProfileNameComplete?WoolOnboardingStep.Name:!ProfileAvatarComplete?WoolOnboardingStep.Avatar:WoolOnboardingStep.Complete;
         public static void SetProfile(string name,int avatar)
         {
             EnsureLoaded();name=(name??"").Trim();
             name=System.Text.RegularExpressions.Regex.Replace(name,@"[\p{C}<>]","");
             if(name.Length>MaxPlayerNameLength)name=name.Substring(0,MaxPlayerNameLength);
+            if(avatar!=data.avatarIndex)data.profileAvatarSet=true;
             data.playerName=string.IsNullOrWhiteSpace(name)?data.userId:name;data.avatarIndex=Math.Max(0,Math.Min(5,avatar));Save();
         }
         public static void ResolveProfilePlays()

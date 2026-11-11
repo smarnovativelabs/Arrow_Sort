@@ -44,7 +44,7 @@ namespace WoolGame
             var levelMaterial=UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/WoolGame/Designer/UI/FantasyHome/LevelText.mat");
             if(levelMaterial)specialOffer.priceLabel.fontSharedMaterial=levelMaterial;
             specialOffer.rewardLabel=FantasyText("Editable bonus coins",card,150,1140,270,82,80,Color.white);
-            var title=FantasyText("Special Offer title",card,210,42,620,116,96,Color.white);title.text="Special Offer";
+            var title=FantasyText("Special Offer title",card,210,42,620,116,96,Color.white);title.text="Rescue <color=#FFE56E>Shop</color>";title.gameObject.SetActive(false);
             specialOffer.unlockLabel=FantasyText("Editable unlock count",card,495,1020,145,62,54,Color.white);
             specialOffer.removeLabel=FantasyText("Editable remove count",card,705,1020,145,62,54,Color.white);
             specialOffer.sortLabel=FantasyText("Editable sort count",card,495,1200,145,62,54,Color.white);

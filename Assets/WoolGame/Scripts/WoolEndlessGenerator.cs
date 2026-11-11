@@ -12,11 +12,11 @@ namespace WoolGame
         const float Cell=.48f;
         static readonly int[] Palette={3,1,4,8,6,0,2,5,7,9};
         public static int DifficultyTier(int number)=>Math.Min(14,Math.Max(0,(number-1)/5));
-        public static WoolDifficulty DifficultyFor(int number)=>number>=5?WoolDifficulty.Hard:number>=2?WoolDifficulty.Medium:WoolDifficulty.Easy;
+        public static WoolDifficulty DifficultyFor(int number)=>number%11==0?WoolDifficulty.SuperHard:number%5==0?WoolDifficulty.Hard:number>=2?WoolDifficulty.Medium:WoolDifficulty.Easy;
         public static WoolLevelDefinition Generate(int number,Vector3[] referenceRoute)
         {
             if(number<1||number>MaxLevel)throw new ArgumentOutOfRangeException(nameof(number));
-            if(number<=3){var opening=GenerateOpening(number,referenceRoute);ConfigureAbilityLesson(opening);return opening;}
+            if(number<=10){var opening=GenerateOpening(number,referenceRoute);ConfigureAbilityLesson(opening);return opening;}
             var data=ScriptableObject.CreateInstance<WoolLevelDefinition>();data.hideFlags=HideFlags.DontSave;
             data.generatorRevision=5;data.number=number;data.name="Generated level "+number;data.difficulty=DifficultyFor(number);
             data.openSlots=4;data.boardScale=1;data.boardRotation=0;data.colorCount=10;
@@ -97,12 +97,12 @@ namespace WoolGame
                 for(int i=0;i<tiles.Count;i++)if(!gone[i])for(int d=0;d<4;d++)
                 {
                     if(d%2!=(int)tiles[i].direction%2 || (sources&&d==2))continue;
-                    var dir=(WoolDirection)d;bool clear=true;int removedBlockers=0;
+                    var dir=(WoolDirection)d;bool clear=true;
                     foreach(var p in tunnels)if(WoolLevel.BlocksPath(tiles[i],new WoolTile{x=p.x,y=p.y+.45f,width=1.7f,length=2.8f,direction=WoolDirection.Up},dir)){clear=false;break;}
                     if(!clear)continue;
-                    for(int j=0;j<tiles.Count;j++)if(j!=i&&WoolLevel.BlocksPath(tiles[i],tiles[j],dir)){if(!gone[j]){clear=false;break;}removedBlockers++;}
+                    for(int j=0;j<tiles.Count;j++)if(j!=i&&WoolLevel.BlocksPath(tiles[i],tiles[j],dir)){if(!gone[j]){clear=false;break;}}
                     if(!clear)continue;
-                    float score=(float)r.NextDouble()+removedBlockers*(difficulty==WoolDifficulty.Hard?8:difficulty==WoolDifficulty.Medium?5:3);
+                    float score=(float)r.NextDouble(); // Avoid repeatedly draining a single row or column.
                     if(score>best){best=score;winner=i;direction=dir;}
                 }
                 if(winner<0)throw new InvalidOperationException("Partition layout has no exit witness.");
@@ -118,7 +118,7 @@ namespace WoolGame
         }
         public static void ApplyChallenge(WoolLevelDefinition data)
         {
-            if(data.number>=5)data.difficulty=WoolDifficulty.Hard;
+            data.difficulty=DifficultyFor(data.number);
             var cars=data.vehicles;var order=data.tutorialOrder;
             if(cars.Length<50||cars.Length>MaxVehicles||order.Length!=cars.Length)throw new InvalidOperationException("Challenge levels need 50-70 vehicles and a complete exit order.");
             int total=0;foreach(var car in cars){car.ammo=WoolLevel.Capacity(car.size);total+=car.ammo;}

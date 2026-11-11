@@ -80,8 +80,8 @@ namespace WoolGame
             if(unlockPresentation)
             {
                 unlockPresentation.abilityIcons=newIcons;
-                unlockPresentation.titles=new[]{"Unlock Slot","Remove Vehicle","Sort Colors","Pierce Fog"};
-                unlockPresentation.descriptions=new[]{"Open one extra crossbow slot for this level.","Choose a vehicle and remove it from the board.","Rearrange the snake colors for a better match.","Let your crossbows shoot through the fog."};
+                unlockPresentation.titles=new[]{"Unlock Slot","Remove Vehicle","Sort Colors","Boost"};
+                unlockPresentation.descriptions=new[]{"Open one extra crossbow slot for this level.","Choose a vehicle and remove it from the board.","Rearrange the snake colors for a better match.","Clear the top fog to unlock full-screen attacks"};
                 UnityEditor.EditorUtility.SetDirty(unlockPresentation);
             }
             if(skin!=null&&skin.Length>=9){skin[0]=cream;skin[1]=green;skin[2]=blue;}
@@ -101,7 +101,7 @@ namespace WoolGame
                     if(b)Face(b.GetComponent<UnityEngine.UI.Image>(),b==utilityPanel.shop?blue:green);
                 UnityEditor.EditorUtility.SetDirty(utilityPanel);
             }
-            string[] captions={"UNLOCK","REMOVE","SORT","PIERCE FOG"};
+            string[] captions={"SLOT","REMOVE","SORT","BOOST"};
             for(int k=0;k<4;k++)
             {
                 var button=footer.Find(WoolBoosters.Names[k]);if(!button)continue;

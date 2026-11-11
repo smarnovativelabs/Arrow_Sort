@@ -53,8 +53,10 @@ namespace WoolGame
             gameCamera.cullingMask&=~(1<<layer);vehicleCamera.cullingMask&=~(1<<layer);slotCamera.cullingMask&=~(1<<layer);
             float p=Mathf.Clamp01(progress);
             var endCamera=finalLeg?slotCamera:vehicleCamera;
-            Vector3 start=vehicleCamera.WorldToScreenPoint(world.TransformPoint(from));
-            Vector3 end=endCamera.WorldToScreenPoint(world.TransformPoint(to));
+            bool approachEnd=!finalLeg&&Mathf.Abs(from.y-TravelTop)<.02f&&Mathf.Abs(to.y-TravelTop)<.02f&&Mathf.Abs(to.x-TravelLeft)>.02f&&Mathf.Abs(to.x-TravelRight)>.02f;
+            Vector3 start=DockingScreenPoint(from,vehicleCamera,finalLeg);
+            Vector3 end=DockingScreenPoint(to,endCamera,approachEnd);
+            if(finalLeg)start.x=end.x; // Descend into the reserved slot vertically, without sweeping across neighbors.
             // Preserve the collision-free outer route; never clamp it across parked vehicles.
             var screen=Vector3.Lerp(start,end,p);screen.z=transitCamera.nearClipPlane+10;
             var trail=vehicle.GetComponent<TrailRenderer>();if(trail){trail.emitting=false;trail.Clear();}
@@ -62,7 +64,25 @@ namespace WoolGame
             float boardPixels=vehicleCamera.pixelHeight/(2*vehicleCamera.orthographicSize);
             float slotPixels=endCamera.pixelHeight/(2*endCamera.orthographicSize);
             float pixels=transitCamera.pixelHeight/(2*transitCamera.orthographicSize);
-            vehicle.localScale=originalScale*(boardPixels/pixels);
+            vehicle.localScale=originalScale*(Mathf.Lerp(boardPixels,slotPixels,p)/Mathf.Max(.001f,pixels));
+        }
+        Vector3 DockingScreenPoint(Vector3 point,Camera camera,bool slotApproach=false)
+        {
+            var screen=camera.WorldToScreenPoint(world.TransformPoint(point));
+            if(camera!=vehicleCamera||!ParkingTravelReady)return screen;
+            // Use existing screen shoulders without expanding camera bounds or shrinking cars.
+            var min=vehicleCamera.WorldToScreenPoint(world.TransformPoint(new Vector3(parkedBodyMin.x,parkedBodyMin.y,point.z)));
+            var max=vehicleCamera.WorldToScreenPoint(world.TransformPoint(new Vector3(parkedBodyMax.x,parkedBodyMax.y,point.z)));
+            float boardLeft=Mathf.Min(min.x,max.x),boardRight=Mathf.Max(min.x,max.x);
+            float boardBottom=Mathf.Min(min.y,max.y),boardTop=Mathf.Max(min.y,max.y);
+            var safe=WoolHud.CurrentSafeArea;
+            float leftLane=(safe.xMin+boardLeft)*.5f,rightLane=(boardRight+safe.xMax)*.5f;
+            if(Mathf.Abs(point.x-TravelLeft)<.02f)screen.x=min.x<=max.x?leftLane:rightLane;
+            if(Mathf.Abs(point.x-TravelRight)<.02f)screen.x=min.x<=max.x?rightLane:leftLane;
+            if(Mathf.Abs(point.y-TravelBottom)<.02f)screen.y=((hud?hud.AbilityStripTopPixels:safe.yMin)+boardBottom)*.5f;
+            if(Mathf.Abs(point.y-TravelTop)<.02f)screen.y=(boardTop+SlotCamera.pixelRect.yMin)*.5f;
+            if(slotApproach&&slotCamera)screen.x=slotCamera.WorldToScreenPoint(world.TransformPoint(point)).x;
+            return screen;
         }
         void EnsureSlotCamera()
         {
@@ -72,7 +92,7 @@ namespace WoolGame
                 slotCamera=root.AddComponent<Camera>();
             }
             slotCamera.CopyFrom(vehicleCamera);slotCamera.depth=vehicleCamera.depth+.1f;
-            slotCamera.transform.rotation=vehicleCamera.transform.rotation;
+            slotCamera.transform.rotation=Quaternion.Euler(90,180,0);
             slotCamera.enabled=vehicleCamera.enabled;
             int slot=LayerMask.NameToLayer("Slot View"),rescue=LayerMask.NameToLayer("Rescue View"),board=LayerMask.NameToLayer("Vehicle View");
             slotCamera.cullingMask=~((1<<board)|(1<<rescue)|(1<<5));

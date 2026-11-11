@@ -20,15 +20,15 @@ public sealed class WoolLosePresentation:MonoBehaviour {
  public TMP_Text affordability;
  public const int ClearCost=1200;
  float clock; bool selected;
- Material retryTextMaterial;
  void RestoreRetryLabel(){
+  var retryRect=(RectTransform)retry.transform;retryRect.sizeDelta=new Vector2(420,112);retryRect.localScale=Vector3.one;
+  var face=retry.GetComponent<Image>();face.overrideSprite=null;face.color=Color.white;face.preserveAspect=false;face.type=Image.Type.Sliced;
   TMP_Text text=null;foreach(var t in retry.GetComponentsInChildren<TMP_Text>(true)){text=t;break;}
   if(!text){var go=new GameObject("Visible retry label",typeof(RectTransform),typeof(TextMeshProUGUI));go.transform.SetParent(retry.transform,false);text=go.GetComponent<TMP_Text>();}
-  text.gameObject.SetActive(true);text.enabled=true;text.text="RETRY";text.color=Color.white;text.raycastTarget=false;text.alignment=TextAlignmentOptions.Center;text.enableAutoSizing=true;text.fontSize=text.fontSizeMax=64;text.fontSizeMin=48;text.textWrappingMode=TextWrappingModes.NoWrap;
-  if(!retryTextMaterial&&text.fontSharedMaterial){retryTextMaterial=new Material(text.fontSharedMaterial);retryTextMaterial.SetColor("_FaceColor",Color.white);retryTextMaterial.SetColor("_OutlineColor",new Color(.1f,.25f,.04f));retryTextMaterial.SetFloat("_OutlineWidth",.14f);retryTextMaterial.EnableKeyword("OUTLINE_ON");}if(retryTextMaterial)text.fontSharedMaterial=retryTextMaterial;
+  text.gameObject.SetActive(true);text.enabled=true;text.text="RETRY";text.color=Color.white;text.raycastTarget=false;text.alignment=TextAlignmentOptions.Center;text.enableAutoSizing=true;text.fontSize=text.fontSizeMax=48;text.fontSizeMin=38;text.textWrappingMode=TextWrappingModes.NoWrap;
   var rect=text.rectTransform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=new Vector2(24,8);rect.offsetMax=new Vector2(-24,-8);rect.localScale=Vector3.one;text.transform.SetAsLastSibling();text.canvasRenderer.SetAlpha(1);
+  WoolGlossyButton.HomeAction(retry);
  }
- void OnDestroy(){if(retryTextMaterial)Destroy(retryTextMaterial);}
  public void Open(bool canContinue,Action resume,Action restart,Action goHome){
  RestoreRetryLabel();
  clock=0;selected=false;continueButton.gameObject.SetActive(canContinue);

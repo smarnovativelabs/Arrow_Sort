@@ -1,6 +1,7 @@
 using UnityEngine;
 namespace WoolGame { public sealed partial class WoolHud {
 
+ public bool GameplayControlsVisible=>footer&&footer.gameObject.activeInHierarchy;
  public float AbilityStripTopPixels {
   get {
    if(!footer||!footer.gameObject.activeInHierarchy||!canvas)return 0;
@@ -9,6 +10,17 @@ namespace WoolGame { public sealed partial class WoolHud {
   }
  }
 
+ public bool GameplayHeaderOverlaps(Rect screenBounds){
+  if(!header||!canvas)return false;
+  foreach(string name in new[]{"Pause","Gameplay speed"}){
+   var control=header.Find(name) as RectTransform;if(!control||!control.gameObject.activeInHierarchy)continue;
+   control.GetWorldCorners(mobileCorners);var min=Vector2.one*float.MaxValue;var max=Vector2.one*float.MinValue;
+   var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;
+   foreach(var corner in mobileCorners){var point=RectTransformUtility.WorldToScreenPoint(camera,corner);min=Vector2.Min(min,point);max=Vector2.Max(max,point);}
+   if(screenBounds.Overlaps(UnityEngine.Rect.MinMaxRect(min.x-12,min.y-12,max.x+12,max.y+12)))return true;
+  }
+  return false;
+ }
  readonly Vector3[] mobileCorners=new Vector3[4];
  void LateUpdate(){ClampMobileControls();RefreshTutorialOverlays();RefreshGameplayRule();SetDanger(requestedDangerIntensity,requestedDangerTime);}
  internal void ClampMobileControls(){

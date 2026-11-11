@@ -2,11 +2,15 @@ using UnityEngine;
 namespace WoolGame {
 [CreateAssetMenu(menuName="Arrow Sort/Google Play purchases")]
 public sealed class WoolIapConfiguration:ScriptableObject {
+ [Header("Rescue Shop offer")]
+ [Min(0)] public int rescueShopCoins=2000;
+ [Min(0)] public int rescueShopUnlock=1,rescueShopRemove=1,rescueShopSort=1,rescueShopFog=1;
+ [Tooltip("Preview/fallback only. Live checkout prices come from Google Play.")] public string rescueShopDisplayPrice="$3.99";
  [Tooltip("Enable after the matching products are active in Google Play Console.")] public bool productsPublished;
 }
 public sealed class WoolIapProduct {
- public readonly string id,name,displayPrice,description,tag;public readonly int coins,powers;public readonly bool removeAds,purchaseOnce;
- public WoolIapProduct(string id,string name,int coins,int powers=0,bool removeAds=false,string displayPrice="",bool purchaseOnce=false,string description="",string tag=""){this.id=id;this.name=name;this.coins=coins;this.powers=powers;this.removeAds=removeAds;this.displayPrice=displayPrice;this.purchaseOnce=purchaseOnce||removeAds;this.description=description;this.tag=tag;}
+ public readonly string id,name,displayPrice,description,tag;public readonly int coins,powers,unlockPowers,removePowers,sortPowers,fogPowers;public readonly bool removeAds,purchaseOnce;
+ public WoolIapProduct(string id,string name,int coins,int powers=0,bool removeAds=false,string displayPrice="",bool purchaseOnce=false,string description="",string tag="",int unlock=-1,int remove=-1,int sort=-1,int fog=-1){this.unlockPowers=unlock<0?powers:unlock;this.removePowers=remove<0?powers:remove;this.sortPowers=sort<0?powers:sort;this.fogPowers=fog<0?powers:fog;this.id=id;this.name=name;this.coins=coins;this.powers=powers;this.removeAds=removeAds;this.displayPrice=displayPrice;this.purchaseOnce=purchaseOnce||removeAds;this.description=description;this.tag=tag;}
 }
 public static class WoolIapCatalog {
  public const string RemoveAds="com.peri.arrow.sort.puzzle.rescue.duck.removeads6000coins",Intro="com.peri.arrow.sort.puzzle.rescue.duck.ducklingstarterpack",Special=Intro;
@@ -26,6 +30,9 @@ public static class WoolIapCatalog {
  };
  public static readonly string[] BundleIds={"com.peri.arrow.sort.puzzle.rescue.duck.ducklingstarterpack","com.peri.arrow.sort.puzzle.rescue.duck.ducklingboosterpack","com.peri.arrow.sort.puzzle.rescue.duck.pondrescuepack","com.peri.arrow.sort.puzzle.rescue.duck.flockrescuepack","com.peri.arrow.sort.puzzle.rescue.duck.goldenflockpack","com.peri.arrow.sort.puzzle.rescue.duck.ultimateduckrescuepack"};
  public static readonly string[] CoinIds={"com.peri.arrow.sort.puzzle.rescue.duck.1000duckcoins","com.peri.arrow.sort.puzzle.rescue.duck.5000duckcoins","com.peri.arrow.sort.puzzle.rescue.duck.10000duckcoins","com.peri.arrow.sort.puzzle.rescue.duck.25000duckcoins","com.peri.arrow.sort.puzzle.rescue.duck.100000duckcoins"};
- public static WoolIapProduct Find(string id){foreach(var p in Products)if(p.id==id)return p;return null;}
+ public static WoolIapProduct Find(string id){foreach(var p in Products)if(p.id==id){
+  if(id==Intro){var settings=Resources.Load<WoolIapConfiguration>("ArrowSortPurchases");if(settings)return new WoolIapProduct(p.id,p.name,Mathf.Max(0,settings.rescueShopCoins),p.powers,p.removeAds,settings.rescueShopDisplayPrice,p.purchaseOnce,p.description,p.tag,Mathf.Max(0,settings.rescueShopUnlock),Mathf.Max(0,settings.rescueShopRemove),Mathf.Max(0,settings.rescueShopSort),Mathf.Max(0,settings.rescueShopFog));}
+  return p;
+ }return null;}
 }
 }

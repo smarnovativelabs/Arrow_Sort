@@ -20,12 +20,28 @@ public sealed partial class WoolGameController {
   hud.PointLevelTutorialAt(center,true,size,pointingAction);
  }
  // Unlocks remain available without pausing play or telling the player to use an ability.
- IEnumerator BeginAbilityLesson(){yield break;}
+  IEnumerator BeginAbilityLesson(){
+  if(automatedInput||definition.tutorial)yield break;
+  while(entering||hud.ModalVisible||hud.AbilityGuideVisible||AnyVehicleMovingForLesson()){if(ended||phase==Phase.Menu)yield break;yield return null;}
+  for(int kind=0;kind<4;kind++){
+   if(!WoolBoosters.Available(kind,level.Number)||WoolProgress.AbilityLessonSeen(kind))continue;
+   if(kind==0&&unlockedSlotMask==255){WoolProgress.CompleteAbilityLesson(kind);continue;}
+   int power=kind;lessonKind=kind;paused=true;
+   hud.ShowAbilityGuide(kind,WoolBoosters.Descriptions[kind],()=>{
+    hud.HideAbilityGuide();paused=false;
+    if(power==0){pendingSlot=-1;for(int slot=4;slot<8;slot++)if(!SlotOpen(slot)){pendingSlot=slot;break;}}
+    ActivateBooster(power,0,true);
+    if(power==1){lessonTarget=FindLessonBlocker();ShowRemovalLessonTarget();}
+   });
+   while(lessonKind==power){if(ended||phase==Phase.Menu)yield break;yield return null;}
+   while(transition||removeMode||hud.AbilityGuideVisible)yield return null;
+  }
+ }
  bool AnyVehicleMovingForLesson(){foreach(var bow in active)if(bow!=null&&!bow.arrived)return true;return false;}
  void DockLessonVehicle(int index,int slot){if(index<0||index>=level.Tiles.Count)return;var tile=level.Tiles[index];tile.selected=true;active[slot]=new ActiveCrossbow{index=index,slot=slot,ammo=tile.ammo,initialAmmo=tile.ammo,arrived=true,arrivalOrder=++collectionSequence};tileViews[index].gameObject.SetActive(false);rig.arrowPool.Dock(slot,tile.color,world.TransformPoint(Slot(slot)));rig.arrowPool.Reveal(slot);UpdateCrossbowCounts();}
  int FindLessonBlocker(){for(int i=0;i<level.Tiles.Count;i++)for(int j=0;j<level.Tiles.Count;j++)if(i!=j&&WoolLevel.BlocksPath(level.Tiles[j],level.Tiles[i],level.Tiles[j].direction))return i;return level.Solution[0];}
  void ShowRemovalLessonTarget(){hud.ShowWorldAbilityGuide(tileViews[lessonTarget],rig.vehicleCamera,"Tap this vehicle",()=>{paused=false;hud.HideAbilityGuide();RemoveBox(lessonTarget);});}
- void CompleteAbilityLesson(int kind){if(lessonKind!=kind)return;WoolProgress.CompleteAbilityLesson(kind);if(kind==1)WoolProgress.SetRemovalLessonTargetPending(false);lessonKind=-1;lessonTarget=-1;hud.HideAbilityGuide();}
+ void CompleteAbilityLesson(int kind){WoolProgress.CompleteAbilityLesson(kind);if(lessonKind!=kind)return;if(kind==1)WoolProgress.SetRemovalLessonTargetPending(false);lessonKind=-1;lessonTarget=-1;hud.HideAbilityGuide();}
  void MoveColorToTail(int color){for(int i=0;i<level.Yarn.Count;i++)if(level.Yarn[i]==color){int j=level.Yarn.Count-1;while(j>i&&level.Yarn[j]==color)j--;if(j<=i)break;SwapWool(i,j);}}
  void SwapWool(int a,int b){int c=level.Yarn[a];level.Yarn[a]=level.Yarn[b];level.Yarn[b]=c;float amount=yarnAmounts[a];yarnAmounts[a]=yarnAmounts[b];yarnAmounts[b]=amount;}
  void BringActiveColorForward(){

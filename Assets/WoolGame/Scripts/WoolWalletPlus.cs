@@ -1,0 +1,10 @@
+using UnityEngine;using UnityEngine.UI;
+namespace WoolGame{
+[RequireComponent(typeof(CanvasRenderer))]
+public sealed class WoolWalletPlus:MaskableGraphic{
+ void Disc(VertexHelper v,float r,Color c){int n=v.currentVertCount;v.AddVert(Vector2.zero,c,Vector2.zero);for(int i=0;i<=64;i++){float a=i*Mathf.PI/32;v.AddVert(new Vector2(Mathf.Cos(a),Mathf.Sin(a))*r,c,Vector2.zero);if(i>0)v.AddTriangle(n,n+i,n+i+1);}}
+ void Box(VertexHelper v,float w,float h,Color c){int n=v.currentVertCount;v.AddVert(new Vector2(-w,-h),c,Vector2.zero);v.AddVert(new Vector2(-w,h),c,Vector2.zero);v.AddVert(new Vector2(w,h),c,Vector2.zero);v.AddVert(new Vector2(w,-h),c,Vector2.zero);v.AddTriangle(n,n+1,n+2);v.AddTriangle(n,n+2,n+3);}
+ void Face(VertexHelper v,float r){int n=v.currentVertCount;Color top=WoolArt.Hex("91E739"),bottom=WoolArt.Hex("3DA90D");v.AddVert(Vector2.zero,Color.Lerp(bottom,top,.5f),Vector2.zero);for(int i=0;i<=64;i++){float a=i*Mathf.PI/32;var p=new Vector2(Mathf.Cos(a),Mathf.Sin(a))*r;v.AddVert(p,Color.Lerp(bottom,top,(p.y/r+1)*.5f),Vector2.zero);if(i>0)v.AddTriangle(n,n+i,n+i+1);}}
+ protected override void OnPopulateMesh(VertexHelper v){v.Clear();float r=Mathf.Min(rectTransform.rect.width,rectTransform.rect.height)*.5f;Disc(v,r,WoolArt.Hex("387E10"));Face(v,r*.94f);Box(v,r*.16f,r*.54f,Color.white);Box(v,r*.54f,r*.16f,Color.white);}
+ public static void Apply(RectTransform wallet){if(!wallet)return;var icon=wallet.Find("Green wallet plus");if(!icon){var go=new GameObject("Green wallet plus",typeof(RectTransform),typeof(WoolWalletPlus));go.transform.SetParent(wallet,false);icon=go.transform;}foreach(Transform child in wallet)if(child!=icon&&child.name.ToLowerInvariant().Contains("plus"))child.gameObject.SetActive(false);var rt=(RectTransform)icon;rt.anchorMin=rt.anchorMax=new Vector2(1,.5f);rt.pivot=new Vector2(.5f,.5f);rt.anchoredPosition=new Vector2(-wallet.rect.height*.43f,0);rt.sizeDelta=Vector2.one*wallet.rect.height*.68f;icon.GetComponent<WoolWalletPlus>().raycastTarget=false;}
+}}

@@ -63,7 +63,7 @@ namespace WoolGame
             dismiss.onClick.RemoveAllListeners();dismiss.onClick.AddListener(()=>preview.SetActive(false));
             previewCollect.onClick.RemoveAllListeners();previewCollect.onClick.AddListener(CollectPreview);
         }
-        void OnEnable(){collecting=false;shownCredits=WoolProgress.DailyCredits;shownChest=WoolProgress.DailyChestCredits;nextRefresh=0;if(preview)preview.SetActive(false);if(message)message.text="Saved across daily resets";Fit();Refresh();}
+        void OnEnable(){collecting=false;shownCredits=WoolProgress.DailyCredits;shownChest=WoolProgress.DailyChestCredits;nextRefresh=0;if(preview)preview.SetActive(false);if(message)message.text="Saved across daily resets";Fit();Refresh();foreach(var button in claims)WoolGlossyButton.HomeAction(button);WoolGlossyButton.HomeAction(previewCollect);}
         void OnDisable()
         {
             StopAllCoroutines();writing=null;collecting=false;
@@ -133,7 +133,7 @@ namespace WoolGame
                 rowArt[i].color=done?new Color(.66f,.66f,.72f):Color.white;
                 fills[i].color=done?new Color(.24f,.45f,.28f):new Color(.15f,1,.03f);
                 claimLabels[i].text=done?"Collected":count>=WoolProgress.DailyTargets[i]?"Collect":"Go";
-                claims[i].interactable=!done&&!collecting;
+                claims[i].interactable=!done&&!collecting;var claimStyle=claims[i].GetComponent<WoolGlossyButton>();if(!claimStyle)claimStyle=WoolGlossyButton.Style(claims[i],true);if(claimStyle){claimStyle.tone=WoolGlossyButton.Tone.Green;claimStyle.enabled=true;claimStyle.Apply();}
             }
             for(int i=0;i<4;i++)
             {

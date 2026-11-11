@@ -59,7 +59,7 @@ namespace WoolGame
             if(!familySprite)throw new InvalidOperationException("Missing integrated duck-family sprite.");
             FantasyImage("Mother and babies",motion.mother,familySprite,100,370,620,540,false).SetAsFirstSibling();
             string[] names={"Tasks","Lucky Spin","Rescue Shop","Ad Pass"};
-            string[] captions={"DAILY\nTASKS","LUCKY\nSPIN","RESCUE\nSHOP","AD\nPASS"};
+            string[] captions={"DAILY\nTASKS","LUCKY\nSPIN","RESCUE\nSHOP","REMOVE\nADS"};
             motion.actionIcons=new RectTransform[4];
             motion.actionCards=new RectTransform[4];
             for(int i=0;i<4;i++)

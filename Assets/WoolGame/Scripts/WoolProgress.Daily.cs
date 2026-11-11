@@ -26,10 +26,11 @@ namespace WoolGame
                 return data.daily;
             }
         }
-        public static int DailyCount(int task)=>DailyTasks.Count(task);
+        public static int DailyCount(int task)=>DailyTasksUnlocked?DailyTasks.Count(task):0;
         public static bool DailyClaimed(int task)=>DailyTasks.Claimed(task);
         public static bool ClaimDailyTask(int task)
         {
+            if(!DailyTasksUnlocked)return false;
             int before=DailyCredits;if(!DailyTasks.Claim(task))return false;
             data.dailyChestCollected=false;data.dailyChestCredits+=DailyCredits-before;Save();return true;
         }

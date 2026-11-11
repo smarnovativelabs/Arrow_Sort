@@ -53,7 +53,7 @@ namespace WoolGame
             if(!portraitEnvironmentRenderer||(camera!=gameCamera&&camera!=vehicleCamera&&camera!=slotCamera))return;
             portraitEnvironmentRenderer.GetPropertyBlock(portraitEnvironmentTint);
             bool upper=camera==gameCamera;
-            portraitEnvironmentTint.SetColor("_BaseColor",upper?new Color(.68f,.78f,.60f,1):camera==slotCamera?Color.white:new Color(1,.975f,.92f,1));
+            portraitEnvironmentTint.SetColor("_BaseColor",upper?new Color(.72f,.84f,.60f,1):camera==slotCamera?Color.white:new Color(.93f,.97f,.88f,1));
             portraitEnvironmentTint.SetTexture("_BaseMap",camera!=vehicleCamera&&portraitEnvironmentTexture?portraitEnvironmentTexture:Texture2D.whiteTexture);
             portraitEnvironmentTint.SetVector("_BaseMap_ST",new Vector4(1,1,0,0));
             portraitEnvironmentRenderer.SetPropertyBlock(portraitEnvironmentTint);
@@ -71,9 +71,11 @@ namespace WoolGame
         public void CapturePortraitBounds(WoolLevelDefinition definition)
         {
             if(!gameCamera||!vehicleCamera)return;
+            cameraFitWidth=0; // New bounds invalidate the cached view, including between levels.
             gameCamera.transform.rotation=Quaternion.Euler(rescueCameraPitch,180,0);
             vehicleCamera.transform.rotation=Quaternion.Euler(vehicleCameraPitch,180,0);
             ConfigureCameraVisibility();
+            EnsureSlotCamera();
             var pathTint=new MaterialPropertyBlock();pathTint.SetColor("_BaseColor",Color.white);
             if(authoredLayout&&authoredLayout.paths!=null)foreach(var path in authoredLayout.paths)
                 if(path.road)foreach(var renderer in path.road.GetComponentsInChildren<Renderer>())renderer.SetPropertyBlock(pathTint);
@@ -86,10 +88,9 @@ namespace WoolGame
                         foreach(var point in path.FramingPoints)
                         {
                             var p=path.road.transform.TransformPoint(point);
-                            // Fog-hidden entrance geometry must not reserve visible screen space.
-                            if(authoredLayout.IsInFog(p))continue;
-                            Include(gameCamera,p,.85f,ref rescueMin,ref rescueMax);
-                            Include(gameCamera,p+Vector3.up*1.8f,.35f,ref rescueMin,ref rescueMax);
+                            // Fog changes visibility, not the bounds of the actual road.
+                            Include(gameCamera,p,.95f,ref rescueMin,ref rescueMax);
+                            Include(gameCamera,p+Vector3.up*1.1f,.25f,ref rescueMin,ref rescueMax);
                         }
             if(duckRescue){Include(gameCamera,duckRescue.mother.position,1.2f,ref rescueMin,ref rescueMax);Include(gameCamera,duckRescue.baby.position,1f,ref rescueMin,ref rescueMax);}
             else if(kitten)Include(gameCamera,kitten.position,1.5f,ref rescueMin,ref rescueMax);
@@ -97,19 +98,20 @@ namespace WoolGame
             {
                 Include(vehicleCamera,slot.position,.95f,ref parkingMin,ref parkingMax);
                 Include(vehicleCamera,slot.position+Vector3.up*1.4f,.4f,ref parkingMin,ref parkingMax);
-                Include(vehicleCamera,slot.position,1.05f,ref slotMin,ref slotMax);
-                Include(vehicleCamera,slot.position+Vector3.up*1.8f,.4f,ref slotMin,ref slotMax);
+                Include(slotCamera,slot.position,1.05f,ref slotMin,ref slotMax);
+                Include(slotCamera,slot.position+Vector3.up*1.8f,.4f,ref slotMin,ref slotMax);
             }
             if(vehicles!=null)foreach(var vehicle in vehicles)
             {
                 if(!vehicle||!vehicle.gameObject.activeInHierarchy)continue;
+                if(Application.isPlaying&&!vehicle.GetComponent<WoolVehicleContactShadow>())vehicle.gameObject.AddComponent<WoolVehicleContactShadow>();
                 var collider=vehicle.GetComponent<BoxCollider>();if(!collider)continue;
                 var bounds=collider.bounds;
                 for(int corner=0;corner<8;corner++)
                 {
                     var p=bounds.center+Vector3.Scale(bounds.extents,new Vector3((corner&1)==0?-1:1,(corner&2)==0?-1:1,(corner&4)==0?-1:1));
                     Include(vehicleCamera,p,.08f,ref parkingMin,ref parkingMax);
-                    Include(vehicleCamera,p,.90f,ref boardMin,ref boardMax);
+                    Include(vehicleCamera,p,.28f,ref boardMin,ref boardMax);
                 }
             }
             if(parkingMin.x==float.MaxValue)
@@ -119,6 +121,16 @@ namespace WoolGame
             }
             if(definition&&definition.hasRail)Include(vehicleCamera,world.TransformPoint(ParkingPresentationOffset+new Vector3(0,WoolEndlessGenerator.RailY,-.3f)),1.2f,ref parkingMin,ref parkingMax);
             if(boardMin.x==float.MaxValue){boardMin=parkingMin;boardMax=parkingMax;}
+            foreach(var source in world.GetComponentsInChildren<Transform>())
+            {
+                if(!source.name.StartsWith("Designer vehicle tunnel")&&!source.name.StartsWith("Designer bottom rail tunnel"))continue;
+                foreach(var renderer in source.GetComponentsInChildren<Renderer>())
+                {
+                    if(renderer.GetComponent<TMPro.TMP_Text>())continue;
+                    var b=renderer.bounds;
+                    for(int c=0;c<8;c++)Include(vehicleCamera,b.center+Vector3.Scale(b.extents,new Vector3((c&1)==0?-1:1,(c&2)==0?-1:1,(c&4)==0?-1:1)),.12f,ref boardMin,ref boardMax);
+                }
+            }
             if(definition&&definition.tutorial)
             {
                 float center=(boardMin.x+boardMax.x)*.5f;
@@ -141,8 +153,8 @@ namespace WoolGame
 
             // A small visible shoulder around every layout leaves room to exit and turn.
             float laneScale=world?Mathf.Max(Mathf.Abs(world.lossyScale.x),Mathf.Abs(world.lossyScale.y)):.3f;
-            boardMin-=new Vector2(.65f,.35f)*laneScale;
-            boardMax+=new Vector2(.65f,1.15f)*laneScale;
+            boardMin-=new Vector2(.45f,.25f)*laneScale;
+            boardMax+=new Vector2(.45f,.35f)*laneScale;
             // Keep the same model proportions inside the expanded movement area.
             portraitBoundsReady=rescueMax.y>rescueMin.y&&parkingMax.y>parkingMin.y;
         }
@@ -187,6 +199,8 @@ namespace WoolGame
             var safe=WoolHud.PortraitPixels(width,height,safeArea);
             if(safe.width<=0||safe.height<=0)safe=new Rect(0,0,width,height);
             if(!portraitBoundsReady)return;
+            if(cameraFitWidth==width&&cameraFitHeight==height&&cameraFitSafe==safeArea&&
+                Mathf.Abs((hud?hud.AbilityStripTopPixels:0)-cameraFitAbilityTop)<.5f)return;
             // Camera-only adaptation: keep model transforms and authored geometry intact.
             const float designWidth=1080,padding=18;
             // A uniform reference scale also keeps the control reserve consistent
@@ -218,7 +232,7 @@ namespace WoolGame
             float aspectSum=rescueAspect+boardAspect+slotAspect;
             // Allocate each region by its real aspect, giving the path, slots and
             // vehicle board the same visible width on phones and wide tablets.
-            playWidth=Mathf.Min(safe.width-2*padding*scale,((top-bottom)*height-(topPadding+28)*scale)/Mathf.Max(.1f,aspectSum));
+            playWidth=Mathf.Min(safe.width-2*padding*scale,((top-bottom)*height-(topPadding+64)*scale)/Mathf.Max(.1f,aspectSum));
             if(hud&&playWidth>0)
             {
                 GameplayFrame=new Rect(safe.center.x-playWidth*.5f,safe.yMin,playWidth,safe.height);
@@ -226,12 +240,12 @@ namespace WoolGame
                 hud.ApplyCompactGameplayFrame(GameplayFrame,GameplayDesignHeight,width,height);
                 Canvas.ForceUpdateCanvases();hud.ClampMobileControls();Canvas.ForceUpdateCanvases();
                 bottom=(hud.AbilityStripTopPixels+18*scale)/height;
-                playWidth=Mathf.Min(safe.width-2*padding*scale,((top-bottom)*height-(topPadding+28)*scale)/Mathf.Max(.1f,aspectSum));
+                playWidth=Mathf.Min(safe.width-2*padding*scale,((top-bottom)*height-(topPadding+64)*scale)/Mathf.Max(.1f,aspectSum));
             }
             playWidth=Mathf.Max(64,playWidth);
             left=(safe.center.x-playWidth*.5f)/width;right=(safe.center.x+playWidth*.5f)/width;
             float split=top-(rescueAspect*playWidth+(topPadding+8)*scale)/height;
-            float slotHeight=(slotAspect*playWidth+8*scale)/height;
+            float slotHeight=(slotAspect*playWidth+44*scale)/height;
             float boardTop=split-slotHeight;
             var rescueViewport=Rect.MinMaxRect(0,split,1,1);
             var boardViewport=Rect.MinMaxRect(0,0,1,boardTop);
@@ -243,7 +257,7 @@ namespace WoolGame
             vehicleCamera.backgroundColor=gameCamera.backgroundColor;vehicleCamera.depth=gameCamera.depth-1;
             EnsureSlotCamera();
             var slotViewport=Rect.MinMaxRect(0,boardTop,1,split);
-            FitArea(slotCamera,slotViewport,Rect.MinMaxRect(left,boardTop+4*scale/height,right,split-4*scale/height),slotMin,slotMax,width,height,true);
+            FitArea(slotCamera,slotViewport,Rect.MinMaxRect(left,boardTop+38*scale/height,right,split-4*scale/height),slotMin,slotMax,width,height,true);
             cameraFitWidth=width;cameraFitHeight=height;cameraFitSafe=safeArea;
             cameraFitAbilityTop=hud?hud.AbilityStripTopPixels:0;
             PositionSlotCounts(width,height);
@@ -271,35 +285,28 @@ namespace WoolGame
                 rescueHaze.SetParent(gameCamera.transform,false);SetViewLayer(rescueHaze,"Rescue View");
                 rescueHazeMaterial=new Material(shader);
                 rescueHazeMaterial.SetColor("_Color",Color.white);
-                rescueHazeMaterial.SetFloat("_Density",1f);
-                rescueHazeMaterial.SetFloat("_MinimumDensity",.138f);
+                rescueHazeMaterial.SetFloat("_Density",.28f);
+                rescueHazeMaterial.SetFloat("_MinimumDensity",.14f);
                 rescueHazeMaterial.SetFloat("_EndFade",0f);
                 rescueHazeMaterial.SetFloat("_SideFade",.12f);
-                rescueHazeMaterial.SetFloat("_StartFade",.557f);
+                rescueHazeMaterial.SetFloat("_StartFade",.18f);
                 root.GetComponent<Renderer>().sharedMaterial=rescueHazeMaterial;
                 root.GetComponent<Renderer>().shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
             }
-            // Shared world-space band: no fog below lower, full white above upper.
-            Vector3 upper=authoredLayout&&authoredLayout.fogBoundary?authoredLayout.fogBoundary.position:Vector3.zero;
-            upper.y=.8f;
-            // The boundary marks the thick upper fog; the visible band extends below it.
-            Vector3 lower=upper+Vector3.forward*2f;
-            float bottom=gameCamera.WorldToViewportPoint(lower).y;
-            // Keep the final endpoint clear on every authored route.
-            if(authoredLayout&&authoredLayout.paths!=null)
-                foreach(var path in authoredLayout.paths)
-                    if(path.road&&path.road.activeSelf&&path.points!=null&&path.points.Length>0)
-                    {
-                        var endpoint=path.road.transform.TransformPoint(path.points[path.points.Length-1])+Vector3.up*.8f;
-                        bottom=Mathf.Max(bottom,gameCamera.WorldToViewportPoint(endpoint).y+.035f);
-                    }
-            float heavy=gameCamera.WorldToViewportPoint(upper).y;
-            float top=Mathf.Max(1.2f,heavy+.15f);
+            // The visible edge and shooting restriction share the same world boundary.
+            // A single translucent layer preserves the colours throughout the covered area.
+            var legacyFog=authoredLayout&&authoredLayout.environment
+                ?authoredLayout.environment.transform.Find("Fog"):null;
+            if(legacyFog)foreach(var renderer in legacyFog.GetComponentsInChildren<Renderer>(true))renderer.enabled=false;
+            Vector3 edge=authoredLayout&&authoredLayout.fogBoundary?authoredLayout.fogBoundary.position:Vector3.zero;
+            edge.y=.8f; // Snake surface height on the authored road.
+            float bottom=Mathf.Clamp01(gameCamera.WorldToViewportPoint(edge).y);
+            float top=1.02f;
             float halfHeight=gameCamera.orthographicSize;
             float halfWidth=halfHeight*gameCamera.aspect;
             rescueHazeMaterial.SetFloat("_SideFade",0);
             rescueHazeMaterial.SetFloat("_EndFade",0);
-            rescueHazeMaterial.SetFloat("_StartFade",.557f);
+            rescueHazeMaterial.SetFloat("_StartFade",.18f);
             rescueHaze.localPosition=new Vector3(0,((bottom+top)*.5f-.5f)*2*halfHeight,gameCamera.nearClipPlane+1);
             rescueHaze.localRotation=Quaternion.identity;
             rescueHaze.localScale=new Vector3(2*halfWidth+1,(top-bottom)*2*halfHeight,1);

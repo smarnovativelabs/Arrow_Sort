@@ -10,6 +10,7 @@ namespace WoolGame
         public WoolLuckySpin TutorialSpin=>luckySpin;
         public WoolProfileView TutorialProfile=>profileView;
         public WoolShopView TutorialShop=>shopPage.GetComponent<WoolShopView>();
+        public Button TutorialShopTab=>menuNavigation.tabs[0];
         public Button TutorialHomeTab=>menuNavigation.tabs[1];
         public Button TutorialTasksButton=>referenceHome.GetComponentsInChildren<Button>(true)[0];
         public Button FindHomeTutorialButton(string buttonName)

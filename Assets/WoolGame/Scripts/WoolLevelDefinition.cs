@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace WoolGame
 {
-    public enum WoolDifficulty { Easy, Medium, Hard }
+    public enum WoolDifficulty { Easy, Medium, Hard, SuperHard }
 
     [CreateAssetMenu(menuName="Wool Crush/Level",fileName="Level")]
     public sealed class WoolLevelDefinition : ScriptableObject

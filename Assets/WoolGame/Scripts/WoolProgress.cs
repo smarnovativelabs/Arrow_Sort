@@ -26,6 +26,8 @@ namespace WoolGame
             public int completionRewardsVersion;
             public bool hasStarted;
             public bool onboardingKnown,onboardingSpinTaken;
+            public bool profileVisited,profileAvatarSet,profileIntroDone,profileTutorialPolicyKnown;
+            public bool tasksIntroDone,spinIntroDone,featureTutorialOnly;
             public int onboardingStep;
             public DailyRecord daily;
             public WoolDailyTaskState dailyTasks;
@@ -240,7 +242,7 @@ namespace WoolGame
             if(record.completed){Save();return false;}
             record.completed=true;record.firstTry=record.attempts==1&&record.failures==0;
             data.winningStreak++;data.bestStreak=Math.Max(data.bestStreak,data.winningStreak);
-            Daily.wins++;RecordSpinLevel();Save();return true;
+            Daily.wins++;RecordSpinLevel(number);Save();return true;
         }
         public static bool CanClaimCompletionReward(int number)
         {
@@ -252,10 +254,11 @@ namespace WoolGame
             if(!CanClaimCompletionReward(number))return false;
             var record=Record(number,false);
             record.rewardClaimedAttempt=record.attempts;record.bonusClaimed=doubled;
-            int amount=doubled?100:50;
+            int amount=CompletionReward(number)*(doubled?3:1);
             RecordDailyCoins(amount);data.coins+=amount;data.collectedCoins+=amount;Save();return true;
         }
         public static bool ClaimCompletionBonus(int number)=>ClaimCompletionReward(number,true);
+        public static int CompletionReward(int number)=>number%11==0?200:number%5==0?100:50;
         public static bool HasClaimedCompletionBonus(int number)
         {
             var record=Record(number,false);

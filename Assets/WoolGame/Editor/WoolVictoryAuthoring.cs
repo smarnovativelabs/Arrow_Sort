@@ -53,11 +53,11 @@ public static class WoolVictoryAuthoring {
    var b=bs[i];b.transform.SetParent(p.rewardButtons,false);var rt=(RectTransform)b.transform;rt.anchorMin=rt.anchorMax=new Vector2(.5f,.5f);rt.sizeDelta=new Vector2(397,160);rt.anchoredPosition=new Vector2(i==0?-210:210,0);rt.localScale=Vector3.one;
    b.GetComponent<Image>().sprite=AssetDatabase.LoadAssetAtPath<Sprite>(Folder+"/VictoryButton"+(i==0?2:0)+".png");b.GetComponent<Image>().color=Color.white;
    var cb=b.colors;cb.normalColor=Color.white;cb.highlightedColor=Color.white;cb.pressedColor=new Color(.82f,.82f,.82f);cb.disabledColor=new Color(.72f,.72f,.72f,1);b.colors=cb;
-   var label=i==0?p.collectLabel:p.bonusLabel;label.text=i==0?"Continue":"2x coins";label.rectTransform.sizeDelta=new Vector2(355,64);label.rectTransform.anchoredPosition=new Vector2(0,33);label.fontSize=47;label.fontSizeMax=47;label.fontSizeMin=38;
+   var label=i==0?p.collectLabel:p.bonusLabel;label.text=i==0?"Next":"x3";label.rectTransform.sizeDelta=new Vector2(355,64);label.rectTransform.anchoredPosition=new Vector2(0,33);label.fontSize=58;label.fontSizeMax=58;label.fontSizeMin=40;
    foreach(Transform ch in b.transform)if(ch.GetComponent<Image>()||ch.name=="Reward video icon")ch.gameObject.SetActive(false);
    var coin=b.transform.Find("Reward coin")?b.transform.Find("Reward coin").GetComponent<Image>():Picture("Reward coin",b.transform,p.walletCoin.sprite,new Vector2(65,65),new Vector2(i==0?-72:-33,-37));coin.gameObject.SetActive(true);
-   var amount=b.transform.Find("Editable reward amount")?b.transform.Find("Editable reward amount").GetComponent<TMP_Text>():Text(label,"Editable reward amount",b.transform,i==0?"+50":"+100",new Vector2(165,60),new Vector2(i==0?38:72,-37),46);
-   if(i==0)p.collectAmount=amount;else {p.bonusAmount=amount;var video=b.transform.Find("Reward video icon");if(video){video.gameObject.SetActive(true);var v=(RectTransform)video;v.sizeDelta=new Vector2(56,50);v.anchoredPosition=new Vector2(-133,-34);}}
+   var amount=b.transform.Find("Editable reward amount")?b.transform.Find("Editable reward amount").GetComponent<TMP_Text>():Text(label,"Editable reward amount",b.transform,i==0?"+50":"+150",new Vector2(165,60),new Vector2(i==0?38:72,-37),46);
+   if(i==0)p.collectAmount=amount;else {p.bonusAmount=amount;var video=b.transform.Find("Reward video icon");if(video){video.gameObject.SetActive(true);var v=(RectTransform)video;v.sizeDelta=new Vector2(88,84);v.anchoredPosition=new Vector2(174,68);v.localRotation=Quaternion.Euler(0,0,12);}}
   }
   p.home.transform.SetParent(root,false);var hr=(RectTransform)p.home.transform;hr.anchorMin=hr.anchorMax=new Vector2(0,1);hr.pivot=new Vector2(0,1);hr.sizeDelta=new Vector2(90,90);
   if(!p.close){p.close=UnityEngine.Object.Instantiate(p.home,root);p.close.name="Victory Close";}var cr=(RectTransform)p.close.transform;cr.anchorMin=cr.anchorMax=Vector2.one;cr.pivot=Vector2.one;cr.sizeDelta=new Vector2(90,90);

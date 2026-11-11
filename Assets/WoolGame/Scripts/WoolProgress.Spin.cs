@@ -28,10 +28,10 @@ namespace WoolGame
                 return data.spin;
             }
         }
-        public static int ReadySpinNotifications=>Math.Max(AvailableSpins,SpinState.extraSpins);
-        public static int AvailableSpins=>SpinState?.Available(WoolTrustedClock.UnixNow)??0;
+        public static int ReadySpinNotifications=>LuckySpinUnlocked?Math.Max(AvailableSpins,SpinState.extraSpins):0;
+        public static int AvailableSpins=>LuckySpinUnlocked?(SpinState?.Available(WoolTrustedClock.UnixNow)??0):0;
         public static int SpinStreak=>SpinState?.CurrentStreak(WoolTrustedClock.UnixNow)??0;
-        public static int SpinLevelProgress=>SpinState?.levelProgress??0;
+        public static int SpinLevelProgress=>LuckySpinUnlocked?(SpinState?.levelProgress??0):0;
         public static int SpinMilestoneProgress=>SpinState.CycleProgress(WoolTrustedClock.UnixNow);
         public static bool LastSpinMilestone=>SpinState.lastSpinMilestone;
         public static int UnlockPowerCount {get{EnsureLoaded();return data.spin?.unlockPowers??0;}}
@@ -42,7 +42,7 @@ namespace WoolGame
         public static TimeSpan SpinResetIn=>WoolTrustedClock.UntilLocalMidnight;
         public static int SpinDaily()
         {
-            if(!WoolTrustedClock.Ready)return -1;
+            if(!LuckySpinUnlocked||!WoolTrustedClock.Ready)return -1;
             var state=SpinState;int slot=state.Spin(WoolTrustedClock.UnixNow,UnityEngine.Random.Range(1,8));
             if(slot<0)return -1;
             if(OnboardingStep==WoolOnboardingStep.Spin)data.onboardingSpinTaken=true;
@@ -55,6 +55,16 @@ namespace WoolGame
             EnsureLoaded();if(data.spin==null||data.spin.unlockPowers<=0)return false;
             data.spin.unlockPowers--;Save();return true;
         }
-        static void RecordSpinLevel(){EnsureLoaded();if(data.spin==null)data.spin=new WoolSpinState();data.spin.CompleteLevel();}
+        static void RecordSpinLevel(int number){
+            EnsureLoaded();
+            if(number<=LuckySpinUnlockLevel){
+                // The unlock win starts the counter; earlier wins earn no tickets.
+                // Clear old pre-unlock accrual only when no spin has ever been used.
+                if(number==LuckySpinUnlockLevel&&data.spin!=null&&data.spin.lastSpinUtc==0){data.spin.extraSpins=0;data.spin.levelProgress=0;}
+                return;
+            }
+            if(!LuckySpinUnlocked)return;
+            if(data.spin==null)data.spin=new WoolSpinState();data.spin.CompleteLevel();
+        }
     }
 }
