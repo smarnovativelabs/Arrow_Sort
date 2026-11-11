@@ -21,8 +21,9 @@ namespace WoolGame
     // Consecutive symbols and shared-material captions can batch independently.
     foreach(var label in labels)label.transform.SetAsLastSibling();
    }
+   root.SetAsFirstSibling();
    var canvas=root.GetComponentInParent<Canvas>().rootCanvas;var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;float units=root.rect.width/Mathf.Max(1,Screen.width);
-   bool gameplay=rig.hud.GameplayControlsVisible&&(!rig.hud.ModalVisible||rig.hud.GameplayRuleVisible)&&!rig.hud.AdVisible&&rig.world.gameObject.activeInHierarchy;
+   bool gameplay=rig.hud.GameplayControlsVisible&&!rig.hud.AdVisible&&rig.world.gameObject.activeInHierarchy;
    for(int i=0;i<icons.Length;i++){
     rig.counts[i].color=new Color(1,1,1,0);
     if(nativeLabels[i]&&nativeLabels[i].enabled)nativeLabels[i].enabled=false;

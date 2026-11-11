@@ -30,7 +30,8 @@ namespace WoolGame
         [SerializeField] Image boosterIcon;
         [SerializeField] RectTransform boosterPicture;
         int gameplayInputBlockedThroughFrame=-1;
-        public bool ModalVisible => Time.frameCount<=gameplayInputBlockedThroughFrame || GameplayRuleVisible || walletShopOpen || (modal && modal.activeSelf) || (utilityPanel && utilityPanel.gameObject.activeInHierarchy);
+        public bool DifficultyAnnouncementVisible => GetComponent<WoolDifficultyAnnouncement>() is WoolDifficultyAnnouncement announcement && announcement.IsVisible;
+        public bool ModalVisible => DifficultyAnnouncementVisible || Time.frameCount<=gameplayInputBlockedThroughFrame || GameplayRuleVisible || walletShopOpen || (modal && modal.activeSelf) || (utilityPanel && utilityPanel.gameObject.activeInHierarchy);
         public event Action PausePressed, PlayPressed, FreeCoinsPressed;
         public event Action<int> BoosterPressed;
 
@@ -140,7 +141,7 @@ namespace WoolGame
         public void Hint(string text) { hint.text=text; }
         public void Tutorial(bool enabled)
         {
-            safe.gameObject.SetActive(true);header.gameObject.SetActive(true);footer.gameObject.SetActive(true);meter.gameObject.SetActive(true);progress.gameObject.SetActive(true);
+            safe.gameObject.SetActive(true);header.gameObject.SetActive(true);footer.gameObject.SetActive(true);meter.gameObject.SetActive(false);progress.gameObject.SetActive(false);
             var toolsInput=footer.GetComponent<CanvasGroup>();if(!toolsInput)toolsInput=footer.gameObject.AddComponent<CanvasGroup>();
             toolsInput.interactable=!enabled;toolsInput.blocksRaycasts=!enabled;
             tutorialCard.gameObject.SetActive(enabled);tutorialTip.gameObject.SetActive(false);SelectionMode(false,null);
@@ -277,3 +278,4 @@ namespace WoolGame
         }
     }
 }
+

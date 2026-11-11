@@ -29,16 +29,22 @@ namespace WoolGame
         public bool Walking {get;private set;}
         public float MotherDistance=>distance;
         public float BabyDistance=>Mathf.Min(route.Length,distance+babyLead);
-        public float MotherCaptureDistance=>BodyCentreDistance(motherGeometry,MotherDistance);
-        public float BabyCaptureDistance=>BodyCentreDistance(babyGeometry,BabyDistance);
-        float BodyCentreDistance(Renderer[] geometry,float pathDistance)
+        public float MotherCaptureDistance=>BodyCaptureDistance(motherGeometry,MotherDistance,.25f);
+        public float BabyCaptureDistance=>BodyCaptureDistance(babyGeometry,BabyDistance,1f);
+        float BodyCaptureDistance(Renderer[] geometry,float pathDistance,float fraction)
         {
             if(!route||!board||geometry==null||geometry.Length==0)return pathDistance;
             var bounds=geometry[0].bounds;
             for(int i=1;i<geometry.Length;i++)bounds.Encapsulate(geometry[i].bounds);
-            // Imported duck pivots sit at the feet; the visible body can be offset.
-            var offset=board.InverseTransformPoint(bounds.center)-route.Position(pathDistance);
-            return pathDistance+Vector3.Dot(offset,route.Tangent(pathDistance));
+                        // Measure visible geometry along the path, from the edge nearest the dragon.
+            var origin=route.Position(pathDistance);var tangent=route.Tangent(pathDistance).normalized;
+            float near=float.PositiveInfinity,far=float.NegativeInfinity;
+            for(int corner=0;corner<8;corner++){
+                var sign=new Vector3((corner&1)==0?-1:1,(corner&2)==0?-1:1,(corner&4)==0?-1:1);
+                var point=board.InverseTransformPoint(bounds.center+Vector3.Scale(bounds.extents,sign));
+                float along=Vector3.Dot(point-origin,tangent);near=Mathf.Min(near,along);far=Mathf.Max(far,along);
+            }
+            return pathDistance+Mathf.Lerp(near,far,Mathf.Clamp01(fraction));
         }
         public void ShiftRouteOrigin(float delta){firstStop+=delta;secondStop+=delta;distance+=delta;target+=delta;}
         public void ResetForLevel(GroundSplinePath path,Transform world,WoolAuthoredLayout authored)
@@ -72,7 +78,7 @@ namespace WoolGame
             }
             Present(dt);
             if(!MotherCaught&&!BabyCaught)RememberSafePoint();
-            // The mouth plane reaches the duck's centre: half its body is inside.
+            // Parent disappears at 25% capture; the child stays until fully captured.
             if(EscapeStage==2&&!Walking)
             {
                 if(!MotherCaught&&dragonDistance+mouthLead>=MotherCaptureDistance){MotherCaught=true;mother.gameObject.SetActive(false);DuckCaught?.Invoke();}

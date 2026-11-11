@@ -221,7 +221,7 @@ namespace WoolGame
         public static void BeginLevel(int number)
         {
             if(number<1||number>totalLevels||(!IsPreview&&!IsUnlocked(number)))return;
-            var record=Record(number,true);record.attempts++;data.hasStarted=true;RecordProfilePlay();Save();
+            var record=Record(number,true);record.attempts++;data.hasStarted=true;data.mapPresentedLevel=CurrentLevel;data.mapPresentationKnown=true;RecordProfilePlay();Save();
         }
         public static void MarkFailed(int number)
         {
@@ -240,7 +240,7 @@ namespace WoolGame
             if(!data.mapPresentationKnown){data.mapPresentedLevel=MapDestinationLevel;data.mapPresentationKnown=true;}
             data.mapLastCompletedLevel=number;
             if(record.completed){Save();return false;}
-            record.completed=true;record.firstTry=record.attempts==1&&record.failures==0;
+            record.completed=true;data.mapPresentedLevel=CurrentLevel;data.mapPresentationKnown=true;record.firstTry=record.attempts==1&&record.failures==0;
             data.winningStreak++;data.bestStreak=Math.Max(data.bestStreak,data.winningStreak);
             Daily.wins++;RecordSpinLevel(number);Save();return true;
         }

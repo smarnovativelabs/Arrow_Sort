@@ -23,6 +23,7 @@ public sealed class WoolDifficultyAnnouncement:MonoBehaviour {
    var badgeRect=duckBadge.rectTransform;badgeRect.anchorMin=badgeRect.anchorMax=new Vector2(.5f,.5f);badgeRect.anchoredPosition=Vector2.zero;badgeRect.sizeDelta=new Vector2(140,140);
    var spin=GetComponentInChildren<WoolLuckySpin>(true);duckBadge.sprite=spin?(spin.referenceHub?spin.referenceHub:spin.referenceDuck):null;duckBadge.enabled=duckBadge.sprite;
   }
+  var bannerCanvas=ribbon.GetComponent<Canvas>();if(!bannerCanvas)bannerCanvas=ribbon.gameObject.AddComponent<Canvas>();bannerCanvas.overrideSorting=true;bannerCanvas.sortingOrder=32761;if(inputBlocker)bannerCanvas.sortingLayerID=inputBlocker.GetComponent<Canvas>().sortingLayerID;
   ribbon.GetComponent<WoolDifficultyRibbon>().superHard=difficulty==WoolDifficulty.SuperHard;
   ribbon.GetComponent<WoolDifficultyRibbon>().SetVerticesDirty();
   title.text=difficulty==WoolDifficulty.SuperHard?"SUPER HARD":"HARD LEVEL";
@@ -93,3 +94,4 @@ public sealed class WoolDifficultyRibbon:MaskableGraphic {
  static void Disc(VertexHelper v,Vector2 center,float radius,Color color){int n=v.currentVertCount;v.AddVert(center,color,Vector2.zero);for(int i=0;i<=32;i++){float a=i*Mathf.PI/16;v.AddVert(center+new Vector2(Mathf.Cos(a),Mathf.Sin(a))*radius,color,Vector2.zero);if(i>0)v.AddTriangle(n,n+i,n+i+1);}}
 }
 }
+

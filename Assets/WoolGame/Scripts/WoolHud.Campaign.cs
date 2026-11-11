@@ -39,7 +39,7 @@ namespace WoolGame
                 BindNav(nav,"Shop",ShowShop);BindNav(nav,"Home",()=>Navigate(2));BindNav(nav,"Map",ShowMap);
             }
         }
-        void BindNav(Transform root,string name,Action callback){var t=root.Find(name);if(!t)return;var b=t.GetComponent<Button>();b.onClick.RemoveAllListeners();b.onClick.AddListener(()=>callback());}
+        void BindNav(Transform root,string name,Action callback){var t=root.Find(name);if(!t)return;var b=t.GetComponent<Button>();b.onClick.RemoveAllListeners();b.onClick.AddListener(()=>{DismissHomeLevelTwoHint();callback();});}
         public void ShowMap()
         {
             if(skywayMap){ShowSkywayMap();return;}

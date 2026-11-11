@@ -56,10 +56,22 @@ public sealed partial class WoolHud {
  // The overlay is full-screen. Convert the final, safe-area-adjusted target AFTER footer layout.
  root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.offsetMin=root.offsetMax=Vector2.zero;
  if(guideTarget){guideTarget.GetWorldCorners(guideCorners);var a=GuidePoint(RectTransformUtility.WorldToScreenPoint(GuideCamera,guideCorners[0]));var b=GuidePoint(RectTransformUtility.WorldToScreenPoint(GuideCamera,guideCorners[2]));guideScreen=RectTransformUtility.WorldToScreenPoint(GuideCamera,(guideCorners[0]+guideCorners[2])*.5f);guideSize=b-a;}
- if(guideWorldTarget&&guideWorldCamera)guideScreen=guideWorldCamera.WorldToScreenPoint(guideWorldTarget.position);
+  if(guideWorldTarget&&guideWorldCamera){
+  var box=guideWorldTarget.GetComponent<BoxCollider>();
+  if(box){
+   var min=Vector2.one*float.MaxValue;var max=Vector2.one*float.MinValue;
+   for(int corner=0;corner<8;corner++){
+    var sign=new Vector3((corner&1)==0?-1:1,(corner&2)==0?-1:1,(corner&4)==0?-1:1);
+    var world=box.transform.TransformPoint(box.center+Vector3.Scale(box.size*.5f,sign));
+    Vector2 screen=guideWorldCamera.WorldToScreenPoint(world);min=Vector2.Min(min,screen);max=Vector2.Max(max,screen);
+   }
+   guideScreen=(min+max)*.5f;guideSize=GuidePoint(max)-GuidePoint(min);
+  }else guideScreen=guideWorldCamera.WorldToScreenPoint(guideWorldTarget.position);
+ }
  var point=GuidePoint(guideScreen);var buttonSize=guideSize;
- var cutout=abilityGuide.GetComponent<WoolAbilitySpotlight>();cutout.opening=new Rect(point-buttonSize*.5f-Vector2.one*12,buttonSize+Vector2.one*24);cutout.SetVerticesDirty();
- guideHalo.anchoredPosition=point;guideHalo.sizeDelta=buttonSize+Vector2.one*24;
+ float padding=guideWorldTarget?2:12;
+ var cutout=abilityGuide.GetComponent<WoolAbilitySpotlight>();cutout.opening=new Rect(point-buttonSize*.5f-Vector2.one*padding,buttonSize+Vector2.one*(padding*2));cutout.SetVerticesDirty();
+ guideHalo.anchoredPosition=point;guideHalo.sizeDelta=buttonSize+Vector2.one*(padding*2);
  var tap=(RectTransform)guideTap.transform;tap.localScale=Vector3.one;tap.anchoredPosition=point;tap.sizeDelta=buttonSize;guideTap.GetComponentInChildren<TMP_Text>().text="";
  var safeMin=GuidePoint(CurrentSafeArea.min);var safeMax=GuidePoint(CurrentSafeArea.max);
  bool above=point.y<(safeMin.y+safeMax.y)*.5f;

@@ -75,10 +75,11 @@ Shader "WoolGame/Shared Snake Gloss"
                 Light light=GetMainLight();
                 half diffuse=saturate(dot(n,light.direction));
                 float3 halfway=SafeNormalize(light.direction+SafeNormalize(i.viewWS));
-                half reflection=pow(saturate(dot(n,halfway)),28);
+                half reflection=pow(saturate(dot(n,halfway)),42);
+                half clearCoat=pow(saturate(dot(n,halfway)),96);
                 float2 spot=(i.paint-float2(.27,.73))*float2(4.8,6.0);
                 half painted=exp2(-dot(spot,spot));
-                half gloss=saturate(max(reflection*.65h,painted)*_Shine);
+                half gloss=saturate(max(reflection*.85h,painted)*_Shine);
                 half shade=.45h+.05h*diffuse;
                 shade=lerp(shade,.99h,gloss);
                 shade=lerp(shade,high,_DetailStrength);
@@ -90,7 +91,7 @@ Shader "WoolGame/Shared Snake Gloss"
                 // Add light using the existing palette hue; do not replace gameplay colors.
                 half rim=pow(1-saturate(dot(n,SafeNormalize(i.viewWS))),2.4h);
                 half3 paletteLight=SAMPLE_TEXTURE2D(_TailRamp,sampler_TailRamp,float2(.92h,i.row)).rgb;
-                result+=colored*(paletteLight*(.22h+rim*.48h)+half3(1,1,1)*reflection*.24h)*_Shine;
+                result+=colored*(paletteLight*(.22h+rim*.70h)+half3(1,1,1)*(reflection*.40h+clearCoat*.52h))*_Shine;
                 result=lerp(result,half3(.88h,.95h,1)*( .82h+.18h*diffuse),_SortWhite);
                 return half4(result,1);
             }

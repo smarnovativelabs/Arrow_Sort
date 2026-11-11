@@ -11,6 +11,7 @@ namespace WoolGame
         Renderer[] railRenderers;
         Transform rail;readonly Transform[] depots=new Transform[2];
         readonly TMP_Text[] depotCounts=new TMP_Text[2];TMP_Text railCount;RectTransform railBadge;TMP_Text railBadgeLabel;
+        readonly TMP_Text[] depotBadges=new TMP_Text[2];
         readonly Vector3[] depotCountAnchors=new Vector3[2];Vector3 railCountAnchor;
         readonly int[] front={-1,-1},departing={-1,-1};
         readonly int[] beltDeparting={-1,-1,-1,-1,-1,-1};
@@ -122,7 +123,7 @@ namespace WoolGame
                 railCount.gameObject.SetActive(false);UpdateRailBadge();
             }
             if(!definition.hasRail&&railCount)railCount.gameObject.SetActive(false);
-            if(railBadge)railBadge.gameObject.SetActive(definition.hasRail&&rig.hud.GameplayControlsVisible&&!rig.hud.AdVisible);
+            RefreshRailBadgeVisibility();
             for(int c=0;c<depots.Length;c++)if(depotCounts[c])depotCounts[c].gameObject.SetActive(depots[c].gameObject.activeSelf);
             initializeRail=false;
             for(int c=0;c<depots.Length;c++)if(depots[c].gameObject.activeSelf)
@@ -131,13 +132,15 @@ namespace WoolGame
                 bool clear=departing[c]<0||!rig.vehicles[departing[c]].gameObject.activeSelf||((Vector2)(rig.vehicles[departing[c]].localPosition-depots[c].localPosition)).sqrMagnitude>3.2f;
                 if(i<0&&clear){i=Next(WoolVehicleSource.Container,c);if(i>=0){front[c]=i;Show(i,definition.containerPositions[c]+Vector2.up*1.15f);}}
                 depotCounts[c].SetText("{0}\n<size=60%>LEFT</size>",Remaining(WoolVehicleSource.Container,c));
-                FitCount(depotCounts[c],depotCountAnchors[c],depots[c]);
+
             }
         }
+        void LateUpdate(){if(definition!=null&&definition.hasRail&&rail&&railCount)UpdateRailBadge();if(railBadge)railBadge.SetAsFirstSibling();RefreshRailBadgeVisibility();RefreshDepotBadges();}
+        void RefreshRailBadgeVisibility(){if(railBadge)railBadge.gameObject.SetActive(definition!=null&&definition.hasRail&&rail&&rail.gameObject.activeInHierarchy&&rig.world.gameObject.activeInHierarchy&&rig.vehicleCamera&&rig.vehicleCamera.isActiveAndEnabled&&rig.hud.GameplayControlsVisible&&!rig.hud.AdVisible);}
         void UpdateRailBadge(){
             if(!railBadge){
                 railBadge=new GameObject("Tunnel remaining count",typeof(RectTransform)).GetComponent<RectTransform>();railBadge.SetParent(rig.hud.transform,false);
-                var text=new GameObject("Remaining vehicles",typeof(RectTransform),typeof(TextMeshProUGUI));text.transform.SetParent(railBadge,false);railBadgeLabel=text.GetComponent<TMP_Text>();railBadgeLabel.font=railCount.font;railBadgeLabel.color=Color.white;railBadgeLabel.outlineColor=new Color(.12f,.14f,.20f,1);railBadgeLabel.outlineWidth=.12f;railBadgeLabel.alignment=TextAlignmentOptions.Center;railBadgeLabel.raycastTarget=false;railBadgeLabel.textWrappingMode=TextWrappingModes.NoWrap;
+                var text=new GameObject("Remaining vehicles",typeof(RectTransform),typeof(TextMeshProUGUI));text.transform.SetParent(railBadge,false);railBadgeLabel=text.GetComponent<TMP_Text>();railBadgeLabel.font=rig.counts[0].font;railBadgeLabel.color=Color.white;railBadgeLabel.outlineColor=new Color(.12f,.14f,.20f,1);railBadgeLabel.outlineWidth=.12f;railBadgeLabel.alignment=TextAlignmentOptions.Center;railBadgeLabel.raycastTarget=false;railBadgeLabel.textWrappingMode=TextWrappingModes.NoWrap;
                 var rect=railBadgeLabel.rectTransform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=Vector2.zero;rect.offsetMax=Vector2.zero;
             }
             var oldBackground=railBadge.GetComponent<UnityEngine.UI.Image>();if(oldBackground)oldBackground.enabled=false;
@@ -147,21 +150,31 @@ namespace WoolGame
             float minX=float.PositiveInfinity,maxX=float.NegativeInfinity,minY=float.PositiveInfinity,maxY=float.NegativeInfinity;
             foreach(var renderer in railRenderers){if(!renderer||renderer.GetComponent<TMP_Text>()||!renderer.enabled)continue;var bounds=renderer.bounds;for(int corner=0;corner<8;corner++){var offset=new Vector3((corner&1)==0?-1:1,(corner&2)==0?-1:1,(corner&4)==0?-1:1);var projected=rig.vehicleCamera.WorldToScreenPoint(bounds.center+Vector3.Scale(bounds.extents,offset));minX=Mathf.Min(minX,projected.x);maxX=Mathf.Max(maxX,projected.x);minY=Mathf.Min(minY,projected.y);maxY=Mathf.Max(maxY,projected.y);}}
             float beltWidth=float.IsInfinity(minY)?frame*.74f:maxX-minX;float beltHeight=float.IsInfinity(minY)?frame*.16f:maxY-minY;
-            var screen=rig.vehicleCamera.WorldToScreenPoint(rail.position);if(!float.IsInfinity(minY))screen=new Vector3(minX+beltWidth*.095f,minY+beltHeight*.60f,0);
+            var screen=rig.vehicleCamera.WorldToScreenPoint(rail.position);if(!float.IsInfinity(minY)){screen.x=minX+beltWidth*.105f;screen.y+=beltWidth*.035f;}
             RectTransformUtility.ScreenPointToLocalPointInRectangle(root,screen,uiCamera,out var point);float units=root.rect.width/Mathf.Max(1,Screen.width);
             railBadge.anchorMin=railBadge.anchorMax=railBadge.pivot=Vector2.one*.5f;railBadge.anchoredPosition=point;railBadge.sizeDelta=new Vector2(beltWidth*.12f,beltHeight*.62f)*units;
-            railBadgeLabel.fontSize=beltHeight*.30f*units;railBadgeLabel.lineSpacing=0;railBadgeLabel.margin=Vector4.zero;railBadgeLabel.text=Remaining(WoolVehicleSource.Rail,0)+"\n<size=60%>LEFT</size>";
+            railBadgeLabel.fontSize=beltWidth*.054f*units;railBadgeLabel.enableAutoSizing=false;railBadgeLabel.overflowMode=TextOverflowModes.Overflow;railBadgeLabel.lineSpacing=-8;railBadgeLabel.margin=Vector4.zero;railBadgeLabel.text=Remaining(WoolVehicleSource.Rail,0)+"\n<size=60%>LEFT</size>";
         }
-        void OnDestroy(){if(railBadge)Destroy(railBadge.gameObject);}
-        void FitCount(TMP_Text text,Vector3 anchor,Transform housing)
-        {
-            if(!rig||!rig.vehicleCamera||!text)return;
-            var camera=rig.vehicleCamera;var parent=text.transform.parent;
-            text.alignment=TextAlignmentOptions.Center;text.margin=Vector4.zero;text.textWrappingMode=TextWrappingModes.NoWrap;text.overflowMode=TextOverflowModes.Overflow;
-            text.transform.SetPositionAndRotation(housing.TransformPoint(anchor)-camera.transform.forward*.3f,camera.transform.rotation);
-            float pixels=Mathf.Clamp((rig.GameplayFrame.width>0?rig.GameplayFrame.width:Screen.width)*.042f,18,64);
-            float units=pixels/(Mathf.Max(.01f,text.GetPreferredValues(text.text,100,100).y)*Mathf.Max(.001f,camera.pixelHeight/(2*camera.orthographicSize)));
-            var s=parent.lossyScale;text.transform.localScale=new Vector3(units/Mathf.Abs(s.x),units/Mathf.Abs(s.y),units/Mathf.Abs(s.z));
+        void OnDestroy(){if(railBadge)Destroy(railBadge.gameObject);foreach(var label in depotBadges)if(label){Destroy(label.fontMaterial);Destroy(label.gameObject);}}
+        void RefreshDepotBadges(){
+            if(!rig||!rig.hud||!rig.vehicleCamera||level==null)return;
+            var root=(RectTransform)rig.hud.transform;var canvas=rig.hud.GetComponentInParent<Canvas>().rootCanvas;var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;
+            float units=root.rect.width/Mathf.Max(1,Screen.width);
+            for(int i=0;i<depots.Length;i++){
+                if(!depots[i]||!depotCounts[i])continue;
+                depotCounts[i].gameObject.SetActive(false);
+                if(!depotBadges[i]){
+                    var go=new GameObject("Container remaining count "+i,typeof(RectTransform),typeof(TextMeshProUGUI));go.transform.SetParent(root,false);
+                    var label=go.GetComponent<TMP_Text>();depotBadges[i]=label;label.font=rig.counts[0].font;label.fontMaterial=new Material(label.font.material);label.color=Color.white;label.outlineColor=new Color(.12f,.14f,.20f,1);label.outlineWidth=.18f;label.fontMaterial.EnableKeyword("OUTLINE_ON");label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;label.enableAutoSizing=false;label.textWrappingMode=TextWrappingModes.NoWrap;
+                }
+                var text=depotBadges[i];text.transform.SetAsFirstSibling();text.gameObject.SetActive(depots[i].gameObject.activeInHierarchy&&rig.world.gameObject.activeInHierarchy&&rig.hud.GameplayControlsVisible&&!rig.hud.AdVisible);
+                var position=depots[i].TransformPoint(depotCountAnchors[i]);var screen=rig.vehicleCamera.WorldToScreenPoint(position);
+                var bounds=new Bounds(depots[i].position,Vector3.zero);foreach(var renderer in depots[i].GetComponentsInChildren<Renderer>())bounds.Encapsulate(renderer.bounds);
+                float width=Mathf.Abs(rig.vehicleCamera.WorldToScreenPoint(bounds.center+Vector3.right*bounds.extents.x).x-rig.vehicleCamera.WorldToScreenPoint(bounds.center-Vector3.right*bounds.extents.x).x);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(root,screen,camera,out var point);var rect=text.rectTransform;rect.anchorMin=rect.anchorMax=rect.pivot=Vector2.one*.5f;rect.anchoredPosition=point;rect.sizeDelta=new Vector2(width*.85f,width*.85f)*units;
+                text.fontSize=width*.32f*units;text.text=Remaining(WoolVehicleSource.Container,i)+"\n<size=60%>LEFT</size>";
+            }
         }
+
     }
 }

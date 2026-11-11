@@ -86,7 +86,7 @@ namespace WoolGame
             pageStart=((Mathf.Max(1,target)-1)/Stops.Length)*Stops.Length+1;
             Canvas.ForceUpdateCanvases();Fit();RefreshNodes();
             bool shouldTravel=target>presented;
-            if(WoolProgress.OnboardingStep==WoolOnboardingStep.Map&&target>1&&presented>=target){presented=target-1;shouldTravel=true;}
+            // The marker destination is saved when levels start or finish, including while the map is hidden.
             SetDuckPoint(shouldTravel&&presented<pageStart?Stops[0]-new Vector2(.15f,.12f):Stops[Mathf.Clamp(presented-pageStart,0,Stops.Length-1)]);
             duck.rectTransform.localScale=Vector3.one;duck.gameObject.SetActive(true);
             Focus(duckPoint.y);if(!shouldTravel)WoolProgress.MarkMapPresented(target);SetStatus();

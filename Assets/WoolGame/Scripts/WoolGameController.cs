@@ -295,9 +295,9 @@ namespace WoolGame
                     if(headDistance>=entryTarget){entering=false;phase=Phase.Playing;UpdateTutorial();}
                 }
                 else headDistance+=dt*definition.advanceSpeed*SnakeDangerSpeedMultiplier;
-                if(definition.tutorial)headDistance=Mathf.Min(headDistance,rig.route.Length-1.5f);
-                if(rig.duckRescue)rig.duckRescue.Tick(dt,headDistance,definition.advanceSpeed*SnakeDangerSpeedMultiplier,.35f+Mathf.Abs(dragonHead.localScale.x)*(rig.models?rig.models.mouthOffset.x:.65f));
-                if(!definition.tutorial&&(rig.duckRescue?rig.duckRescue.BothCaught:headDistance>=rig.route.Length-.7f)){Lose("The dragon caught the duck family at the end of the path. Try a different box order.");return;}
+                if(TutorialGuidance)headDistance=Mathf.Min(headDistance,rig.route.Length-1.5f);
+                if(rig.duckRescue&&!TutorialGuidance)rig.duckRescue.Tick(dt,headDistance,definition.advanceSpeed*SnakeDangerSpeedMultiplier,.35f+Mathf.Abs(dragonHead.localScale.x)*(rig.models?rig.models.mouthOffset.x:.65f));
+                if(!TutorialGuidance&&(rig.duckRescue?rig.duckRescue.BothCaught:headDistance>=rig.route.Length-.7f)){Lose("The dragon caught the duck family at the end of the path. Try a different box order.");return;}
             }
             if(vehicleSources)vehicleSources.Tick(dt,HasFreeVehicleSlot);
             PositionYarn();simultaneousCollectors=0;CollectingColorMask=0;float collected=0;
@@ -543,7 +543,7 @@ namespace WoolGame
         public void OfferBooster(int kind)=>OfferBoosterForSlot(kind,-1);
         void OfferBoosterForSlot(int kind,int requestedSlot)
         {
-            if(level==null||kind<0||kind>=4||ended||paused||transition||removeMode||phase==Phase.Menu)return;
+            if(level==null||kind<0||kind>=4||ended||paused||transition||removeMode||phase==Phase.Menu||hud.DifficultyAnnouncementVisible)return;
             if(!WoolBoosters.Available(kind,level.Number)){hud.Hint(WoolBoosters.Names[kind]+" unlocks at level "+WoolBoosters.UnlockLevels[kind]+".");return;}
             if(TutorialGuidance){hud.Hint("First, learn to rescue the family with the highlighted vehicles.");return;}
             if(kind==0&&unlockedSlotMask==255){hud.Hint("All eight slots are unlocked.");return;}
@@ -561,14 +561,21 @@ namespace WoolGame
                 Action cancel=()=>{paused=false;hud.Hide();};
                 hud.Show(WoolBoosters.Names[kind],WoolBoosters.Descriptions[kind],"USE POWER ("+WoolProgress.AbilityCount(kind)+")",()=>ActivateBooster(kind,0,true),"CANCEL",cancel,cancel);return;
             }
-            hud.Show(WoolBoosters.Names[kind],(kind==0?"Unlock slot "+(pendingSlot+1)+" for this level.":WoolBoosters.Descriptions[kind])+"\nWatch a video or use coins.",WoolBoosters.Prices[kind]+" COINS",()=>ActivateBooster(kind,WoolBoosters.Prices[kind]),"WATCH VIDEO",()=>
+            hud.Show(WoolBoosters.Names[kind],(kind==0&&requestedSlot>=4?"Unlock slot "+(pendingSlot+1)+" for this level.":"Add 1 "+WoolBoosters.Names[kind]+" to your abilities for later use.")+"\nWatch a video or use coins.",WoolBoosters.Prices[kind]+" COINS",()=>{if(kind==0&&requestedSlot>=4)ActivateBooster(kind,WoolBoosters.Prices[kind]);else PurchaseStoredAbility(kind);},"WATCH VIDEO",()=>
             {
-                WatchReward(()=>StoreRewardedAbility(kind),()=>{paused=false;hud.Hide();OfferBoosterForSlot(kind,requestedSlot);},WoolBoosters.Prices[kind],WoolBoosters.Names[kind]);
+                WatchReward(()=>{if(kind==0&&requestedSlot>=4){pendingSlot=requestedSlot;ActivateBooster(0,0);}else StoreRewardedAbility(kind);},()=>{paused=false;hud.Hide();OfferBoosterForSlot(kind,requestedSlot);},WoolBoosters.Prices[kind],WoolBoosters.Names[kind]);
                },()=>{paused=false;hud.Hide();});
 
         }
+        void PurchaseStoredAbility(int kind)
+        {
+            if(hud.DifficultyAnnouncementVisible)return;money=WoolProgress.Coins;int cost=WoolBoosters.Prices[kind];
+            if(money<cost){hud.ShowGameplayCoinShop(()=>{paused=false;hud.Hide();OfferBooster(kind);});return;}
+            money-=cost;Save();StoreRewardedAbility(kind);hud.Status(level.Number,money,RemainingYarn,total);
+        }
         void ActivateBooster(int kind,int cost,bool spendUnlockPower=false)
         {
+            if(hud.DifficultyAnnouncementVisible)return;
             money=WoolProgress.Coins;
             if(kind==0&&(pendingSlot<4||pendingSlot>=8||SlotOpen(pendingSlot)))return;
             if(money<cost){int returnSlot=kind==0?pendingSlot:-1;hud.ShowGameplayCoinShop(()=>{paused=false;hud.Hide();OfferBoosterForSlot(kind,returnSlot);});return;}
@@ -888,4 +895,5 @@ namespace WoolGame
         }
     }
 }
+
 
