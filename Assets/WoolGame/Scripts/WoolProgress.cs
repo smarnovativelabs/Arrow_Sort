@@ -102,10 +102,11 @@ namespace WoolGame
             }
         }
         public static int TotalLevels { get { return totalLevels; } }
-        public static int FirstTryWins { get { EnsureLoaded();return data.levels.FindAll(x=>x.completed&&x.firstTry).Count; } }
+        public static int FirstTryWins { get { return CountCompleted(true); } }
         public static int WinningStreak { get { EnsureLoaded();return data.winningStreak; } }
         public static int BestStreak { get { EnsureLoaded();return data.bestStreak; } }
-        public static int CompletedCount { get { EnsureLoaded();return data.levels.FindAll(x=>x.completed).Count; } }
+        public static int CompletedCount { get { return CountCompleted(false); } }
+        static int CountCompleted(bool firstTryOnly){EnsureLoaded();int count=0;foreach(var record in data.levels)if(record.completed&&(!firstTryOnly||record.firstTry))count++;return count;}
         public static int Collectibles { get { EnsureLoaded();return data.collectibles.Count; } }
         public static int Coins { get { EnsureLoaded();return data.coins; } }
         public static bool HasStarted { get { EnsureLoaded();return data.hasStarted; } }

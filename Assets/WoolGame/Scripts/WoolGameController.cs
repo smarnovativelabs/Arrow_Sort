@@ -118,31 +118,41 @@ namespace WoolGame
             if(!rig||!rig.hud||rig.levels.Length==0){Debug.LogError("The core scene must be authored before Play.",this);enabled=false;yield break;}
             // Gameplay pause is owned by paused/modal state; clear stale Editor or SDK time freezes at startup.
             Time.timeScale=1f;
+            QualitySettings.shadows=ShadowQuality.Disable;QualitySettings.shadowDistance=0;
             if(rig.arrowPool)rig.arrowPool.sceneRig=rig;rig.PrepareSnakeModels();flame=GetComponent<WoolDragonFlame>();
-            QualitySettings.vSyncCount=0;Application.targetFrameRate=40;
-            if(Application.isMobilePlatform)Application.targetFrameRate=40;Screen.orientation=ScreenOrientation.Portrait;AudioListener.volume=1;
+            QualitySettings.vSyncCount=0;Application.targetFrameRate=Application.isMobilePlatform?WoolMobileQuality.CurrentTargetFrameRate:40;
+            Screen.orientation=ScreenOrientation.Portrait;AudioListener.volume=1;
             yarnProperties=new MaterialPropertyBlock();world=rig.world;view=rig.gameCamera;hud=rig.hud;dragonHead=rig.dragon;tutorialHand=rig.hand;sound=rig.audioSource;
             kittenStart=rig.kitten.localPosition;kittenScale=rig.kitten.localScale;dragonScale=dragonHead.localScale;
             hud.InitializeAuthored();hud.EnsureTouchFeedback();gameAudio=GetComponent<WoolGameAudio>();if(!gameAudio)gameAudio=gameObject.AddComponent<WoolGameAudio>();gameAudio.Initialize(rig,audioEnabled);sound=rig.audioSource;hud.PausePressed+=TogglePause;hud.BoosterPressed+=OfferBooster;hud.SpeedPressed+=ToggleGameplaySpeed;
             hud.PlayPressed+=PlaySaved;hud.FreeCoinsPressed+=OfferFreeCoins;hud.LevelSelected+=OpenCampaignLevel;
+            foreach(var shadow in hud.GetComponentsInChildren<UnityEngine.UI.Shadow>(true))
+                if(shadow.GetType()==typeof(UnityEngine.UI.Shadow))shadow.enabled=false;
             WoolProgress.Load(WoolEndlessGenerator.MaxLevel);WoolProgress.InitializeOnboarding();money=WoolProgress.Coins;
             if(rig.duckRescue)rig.duckRescue.DuckCaught+=PlayDuckCaught;
             if(!automatedInput){var ads=WoolServices.EnsureAds();ads.AdVisibilityChanged+=hud.SetAdVisible;ads.AdLoadingChanged+=hud.SetAdLoading;}
             phase=Phase.Menu;transition=true;world.gameObject.SetActive(false);if(rig.authoredLayout)rig.authoredLayout.environment.SetActive(false);hud.Hide();hud.CloseMenu();
             hud.Launch("Arrow Sort Puzzle: Rescue Ducks",WoolArt.Hex("F39B22"),0);
-            // Startup imports and SDK initialization can stall the first frame for seconds.
-            // Bound presentation time per rendered frame so that stall cannot skip the bar.
+            // Use wall time: slow frames must not stretch the loading animation.
+            float loadingStarted=Time.realtimeSinceStartup;
+            const float loadingDeadlineSeconds=5f;
             hud.SetLaunchProgress(0,"Getting your rescue ready.");
             yield return null;
+            // Select graphics only after the loading overlay has rendered.
+            // The chosen budget stays fixed until the next app launch.
+            WoolMobileQuality.Apply();
+            yield return null;
             const float loadingPresentationSeconds=2.5f;
-            for(float time=0;time<loadingPresentationSeconds;time+=Mathf.Min(Time.unscaledDeltaTime,1f/30f))
+            while(Time.realtimeSinceStartup-loadingStarted<loadingPresentationSeconds)
             {
+                float time=Time.realtimeSinceStartup-loadingStarted;
                 hud.SetLaunchProgress(Mathf.Clamp01(time/loadingPresentationSeconds),"Every little move makes a big rescue.");
                 yield return null;
             }
             hud.SetLaunchProgress(1,"Your next adventure is ready.");
             yield return null;
-            yield return new WaitForSecondsRealtime(.35f);
+            float remaining=loadingDeadlineSeconds-(Time.realtimeSinceStartup-loadingStarted);
+            if(remaining>0)yield return new WaitForSecondsRealtime(Mathf.Min(.35f,remaining));
             WoolProgress.MarkStarted();transition=false;hud.EndLaunch();
             #if UNITY_EDITOR
             if(openInspectorLevelOnPlay){OpenInspectorLevel();yield break;}

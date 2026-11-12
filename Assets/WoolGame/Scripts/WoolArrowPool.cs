@@ -40,6 +40,7 @@ namespace WoolGame
         Quaternion returnRotation;
         float timer,flightTime;
         int shooter=-1,color;
+        bool cancelAfterActivation;
         public bool Busy=>SerialBusy||AnyParallelBusy(false);
         bool SerialBusy=>stage!=ShotStage.Idle;
         public bool InFlight=>stage==ShotStage.Travel||AnyParallelBusy(true);
@@ -144,6 +145,7 @@ namespace WoolGame
         }
         int TickSerial(float dt)
         {
+            if(cancelAfterActivation)CancelLocal();
             if(!SerialBusy)return -1;
             dt=Mathf.Max(0,dt);timer+=dt;
             if(!target||!target.gameObject.activeInHierarchy||(!AllowFogTargets&&authoredLayout.IsInFog(target.position)))
@@ -289,6 +291,7 @@ namespace WoolGame
         }
         void CancelLocal()
         {
+            cancelAfterActivation=false;
             if(impactSegment)impactSegment.gameObject.SetActive(false);
             if(recovering!=null)
             {
@@ -305,7 +308,19 @@ namespace WoolGame
             }
             Finish();
         }
-        void OnDisable()=>Cancel();
+        void OnDisable()
+        {
+            // Unity forbids reparenting arrows while an ancestor is being disabled.
+            // Hide the shot now; restore its loaded hierarchy after activation finishes.
+            if(!gameObject.activeInHierarchy)
+            {
+                cancelAfterActivation=true;
+                if(arrow){if(visual!=null&&visual.trail){visual.trail.emitting=false;visual.trail.Clear();}arrow.gameObject.SetActive(false);}
+                return;
+            }
+            Cancel();
+        }
+        void LateUpdate(){if(cancelAfterActivation)CancelLocal();}
     }
 }
 

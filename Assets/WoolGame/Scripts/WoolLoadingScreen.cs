@@ -10,6 +10,7 @@ namespace WoolGame
         RectTransform scenicBackground,bar;
         bool illustrated;
         RectTransform content,mascot,title,fill; TMP_Text status; CanvasGroup group;
+        static readonly string[] LoadingDots={"Loading.","Loading..","Loading..."};
         float started,progress; bool built;
         public bool Ready => built;
         public float Progress => progress;
@@ -49,7 +50,6 @@ namespace WoolGame
             Surface("Halo inner",content,new Vector2(620,620),new Vector2(0,20),"6461A0","334877",310);
             Text("Rescue invitation","A LITTLE PUZZLE. A BIG RESCUE.",content,new Vector2(820,70),new Vector2(0,620),27,"DACAF2");
             title=Rect("Animated game name",content,new Vector2(880,250),new Vector2(0,410));
-            Text("Title shadow","Arrow Sort Puzzle",title,new Vector2(880,115),new Vector2(0,40),79,"16152F");
             Text("Game name","Arrow Sort Puzzle",title,new Vector2(880,115),new Vector2(0,47),79,"FFF5D5");
             Text("Game subtitle","Rescue Ducks",title,new Vector2(820,115),new Vector2(0,-63),88,"FFD34A");
             mascot=Rect("Floating duck",content,new Vector2(550,540),new Vector2(0,30));
@@ -91,9 +91,9 @@ namespace WoolGame
         {
             if(!built)return;Layout();float t=Time.unscaledTime-started;
             group.alpha=Mathf.Clamp01(t/.3f);title.localScale=Vector3.one*(1+.012f*Mathf.Sin(t*2));
-            if(illustrated){title.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*1.7f)*.65f);title.anchoredPosition+=new Vector2(0,Mathf.Sin(t*2)*7);float width=742*progress;fill.sizeDelta=new Vector2(width,60);fill.anchoredPosition=new Vector2(-371+width*.5f,0);status.text="Loading"+new string('.',1+(int)(t*2)%3);return;}
+            if(illustrated){title.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*1.7f)*.65f);title.anchoredPosition+=new Vector2(0,Mathf.Sin(t*2)*7);float width=742*progress;fill.sizeDelta=new Vector2(width,60);fill.anchoredPosition=new Vector2(-371+width*.5f,0);status.text=LoadingDots[(int)(t*2)%3];return;}
             mascot.anchoredPosition=new Vector2(0,30+Mathf.Sin(t*2.5f)*10);mascot.localRotation=Quaternion.Euler(0,0,Mathf.Sin(t*1.8f)*1.5f);
-            fill.sizeDelta=new Vector2(640*progress,26);status.text="Loading"+new string('.',1+(int)(t*2)%3);
+            fill.sizeDelta=new Vector2(640*progress,26);status.text=LoadingDots[(int)(t*2)%3];
         }
     }
 }

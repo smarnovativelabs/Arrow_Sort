@@ -8,6 +8,8 @@ namespace WoolGame {
 public sealed class WoolGlossyButton:MonoBehaviour {
  public enum Tone { Green,Blue,Purple,Amber,Quiet,Card,Red,GoldCard,Close }
  public Sprite background;public Tone tone;public bool subtleShine=true;
+ static readonly string[] ToneNames={"Green","Blue","Purple","Amber","Quiet","Card","Red","GoldCard","Close"};
+ bool[] tintLabels;string objectName;
  Image image;WoolAbilityTileGraphic tile;Button button;TMP_Text[] labels;Coffee.UIEffects.UIShiny shine;
  static readonly Dictionary<string,Sprite> faces=new Dictionary<string,Sprite>();
  static Sprite Face(string name){
@@ -71,10 +73,12 @@ public sealed class WoolGlossyButton:MonoBehaviour {
  }
  void Awake(){Cache();EnsureEdgeShading();}
  void EnsureEdgeShading(){var effect=GetComponent<WoolButtonEdgeShading>();if(effect)effect.enabled=false;}
- void Cache(){if(!button)button=GetComponent<Button>();if(!image)image=GetComponent<Image>();if(!tile)tile=GetComponent<WoolAbilityTileGraphic>();if(labels==null)labels=GetComponentsInChildren<TMP_Text>(true);if(!shine)shine=GetComponent<Coffee.UIEffects.UIShiny>();}
+ void Cache(){if(!button)button=GetComponent<Button>();if(!image)image=GetComponent<Image>();if(!tile)tile=GetComponent<WoolAbilityTileGraphic>();if(labels==null){labels=GetComponentsInChildren<TMP_Text>(true);tintLabels=new bool[labels.Length];for(int i=0;i<labels.Length;i++){var labelName=labels[i].name;tintLabels[i]=labelName.IndexOf("count",System.StringComparison.OrdinalIgnoreCase)<0&&labelName!="Alert"&&labelName.IndexOf("amount",System.StringComparison.OrdinalIgnoreCase)<0;}}if(objectName==null)objectName=name;if(!shine)shine=GetComponent<Coffee.UIEffects.UIShiny>();}
  void OnEnable(){Cache();EnsureEdgeShading();ConfigureShine();Apply();}
  void LateUpdate(){Apply();}
- static bool IsCancel(string name,string caption){caption=(caption??string.Empty).Trim().ToLowerInvariant();return name.Contains("cancel")||name.Contains("dismiss")||name.Contains("decline")||name.Contains("close")||caption=="x"||caption=="×"||caption=="cancel"||caption=="no thanks";}
+ static bool Contains(string text,string value)=>text.IndexOf(value,System.StringComparison.OrdinalIgnoreCase)>=0;
+ static bool IsCancel(string name,string caption){caption=(caption??string.Empty).Trim();return Contains(name,"cancel")||Contains(name,"dismiss")||Contains(name,"decline")||Contains(name,"close")||string.Equals(caption,"x",System.StringComparison.OrdinalIgnoreCase)||caption=="\u00D7"||string.Equals(caption,"cancel",System.StringComparison.OrdinalIgnoreCase)||string.Equals(caption,"no thanks",System.StringComparison.OrdinalIgnoreCase);}
+
  public static void HomeAction(Button target){
   if(!target)return;var style=Style(target,true);if(!style)return;
   style.tone=Tone.Green;style.enabled=true;style.Apply();
@@ -119,13 +123,13 @@ public sealed class WoolGlossyButton:MonoBehaviour {
  }
  public void Apply(){
   Cache();if(!button)return;bool enabled=button.IsInteractable();bool off=false;
-  if(name=="Toggle"&&labels.Length>0)off=labels[0].text=="OFF";
-  bool cancel=IsCancel(name.ToLowerInvariant(),null);foreach(var label in labels)if(label&&IsCancel(string.Empty,label.text)){cancel=true;break;}
-  Tone current=cancel?(tone==Tone.Close?Tone.Close:Tone.Red):off?Tone.Quiet:tone;var face=Face(!enabled?"Disabled":current.ToString());if(!face)face=background;if(!face)return;
+  if(objectName=="Toggle"&&labels.Length>0)off=labels[0].text=="OFF";
+  bool cancel=IsCancel(objectName,null);foreach(var label in labels)if(label&&IsCancel(string.Empty,label.text)){cancel=true;break;}
+  Tone current=cancel?(tone==Tone.Close?Tone.Close:Tone.Red):off?Tone.Quiet:tone;var face=Face(!enabled?"Disabled":ToneNames[(int)current]);if(!face)face=background;if(!face)return;
   if(image){if(image.sprite!=face)image.sprite=face;var imageType=current==Tone.Close||current==Tone.GoldCard?Image.Type.Simple:Image.Type.Sliced;if(image.type!=imageType)image.type=imageType;if(current!=Tone.Close&&current!=Tone.GoldCard)image.pixelsPerUnitMultiplier=Mathf.Max(1,180f/Mathf.Max(1,((RectTransform)transform).rect.height));if(current==Tone.Close)image.pixelsPerUnitMultiplier=1;if(image.preserveAspect)image.preserveAspect=false;if(image.color!=Color.white)image.color=Color.white;}
   if(tile&&tile.tile!=face){tile.tile=face;tile.SetAllDirty();}
   Color ink=current==Tone.GoldCard?new Color(.32f,.12f,.025f):current==Tone.Quiet||current==Tone.Card?new Color(.13f,.23f,.22f):Color.white;if(!enabled)ink=new Color(.95f,.97f,.98f);
-  foreach(var label in labels){if(!label||label.name.Contains("count")||label.name.Contains("Count")||label.name=="Alert"||label.name.Contains("amount")||label.name.Contains("Amount"))continue;if(label.color!=ink)label.color=ink;if(label.font&&label.fontSharedMaterial!=label.font.material)label.fontSharedMaterial=label.font.material;}
+  for(int i=0;i<labels.Length;i++){var label=labels[i];if(!label||!tintLabels[i])continue;if(label.color!=ink)label.color=ink;if(label.font&&label.fontSharedMaterial!=label.font.material)label.fontSharedMaterial=label.font.material;}
   if(shine){bool show=current!=Tone.Close&&subtleShine&&enabled;if(shine.enabled!=show)shine.enabled=show;}
  }
 }

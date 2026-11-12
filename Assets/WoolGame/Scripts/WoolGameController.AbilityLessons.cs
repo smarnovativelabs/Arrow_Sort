@@ -53,7 +53,7 @@ public sealed partial class WoolGameController {
  }
 
  MaterialPropertyBlock sortProperties;
- void SetSortWhite(float amount){if(sortProperties==null)sortProperties=new MaterialPropertyBlock();foreach(var renderer in yarnRenderers)White(renderer,amount);}
+ void SetSortWhite(float amount){amount=Mathf.Clamp01(amount);rig.SortWhiteAmount=amount;if(sortProperties==null)sortProperties=new MaterialPropertyBlock();foreach(var renderer in yarnRenderers)White(renderer,amount);}
 
  void White(Renderer renderer,float amount){if(!renderer)return;renderer.GetPropertyBlock(sortProperties);sortProperties.SetFloat("_SortWhite",amount);
  if(renderer.sharedMaterial&&renderer.sharedMaterial.HasProperty("_BaseMap")&&!renderer.sharedMaterial.HasProperty("_SortWhite")){sortProperties.SetTexture("_BaseMap",amount>=.7f?Texture2D.whiteTexture:renderer.sharedMaterial.GetTexture("_BaseMap"));if(renderer.sharedMaterial.HasProperty("_BaseColor"))sortProperties.SetColor("_BaseColor",Color.Lerp(renderer.sharedMaterial.GetColor("_BaseColor"),Color.white,amount));}

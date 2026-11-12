@@ -33,10 +33,11 @@ namespace WoolGame
             transitCamera.depth=Mathf.Max(gameCamera.depth,slotCamera.depth)+1;
             transitCamera.clearFlags=CameraClearFlags.SolidColor;transitCamera.backgroundColor=Color.clear;transitCamera.cullingMask=1<<layer;
             transitCamera.allowHDR=false;transitCamera.allowMSAA=false;
-            if(!transitTexture||transitTexture.width!=Screen.width||transitTexture.height!=Screen.height)
+            var transitSize=WoolMobileQuality.TransitTextureSize(Screen.width,Screen.height);
+            if(!transitTexture||transitTexture.width!=transitSize.x||transitTexture.height!=transitSize.y)
             {
                 if(transitTexture){transitTexture.Release();Destroy(transitTexture);}
-                transitTexture=new RenderTexture(Screen.width,Screen.height,16,RenderTextureFormat.ARGB32);transitTexture.Create();
+                transitTexture=new RenderTexture(transitSize.x,transitSize.y,16,RenderTextureFormat.ARGB32);transitTexture.Create();
             }
             transitCamera.targetTexture=transitTexture;
             if(!transitImage)
@@ -60,10 +61,12 @@ namespace WoolGame
             // Preserve the collision-free outer route; never clamp it across parked vehicles.
             var screen=Vector3.Lerp(start,end,p);screen.z=transitCamera.nearClipPlane+10;
             var trail=vehicle.GetComponent<TrailRenderer>();if(trail){trail.emitting=false;trail.Clear();}
-            SetViewLayer(vehicle,"Vehicle Transit");vehicle.position=transitCamera.ScreenToWorldPoint(screen);
+            // The whole hierarchy changes layer on entry, not on every animation frame.
+            if(vehicle.gameObject.layer!=layer)SetViewLayer(vehicle,"Vehicle Transit");
+            vehicle.position=transitCamera.ViewportToWorldPoint(new Vector3(screen.x/Screen.width,screen.y/Screen.height,screen.z));
             float boardPixels=vehicleCamera.pixelHeight/(2*vehicleCamera.orthographicSize);
             float slotPixels=endCamera.pixelHeight/(2*endCamera.orthographicSize);
-            float pixels=transitCamera.pixelHeight/(2*transitCamera.orthographicSize);
+            float pixels=Screen.height/(2*transitCamera.orthographicSize);
             vehicle.localScale=originalScale*(Mathf.Lerp(boardPixels,slotPixels,p)/Mathf.Max(.001f,pixels));
         }
         Vector3 DockingScreenPoint(Vector3 point,Camera camera,bool slotApproach=false)

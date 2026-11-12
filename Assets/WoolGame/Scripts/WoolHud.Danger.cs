@@ -5,6 +5,7 @@ namespace WoolGame
     public sealed partial class WoolHud
     {
         [SerializeField] Image dangerBorder;
+        WoolDangerVignette dangerVignette;
         float requestedDangerIntensity,requestedDangerTime;
         public void SetDanger(float intensity,float time)
         {
@@ -16,13 +17,14 @@ namespace WoolGame
             WoolCanvasArt.FillCanvas(dangerBorder.rectTransform);
             dangerBorder.raycastTarget=false;dangerBorder.preserveAspect=false;
             dangerBorder.enabled=false;
-            var vignette=dangerBorder.GetComponentInChildren<WoolDangerVignette>(true);
+            if(!dangerVignette)dangerVignette=dangerBorder.GetComponentInChildren<WoolDangerVignette>(true);
+            var vignette=dangerVignette;
             if(!vignette)
             {
                 var edge=new GameObject("Full screen danger glow",typeof(RectTransform),typeof(CanvasRenderer));
                 var rect=(RectTransform)edge.transform;rect.SetParent(dangerBorder.transform,false);
                 rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=rect.offsetMax=Vector2.zero;
-                vignette=edge.AddComponent<WoolDangerVignette>();
+                vignette=dangerVignette=edge.AddComponent<WoolDangerVignette>();
             }
             vignette.raycastTarget=false;
             vignette.color=new Color(.95f,.035f,.02f,Mathf.Lerp(.7f,1f,Mathf.Clamp01(intensity))*(.85f+.15f*Mathf.Sin(time*5)));

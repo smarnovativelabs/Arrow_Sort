@@ -9,6 +9,9 @@ namespace WoolGame
     {
         WoolSceneRig rig;WoolLevel level;WoolLevelDefinition definition;
         Renderer[] railRenderers;
+        readonly Renderer[][] depotRenderers=new Renderer[2][];
+        int shownRailRemaining=-1;
+        readonly int[] shownDepotRemaining={-1,-1};
         Transform rail;readonly Transform[] depots=new Transform[2];
         readonly TMP_Text[] depotCounts=new TMP_Text[2];TMP_Text railCount;RectTransform railBadge;TMP_Text railBadgeLabel;
         readonly TMP_Text[] depotBadges=new TMP_Text[2];
@@ -73,6 +76,7 @@ namespace WoolGame
                     depots[c].name="Designer vehicle tunnel "+(c+1);WoolSceneRig.SetViewLayer(depots[c],"Vehicle View");
                     depotCounts[c]=Count(depots[c],new Vector3(0,0,-1.05f));
                     depotCountAnchors[c]=depots[c].InverseTransformPoint(depotCounts[c].transform.position);
+                    depotRenderers[c]=depots[c].GetComponentsInChildren<Renderer>(true);
                 }
                 bool enabled=data.containerPositions!=null&&c<data.containerPositions.Length;
                 depots[c].gameObject.SetActive(enabled);if(enabled)depots[c].localPosition=WoolSceneRig.ParkingOffset+(Vector3)data.containerPositions[c];
@@ -120,7 +124,7 @@ namespace WoolGame
                     if(i<0&&clear&&insideEntry){i=Next(WoolVehicleSource.Rail,0);if(i>=0){beltSlots[n]=i;Show(i,new Vector2(x,WoolEndlessGenerator.RailY));}}
                     if(i>=0&&!level.Tiles[i].probing){var t=level.Tiles[i];t.x=x;t.carried=true;t.transitDirection=WoolDirection.Up;t.motionX=t.motionY=0;rig.vehicles[i].localPosition=rig.ParkingPresentationOffset+WoolSceneRig.ParkingOffset+new Vector3(x,WoolEndlessGenerator.RailY,-.3f);rig.vehicles[i].localRotation=Quaternion.Euler(-90,0,0);}
                 }
-                railCount.gameObject.SetActive(false);UpdateRailBadge();
+                railCount.gameObject.SetActive(false);
             }
             if(!definition.hasRail&&railCount)railCount.gameObject.SetActive(false);
             RefreshRailBadgeVisibility();
@@ -135,7 +139,7 @@ namespace WoolGame
 
             }
         }
-        void LateUpdate(){if(definition!=null&&definition.hasRail&&rail&&railCount)UpdateRailBadge();if(railBadge)railBadge.SetAsFirstSibling();RefreshRailBadgeVisibility();RefreshDepotBadges();}
+        void LateUpdate(){if(definition!=null&&definition.hasRail&&rail&&railCount&&rig.world.gameObject.activeInHierarchy&&rig.hud.GameplayControlsVisible&&!rig.hud.AdVisible)UpdateRailBadge();if(railBadge)railBadge.SetAsFirstSibling();RefreshRailBadgeVisibility();RefreshDepotBadges();}
         void RefreshRailBadgeVisibility(){if(railBadge)railBadge.gameObject.SetActive(definition!=null&&definition.hasRail&&rail&&rail.gameObject.activeInHierarchy&&rig.world.gameObject.activeInHierarchy&&rig.vehicleCamera&&rig.vehicleCamera.isActiveAndEnabled&&rig.hud.GameplayControlsVisible&&!rig.hud.AdVisible);}
         void UpdateRailBadge(){
             if(!railBadge){
@@ -153,7 +157,8 @@ namespace WoolGame
             var screen=rig.vehicleCamera.WorldToScreenPoint(rail.position);if(!float.IsInfinity(minY)){screen.x=minX+beltWidth*.105f;screen.y+=beltWidth*.035f;}
             RectTransformUtility.ScreenPointToLocalPointInRectangle(root,screen,uiCamera,out var point);float units=root.rect.width/Mathf.Max(1,Screen.width);
             railBadge.anchorMin=railBadge.anchorMax=railBadge.pivot=Vector2.one*.5f;railBadge.anchoredPosition=point;railBadge.sizeDelta=new Vector2(beltWidth*.12f,beltHeight*.62f)*units;
-            railBadgeLabel.fontSize=beltWidth*.054f*units;railBadgeLabel.enableAutoSizing=false;railBadgeLabel.overflowMode=TextOverflowModes.Overflow;railBadgeLabel.lineSpacing=-8;railBadgeLabel.margin=Vector4.zero;railBadgeLabel.text=Remaining(WoolVehicleSource.Rail,0)+"\n<size=60%>LEFT</size>";
+            railBadgeLabel.fontSize=beltWidth*.054f*units;railBadgeLabel.enableAutoSizing=false;railBadgeLabel.overflowMode=TextOverflowModes.Overflow;railBadgeLabel.lineSpacing=-8;railBadgeLabel.margin=Vector4.zero;
+            int remaining=Remaining(WoolVehicleSource.Rail,0);if(shownRailRemaining!=remaining){shownRailRemaining=remaining;railBadgeLabel.SetText("{0}\n<size=60%>LEFT</size>",remaining);}
         }
         void OnDestroy(){if(railBadge)Destroy(railBadge.gameObject);foreach(var label in depotBadges)if(label){Destroy(label.fontMaterial);Destroy(label.gameObject);}}
         void RefreshDepotBadges(){
@@ -168,11 +173,12 @@ namespace WoolGame
                     var label=go.GetComponent<TMP_Text>();depotBadges[i]=label;label.font=rig.counts[0].font;label.fontMaterial=new Material(label.font.material);label.color=Color.white;label.outlineColor=new Color(.12f,.14f,.20f,1);label.outlineWidth=.18f;label.fontMaterial.EnableKeyword("OUTLINE_ON");label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;label.enableAutoSizing=false;label.textWrappingMode=TextWrappingModes.NoWrap;
                 }
                 var text=depotBadges[i];text.transform.SetAsFirstSibling();text.gameObject.SetActive(depots[i].gameObject.activeInHierarchy&&rig.world.gameObject.activeInHierarchy&&rig.hud.GameplayControlsVisible&&!rig.hud.AdVisible);
+                if(!text.gameObject.activeInHierarchy)continue;
                 var position=depots[i].TransformPoint(depotCountAnchors[i]);var screen=rig.vehicleCamera.WorldToScreenPoint(position);
-                var bounds=new Bounds(depots[i].position,Vector3.zero);foreach(var renderer in depots[i].GetComponentsInChildren<Renderer>())bounds.Encapsulate(renderer.bounds);
+                var bounds=new Bounds(depots[i].position,Vector3.zero);foreach(var renderer in depotRenderers[i])if(renderer&&renderer.gameObject.activeInHierarchy)bounds.Encapsulate(renderer.bounds);
                 float width=Mathf.Abs(rig.vehicleCamera.WorldToScreenPoint(bounds.center+Vector3.right*bounds.extents.x).x-rig.vehicleCamera.WorldToScreenPoint(bounds.center-Vector3.right*bounds.extents.x).x);
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(root,screen,camera,out var point);var rect=text.rectTransform;rect.anchorMin=rect.anchorMax=rect.pivot=Vector2.one*.5f;rect.anchoredPosition=point;rect.sizeDelta=new Vector2(width*.85f,width*.85f)*units;
-                text.fontSize=width*.32f*units;text.text=Remaining(WoolVehicleSource.Container,i)+"\n<size=60%>LEFT</size>";
+                text.fontSize=width*.32f*units;int remaining=Remaining(WoolVehicleSource.Container,i);if(shownDepotRemaining[i]!=remaining){shownDepotRemaining[i]=remaining;text.SetText("{0}\n<size=60%>LEFT</size>",remaining);}
             }
         }
 

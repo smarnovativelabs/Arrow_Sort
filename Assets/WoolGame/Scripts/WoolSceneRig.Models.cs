@@ -7,6 +7,8 @@ namespace WoolGame
     {
         [Header("Replaceable art")]
         public WoolModelSet models;
+        // Shared body-only reveal value, including the instanced section draw calls.
+        public float SortWhiteAmount { get; set; }
         Animator dragonAnimator;
         static readonly int AnimationState=Animator.StringToHash("Dragon_Animation_State");
         int lastAnimationState=-1;

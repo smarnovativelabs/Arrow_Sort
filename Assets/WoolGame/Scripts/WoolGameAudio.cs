@@ -18,10 +18,12 @@ namespace WoolGame
         float lastClick=-1,lastBlocked=-1;
         bool initialized;
         bool audioAllowed;
-        public bool MusicEnabled=>PlayerPrefs.GetInt("WoolRescue.Music",1)==1;
-        public bool EffectsEnabled=>PlayerPrefs.GetInt("WoolRescue.Sound",1)==1;
-        public void SetMusic(bool enabled){PlayerPrefs.SetInt("WoolRescue.Music",enabled?1:0);PlayerPrefs.Save();ApplyPreferences();}
-        public void SetEffects(bool enabled){PlayerPrefs.SetInt("WoolRescue.Sound",enabled?1:0);PlayerPrefs.Save();ApplyPreferences();}
+        bool preferencesLoaded,musicEnabled,effectsEnabled;
+        void LoadPreferences(){musicEnabled=PlayerPrefs.GetInt("WoolRescue.Music",1)==1;effectsEnabled=PlayerPrefs.GetInt("WoolRescue.Sound",1)==1;preferencesLoaded=true;}
+        public bool MusicEnabled{get{if(!preferencesLoaded)LoadPreferences();return musicEnabled;}}
+        public bool EffectsEnabled{get{if(!preferencesLoaded)LoadPreferences();return effectsEnabled;}}
+        public void SetMusic(bool enabled){if(!preferencesLoaded)LoadPreferences();musicEnabled=enabled;PlayerPrefs.SetInt("WoolRescue.Music",enabled?1:0);PlayerPrefs.Save();ApplyPreferences();}
+        public void SetEffects(bool enabled){if(!preferencesLoaded)LoadPreferences();effectsEnabled=enabled;PlayerPrefs.SetInt("WoolRescue.Sound",enabled?1:0);PlayerPrefs.Save();ApplyPreferences();}
         void ApplyPreferences(){bool suspended=adVisible||applicationPaused;if(music)music.mute=!audioAllowed||!MusicEnabled||suspended;if(effects)effects.mute=!audioAllowed||!EffectsEnabled||suspended;if(feedback)feedback.mute=!audioAllowed||!EffectsEnabled||suspended;if(duckVoice)duckVoice.mute=!audioAllowed||!EffectsEnabled||suspended;if(fireSource)fireSource.mute=!audioAllowed||!EffectsEnabled||suspended;}
         public void Initialize(WoolSceneRig rig,bool enabledAudio)
         {
@@ -31,6 +33,7 @@ namespace WoolGame
             // One upgrade resets the stale OFF preference behind inaudible feedback.
             // Subsequent user mute choices are respected on every later launch.
             if(PlayerPrefs.GetInt("WoolRescue.AudioFeedbackVersion",0)<2){PlayerPrefs.SetInt("WoolRescue.Sound",1);PlayerPrefs.SetInt("WoolRescue.AudioFeedbackVersion",2);PlayerPrefs.Save();}
+            LoadPreferences();
             AudioListener.pause=false;
             effects=rig.audioSource;
             if(!effects){effects=gameObject.AddComponent<AudioSource>();rig.audioSource=effects;}
@@ -152,7 +155,7 @@ WoolSoundLibrary LoadClips()
             if(paused){SetFireActive(false);music.Pause();if(effects)effects.Stop();if(feedback)feedback.Stop();if(duckVoice)duckVoice.Stop();}else if(!adVisible){AudioListener.pause=false;music.UnPause();}
         }
         void OnDisable(){SetFireActive(false);if(fireSource)fireSource.Stop();if(effects)effects.Stop();if(feedback)feedback.Stop();if(duckVoice)duckVoice.Stop();if(music)music.Pause();}
-        void OnEnable(){if(initialized){LoadClips();if(fireSource)fireSource.clip=clips[(int)Cue.Fire];}if(music)music.UnPause();}
+        void OnEnable(){LoadPreferences();if(initialized){LoadClips();if(fireSource)fireSource.clip=clips[(int)Cue.Fire];ApplyPreferences();}if(music)music.UnPause();}
         void OnDestroy(){if(music)Destroy(music);if(fireSource)Destroy(fireSource);if(feedback)Destroy(feedback);if(duckVoice)Destroy(duckVoice);}
     }
     public sealed partial class WoolHud

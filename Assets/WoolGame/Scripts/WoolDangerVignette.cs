@@ -6,12 +6,13 @@ namespace WoolGame
     [RequireComponent(typeof(CanvasRenderer))]
     public sealed class WoolDangerVignette : MaskableGraphic
     {
+        readonly Vector2[] outer=new Vector2[4],inner=new Vector2[4];
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();var r=rectTransform.rect;
             float feather=Mathf.Min(r.width,r.height)*.065f;
-            var outer=new[]{new Vector2(r.xMin,r.yMin),new Vector2(r.xMin,r.yMax),new Vector2(r.xMax,r.yMax),new Vector2(r.xMax,r.yMin)};
-            var inner=new[]{outer[0]+new Vector2(feather,feather),outer[1]+new Vector2(feather,-feather),outer[2]+new Vector2(-feather,-feather),outer[3]+new Vector2(-feather,feather)};
+            outer[0]=new Vector2(r.xMin,r.yMin);outer[1]=new Vector2(r.xMin,r.yMax);outer[2]=new Vector2(r.xMax,r.yMax);outer[3]=new Vector2(r.xMax,r.yMin);
+            inner[0]=outer[0]+new Vector2(feather,feather);inner[1]=outer[1]+new Vector2(feather,-feather);inner[2]=outer[2]+new Vector2(-feather,-feather);inner[3]=outer[3]+new Vector2(-feather,feather);
             var clear=color;clear.a=0;
             for(int i=0;i<4;i++)
             {

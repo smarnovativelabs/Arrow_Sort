@@ -11,21 +11,25 @@ namespace WoolGame
         Vector3 restingScale;
         Vector3 lastApplied;
         bool pressed,hovered,selected,ready;
-        float amount=1,velocity,submitUntil;TMPro.TMP_Text[] captions;UnityEngine.UI.Graphic[] rewardIcons;
+        float amount=1,velocity,submitUntil;TMPro.TMP_Text[] captions;UnityEngine.UI.Graphic[] rewardIcons;bool[] videoIcons;
         public void Initialize(UnityEngine.UI.Button target,WoolGameAudio audio)
         {
             button=target;audioFeedback=audio;captions=GetComponentsInChildren<TMPro.TMP_Text>(true);rewardIcons=GetComponentsInChildren<UnityEngine.UI.Graphic>(true);
-            if(button.targetGraphic&&!button.targetGraphic.GetComponent<UnityEngine.UI.Shadow>())
-            {
-                var shadow=button.targetGraphic.gameObject.AddComponent<UnityEngine.UI.Shadow>();
-                shadow.effectColor=new Color(.08f,.16f,.2f,.18f);shadow.effectDistance=new Vector2(0,-3);
+            videoIcons=new bool[rewardIcons.Length];
+            for(int i=0;i<rewardIcons.Length;i++){
+                var icon=rewardIcons[i];if(!icon)continue;var iconName=icon.name;
+                videoIcons[i]=icon is WoolRewardVideoGraphic||icon is WoolRewardVideoIcon||
+                    (Contains(iconName,"video")&&(Contains(iconName,"icon")||Contains(iconName,"reward")));
             }
+            if(button.targetGraphic)foreach(var shadow in button.targetGraphic.GetComponents<UnityEngine.UI.Shadow>())
+                if(shadow.GetType()==typeof(UnityEngine.UI.Shadow))shadow.enabled=false;
             if(!ready){restingScale=lastApplied=transform.localScale;ready=true;}
             var colors=button.colors;colors.fadeDuration=.1f;
             colors.highlightedColor=new Color(1,.98f,.9f);colors.pressedColor=new Color(.8f,.86f,.9f);
             colors.selectedColor=colors.highlightedColor;button.colors=colors;
         }
         bool CanInteract=>button&&button.IsActive()&&button.IsInteractable();
+        static bool Contains(string text,string value)=>text.IndexOf(value,System.StringComparison.OrdinalIgnoreCase)>=0;
         void Play(){if(CanInteract&&audioFeedback)audioFeedback.Play(WoolGameAudio.Cue.Click);}
         void LateUpdate()
         {
@@ -35,11 +39,11 @@ namespace WoolGame
             if((currentScale-lastApplied).sqrMagnitude>.00001f)restingScale=currentScale;
             float target=CanInteract?(pressed||Time.unscaledTime<submitUntil?.94f:hovered||selected?1.035f:1):1;
                         bool adButton=false;
-            if(captions!=null)foreach(var caption in captions){if(!caption||!caption.gameObject.activeInHierarchy)continue;var text=caption.text.ToLowerInvariant();if(text.Contains("watch")||text.Contains("video")||text.Contains("2x coins")){adButton=true;break;}}
-                        if(!adButton&&rewardIcons!=null)foreach(var icon in rewardIcons){
+            if(captions!=null)foreach(var caption in captions){if(!caption||!caption.gameObject.activeInHierarchy)continue;var text=caption.text;if(Contains(text,"watch")||Contains(text,"video")||Contains(text,"2x coins")){adButton=true;break;}}
+                        if(!adButton&&rewardIcons!=null)for(int i=0;i<rewardIcons.Length;i++){
+                var icon=rewardIcons[i];
                 if(!icon||!icon.enabled||!icon.gameObject.activeInHierarchy)continue;
-                if(icon is WoolRewardVideoGraphic||icon is WoolRewardVideoIcon){adButton=true;break;}
-                var iconName=icon.name.ToLowerInvariant();if(iconName.Contains("video")&&(iconName.Contains("icon")||iconName.Contains("reward"))){adButton=true;break;}
+                if(videoIcons[i]){adButton=true;break;}
             }
             if(CanInteract&&adButton&&!pressed&&Time.unscaledTime>=submitUntil)target=(hovered||selected?1.02f:1)+.055f*Mathf.Sin(Time.unscaledTime*3f);
             // Settle idle buttons when no animation is needed.

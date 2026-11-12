@@ -92,7 +92,7 @@ Shader "WoolGame/Shared Snake Gloss"
                 half rim=pow(1-saturate(dot(n,SafeNormalize(i.viewWS))),2.4h);
                 half3 paletteLight=SAMPLE_TEXTURE2D(_TailRamp,sampler_TailRamp,float2(.92h,i.row)).rgb;
                 result+=colored*(paletteLight*(.22h+rim*.70h)+half3(1,1,1)*(reflection*.40h+clearCoat*.52h))*_Shine;
-                result=lerp(result,half3(.88h,.95h,1)*( .82h+.18h*diffuse),_SortWhite);
+                result=lerp(result,half3(1,1,1)*( .82h+.18h*diffuse),_SortWhite);
                 return half4(result,1);
             }
             ENDHLSL

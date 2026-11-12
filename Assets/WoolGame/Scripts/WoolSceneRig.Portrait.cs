@@ -104,7 +104,6 @@ namespace WoolGame
             if(vehicles!=null)foreach(var vehicle in vehicles)
             {
                 if(!vehicle||!vehicle.gameObject.activeInHierarchy)continue;
-                if(Application.isPlaying&&!vehicle.GetComponent<WoolVehicleContactShadow>())vehicle.gameObject.AddComponent<WoolVehicleContactShadow>();
                 var collider=vehicle.GetComponent<BoxCollider>();if(!collider)continue;
                 var bounds=collider.bounds;
                 for(int corner=0;corner<8;corner++)

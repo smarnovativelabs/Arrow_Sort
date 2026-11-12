@@ -12,7 +12,7 @@ namespace WoolGame { public sealed partial class WoolHud {
 
  public bool GameplayHeaderOverlaps(Rect screenBounds){
   if(!header||!canvas)return false;
-  foreach(string name in new[]{"Pause","Gameplay speed"}){
+  foreach(string name in mobileHeaderHitControls){
    var control=header.Find(name) as RectTransform;if(!control||!control.gameObject.activeInHierarchy)continue;
    control.GetWorldCorners(mobileCorners);var min=Vector2.one*float.MaxValue;var max=Vector2.one*float.MinValue;
    var camera=canvas.renderMode==RenderMode.ScreenSpaceOverlay?null:canvas.worldCamera;
@@ -22,9 +22,11 @@ namespace WoolGame { public sealed partial class WoolHud {
   return false;
  }
  readonly Vector3[] mobileCorners=new Vector3[4];
+ static readonly string[] mobileHeaderControls={"Pause","Level","Gameplay speed"};
+ static readonly string[] mobileHeaderHitControls={"Pause","Gameplay speed"};
  void LateUpdate(){ClampMobileControls();RefreshTutorialOverlays();RefreshGameplayRule();SetDanger(requestedDangerIntensity,requestedDangerTime);}
  internal void ClampMobileControls(){
- if(header&&header.gameObject.activeInHierarchy&&canvas)foreach(string name in new[]{"Pause","Level","Gameplay speed"}){var rt=header.Find(name) as RectTransform;if(rt&&rt.gameObject.activeInHierarchy)ClampHeaderControl(rt);}
+ if(header&&header.gameObject.activeInHierarchy&&canvas)foreach(string name in mobileHeaderControls){var rt=header.Find(name) as RectTransform;if(rt&&rt.gameObject.activeInHierarchy)ClampHeaderControl(rt);}
 
  if(!footer||!footer.gameObject.activeInHierarchy||!canvas)return;
  var area=CurrentSafeArea;var parent=footer.parent as RectTransform;if(!parent)return;

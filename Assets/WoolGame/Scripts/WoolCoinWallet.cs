@@ -5,14 +5,44 @@ namespace WoolGame {
 // Shared balance treatment. Reward amounts and prices remain separate from the wallet.
 public sealed class WoolCoinWallet:MonoBehaviour {
  public WoolHud owner;public TMP_Text amount;public Button button;public Image coin;public TMP_Text plus;
- void OnEnable(){Bind();Refresh();}
+ bool displayOnly,displayDirty=true,layoutDirty=true;
+ int shownBalance=int.MinValue;string formattedBalance;
+ Vector2 shownSize;TMP_Text shownAmount,shownPlus;Image shownCoin;
+ Graphic[] displayGraphics;
+ void OnEnable(){displayDirty=layoutDirty=true;Bind();Refresh();}
  void Start(){Bind();}
- bool DisplayOnly=>GetComponentInParent<WoolUtilityPanel>(true);
- void Bind(){if(!button||!owner)return;button.onClick.RemoveAllListeners();for(int i=0;i<button.onClick.GetPersistentEventCount();i++)button.onClick.SetPersistentListenerState(i,UnityEngine.Events.UnityEventCallState.Off);button.enabled=!DisplayOnly;if(!DisplayOnly)button.onClick.AddListener(owner.ShowCoinOptions);}
- void LateUpdate(){Refresh();if(DisplayOnly){if(button)button.enabled=false;foreach(var graphic in GetComponentsInChildren<Graphic>(true))graphic.raycastTarget=false;var add=transform.Find("Green wallet plus");if(add)add.gameObject.SetActive(false);}}
- public void Refresh(){if(!amount)return;amount.text=WoolCoinText.Format(WoolProgress.Coins);amount.color=WoolArt.Hex("693415");var r=(RectTransform)transform;float w=r.rect.width,h=r.rect.height;if(w<=0||h<=0)return;var t=amount.rectTransform;t.anchorMin=t.anchorMax=new Vector2(.5f,.5f);t.pivot=new Vector2(.5f,.5f);t.anchoredPosition=new Vector2(0,0);t.sizeDelta=new Vector2(Mathf.Max(40,w-h*1.9f),h*.76f);amount.enableAutoSizing=true;amount.fontSizeMax=h*.5f;amount.fontSizeMin=Mathf.Max(18,h*.25f);amount.textWrappingMode=TextWrappingModes.NoWrap;if(coin){coin.rectTransform.anchoredPosition=new Vector2(-w*.5f+h*.47f,0);coin.rectTransform.sizeDelta=Vector2.one*h*.97f;}WoolWalletPlus.Apply(r);if(plus){plus.enabled=false;plus.rectTransform.anchoredPosition=new Vector2(w*.5f-h*.32f,0);plus.rectTransform.sizeDelta=new Vector2(h*.45f,h*.75f);plus.fontSize=h*.46f;plus.color=WoolArt.Hex("3BA940");}}
+ void OnTransformParentChanged(){displayDirty=layoutDirty=true;Bind();}
+ void OnTransformChildrenChanged(){displayDirty=layoutDirty=true;}
+ void RefreshDisplayMode(){
+  displayOnly=GetComponentInParent<WoolUtilityPanel>(true);
+  if(displayOnly){
+   displayGraphics=GetComponentsInChildren<Graphic>(true);
+   foreach(var graphic in displayGraphics)graphic.raycastTarget=false;
+   var add=transform.Find("Green wallet plus");if(add)add.gameObject.SetActive(false);
+  }
+  if(button)button.enabled=!displayOnly;
+  displayDirty=false;
+ }
+ void Bind(){RefreshDisplayMode();if(!button||!owner)return;button.onClick.RemoveAllListeners();for(int i=0;i<button.onClick.GetPersistentEventCount();i++)button.onClick.SetPersistentListenerState(i,UnityEngine.Events.UnityEventCallState.Off);if(!displayOnly)button.onClick.AddListener(owner.ShowCoinOptions);}
+ void LateUpdate(){if(displayDirty)RefreshDisplayMode();Refresh();}
+ public void Refresh(){
+  if(!amount)return;
+  int balance=WoolProgress.Coins;
+  if(shownBalance!=balance||formattedBalance==null){shownBalance=balance;formattedBalance=WoolCoinText.Format(balance);}
+  if(amount.text!=formattedBalance)amount.text=formattedBalance;
+  var r=(RectTransform)transform;var size=r.rect.size;
+  if(!layoutDirty&&shownSize==size&&shownAmount==amount&&shownCoin==coin&&shownPlus==plus)return;
+  float w=size.x,h=size.y;if(w<=0||h<=0)return;
+  shownSize=size;shownAmount=amount;shownCoin=coin;shownPlus=plus;layoutDirty=false;
+  amount.color=WoolArt.Hex("693415");
+  var t=amount.rectTransform;t.anchorMin=t.anchorMax=new Vector2(.5f,.5f);t.pivot=new Vector2(.5f,.5f);t.anchoredPosition=Vector2.zero;t.sizeDelta=new Vector2(Mathf.Max(40,w-h*1.9f),h*.76f);amount.enableAutoSizing=true;amount.fontSizeMax=h*.5f;amount.fontSizeMin=Mathf.Max(18,h*.25f);amount.textWrappingMode=TextWrappingModes.NoWrap;
+  if(coin){coin.rectTransform.anchoredPosition=new Vector2(-w*.5f+h*.47f,0);coin.rectTransform.sizeDelta=Vector2.one*h*.97f;}
+  WoolWalletPlus.Apply(r);
+  if(plus){plus.enabled=false;plus.rectTransform.anchoredPosition=new Vector2(w*.5f-h*.32f,0);plus.rectTransform.sizeDelta=new Vector2(h*.45f,h*.75f);plus.fontSize=h*.46f;plus.color=WoolArt.Hex("3BA940");}
+  if(displayOnly){var add=r.Find("Green wallet plus");if(add)add.gameObject.SetActive(false);}
+ }
  public void MatchAppearance(WoolCoinWallet source){
-  if(!source||source==this)return;var image=GetComponent<Image>();var original=source.GetComponent<Image>();
+  if(!source||source==this)return;layoutDirty=true;var image=GetComponent<Image>();var original=source.GetComponent<Image>();
   if(image&&original){image.enabled=true;image.sprite=original.sprite;image.type=original.type;image.preserveAspect=original.preserveAspect;image.color=original.color;image.raycastTarget=true;}
   ((RectTransform)transform).sizeDelta=((RectTransform)source.transform).sizeDelta;
   if(amount&&source.amount){amount.font=source.amount.font;amount.fontSharedMaterial=source.amount.fontSharedMaterial;amount.color=source.amount.color;amount.gameObject.SetActive(true);}
