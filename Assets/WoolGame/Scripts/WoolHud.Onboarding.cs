@@ -11,6 +11,7 @@ namespace WoolGame
         public WoolProfileView TutorialProfile=>profileView;
         public WoolShopView TutorialShop=>shopPage.GetComponent<WoolShopView>();
         public Button TutorialShopTab=>menuNavigation.tabs[0];
+        public RectTransform TutorialShopFocus=>menuNavigation.ShopTutorialTarget;
         public Button TutorialHomeTab=>menuNavigation.tabs[1];
         public Button TutorialTasksButton=>referenceHome.GetComponentsInChildren<Button>(true)[0];
         public Button FindHomeTutorialButton(string buttonName)

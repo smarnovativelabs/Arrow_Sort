@@ -103,7 +103,7 @@ namespace WoolGame
                     break;
                 case WoolOnboardingStep.Shop:
                     if(!WoolProgress.CanClaimShopDailyGift){FinishIntroHome();break;}
-                    target=hud.TutorialShop.gameObject.activeInHierarchy?(RectTransform)hud.TutorialShop.dailyClaim.transform:(RectTransform)hud.TutorialShopTab.transform;
+                    target=hud.TutorialShop.gameObject.activeInHierarchy?(RectTransform)hud.TutorialShop.dailyClaim.transform:hud.TutorialShopFocus;
                     if(hud.TutorialShop.gameObject.activeInHierarchy){hud.TutorialShop.FocusDailyGift();message.text="Tap CLAIM FREE for 50 coins";}
                     break;
                 case WoolOnboardingStep.Profile:
@@ -181,10 +181,11 @@ namespace WoolGame
                     target=(RectTransform)hud.TutorialSpin.spin.transform;break;
                 case WoolOnboardingStep.Shop:
                     hud.CloseEngagement();heading.text="Your shop gift";message.text="Tap Shop to collect your free reward";
-                    target=(RectTransform)hud.TutorialShopTab.transform;break;
+                    target=hud.TutorialShopFocus;break;
                 case WoolOnboardingStep.Profile:
                     hud.ShowTutorialProfile();heading.text="Your rescue story";message.text="Make it yours. Tap your name";
-                    target=(RectTransform)hud.TutorialProfile.nameButton.transform;break;
+                    target=(RectTransform)hud.TutorialProfile.nameButton.transform;
+                    Canvas.ForceUpdateCanvases();hud.TutorialProfile.nameLabel.ForceMeshUpdate();break;
                 case WoolOnboardingStep.Name:
                     hud.ShowTutorialProfile();hud.TutorialProfile.nameButton.onClick.Invoke();
                     heading.text="Choose your name";message.text="Type your name";
@@ -238,6 +239,17 @@ namespace WoolGame
             if(hasTarget)
             {
                 target.GetWorldCorners(corners);var a=(Vector2)overlay.InverseTransformPoint(corners[0])-r.min;var b=(Vector2)overlay.InverseTransformPoint(corners[2])-r.min;
+                if(Step==WoolOnboardingStep.Profile)
+                {
+                    // The visible name/initial ID is narrower and offset from its tap area.
+                    var label=hud.TutorialProfile.nameLabel;
+                    var bounds=label.textBounds;
+                    if(bounds.size.x>0&&bounds.size.y>0)
+                    {
+                        a=(Vector2)overlay.InverseTransformPoint(label.transform.TransformPoint(bounds.min))-r.min;
+                        b=(Vector2)overlay.InverseTransformPoint(label.transform.TransformPoint(bounds.max))-r.min;
+                    }
+                }
                 if(Step==WoolOnboardingStep.Avatar&&hud.TutorialProfile.AvatarSelectionVersion<=avatarSelectionAt)
                 {
                     a=Vector2.one*float.MaxValue;b=Vector2.one*float.MinValue;

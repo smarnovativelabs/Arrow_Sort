@@ -13,6 +13,21 @@ namespace WoolGame
         public RectTransform shopViewport;
         [SerializeField] int selected=1;
         Vector2 lastParent;
+        RectTransform shopTutorialTarget;
+        public RectTransform ShopTutorialTarget
+        {
+            get
+            {
+                if(shopTutorialTarget)return shopTutorialTarget;
+                shopTutorialTarget=new GameObject("Shop artwork tutorial bounds",typeof(RectTransform)).GetComponent<RectTransform>();
+                shopTutorialTarget.SetParent(surface.transform,false);
+                // The atlas includes the outer navigation frame; focus only the shop card.
+                shopTutorialTarget.anchorMin=new Vector2(.068f,.12f);
+                shopTutorialTarget.anchorMax=new Vector2(.344f,.85f);
+                shopTutorialTarget.offsetMin=shopTutorialTarget.offsetMax=Vector2.zero;
+                return shopTutorialTarget;
+            }
+        }
         public string SelectedTab=>selected==0?"Shop":selected==2?"Map":"Home";
         public float Height=>((RectTransform)transform).rect.height;
         void Bind()

@@ -80,7 +80,7 @@ namespace WoolGame
             }
             // Home now uses the game's green environment and duck family, not the old sailing scene.
             var picture=homePage.Find("Sailing with friends").GetComponent<RawImage>();
-            picture.texture=UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/Texture/Dragon_Game_Background_Grass.png");picture.uvRect=new Rect(0,.67f,1,.33f);
+            picture.texture=UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/Texture/Dragon_Game_Background_Tiles.png");picture.uvRect=new Rect(0,.67f,1,.33f);
             picture.GetComponent<AspectRatioFitter>().aspectRatio=1;
             var banner=homePage.Find("Game title");if(!banner)banner=Panel("Game title",homePage,new Vector2(.5f,.81f),new Vector2(650,125),Vector2.zero,Color.white);
             Art(banner.GetComponent<Image>(),S(61));var heading=banner.Find("Title");if(!heading)heading=Label("Title",banner,"WOOL CRUSH",48,new Vector2(520,80),Vector2.zero,Color.white).transform;heading.GetComponent<TMP_Text>().color=Color.white;

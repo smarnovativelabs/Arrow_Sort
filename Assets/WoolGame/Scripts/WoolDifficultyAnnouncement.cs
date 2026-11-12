@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace WoolGame {
 public sealed class WoolDifficultyAnnouncement:MonoBehaviour {
  RectTransform inputBlocker;
- RectTransform ribbon;TMP_Text title,subtitle;Image duckBadge;Coroutine motion;
+ RectTransform ribbon;TMP_Text title;Image duckBadge;Coroutine motion;
  public bool IsVisible=>ribbon&&ribbon.gameObject.activeSelf;
  public void Show(int level){
   var difficulty=WoolEndlessGenerator.DifficultyFor(level);
@@ -15,8 +15,8 @@ public sealed class WoolDifficultyAnnouncement:MonoBehaviour {
   if(!ribbon){
    ribbon=new GameObject("Duck rescue difficulty banner",typeof(RectTransform),typeof(CanvasRenderer),typeof(WoolDifficultyRibbon)).GetComponent<RectTransform>();ribbon.SetParent(transform,false);ribbon.GetComponent<WoolDifficultyRibbon>().raycastTarget=false;
    title=Label("Difficulty title",new Vector2(120,10),new Vector2(-20,-10),56);
-   subtitle=Label("Difficulty subtitle",new Vector2(120,8),new Vector2(-20,-100),27);
-   title.rectTransform.offsetMin=new Vector2(172,66);title.rectTransform.offsetMax=new Vector2(-20,-10);subtitle.rectTransform.offsetMin=new Vector2(172,8);
+   title.rectTransform.offsetMin=new Vector2(172,18);title.rectTransform.offsetMax=new Vector2(-20,-18);
+   title.textWrappingMode=TextWrappingModes.NoWrap;
    var mask=new GameObject("Round duck medallion",typeof(RectTransform),typeof(CanvasRenderer),typeof(WoolDifficultyBadgeClip),typeof(Mask));mask.transform.SetParent(ribbon,false);mask.GetComponent<Mask>().showMaskGraphic=false;mask.GetComponent<WoolDifficultyBadgeClip>().raycastTarget=false;
    var maskRect=mask.GetComponent<RectTransform>();maskRect.anchorMin=maskRect.anchorMax=new Vector2(0,.5f);maskRect.anchoredPosition=new Vector2(92,0);maskRect.sizeDelta=new Vector2(140,140);
    var badge=new GameObject("Duck rescue badge",typeof(RectTransform),typeof(Image));badge.transform.SetParent(mask.transform,false);duckBadge=badge.GetComponent<Image>();duckBadge.raycastTarget=false;duckBadge.preserveAspect=true;
@@ -26,8 +26,7 @@ public sealed class WoolDifficultyAnnouncement:MonoBehaviour {
   var bannerCanvas=ribbon.GetComponent<Canvas>();if(!bannerCanvas)bannerCanvas=ribbon.gameObject.AddComponent<Canvas>();bannerCanvas.overrideSorting=true;bannerCanvas.sortingOrder=32761;if(inputBlocker)bannerCanvas.sortingLayerID=inputBlocker.GetComponent<Canvas>().sortingLayerID;
   ribbon.GetComponent<WoolDifficultyRibbon>().superHard=difficulty==WoolDifficulty.SuperHard;
   ribbon.GetComponent<WoolDifficultyRibbon>().SetVerticesDirty();
-  title.text=difficulty==WoolDifficulty.SuperHard?"SUPER HARD":"HARD LEVEL";
-  subtitle.text="LEVEL "+level+"  •  Rescue the duck family";
+  title.text=difficulty==WoolDifficulty.SuperHard?"SUPER HARD LEVEL":"HARD LEVEL";
   ribbon.gameObject.SetActive(true);ribbon.SetAsLastSibling();motion=StartCoroutine(Slide());
  }
  void SetInputBlocked(bool blocked){

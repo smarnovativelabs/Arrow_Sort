@@ -22,6 +22,11 @@ namespace WoolGame
         Renderer portraitEnvironmentRenderer;
         Renderer portraitEdgeRenderer;
         Texture portraitEnvironmentTexture;
+        [Tooltip("Optional authored board background. Uses the same UV layout as the environment image.")]
+        public Texture2D gameplayBoardTexture;
+        static readonly int BoardCameraId=Shader.PropertyToID("_BoardCamera");
+        static readonly int SlotCameraId=Shader.PropertyToID("_SlotCamera");
+        static readonly int TileScaleId=Shader.PropertyToID("_TileScale");
         MaterialPropertyBlock portraitEnvironmentTint;
 
         public Rect GameplayFrame {get;private set;}
@@ -52,9 +57,13 @@ namespace WoolGame
         {
             if(!portraitEnvironmentRenderer||(camera!=gameCamera&&camera!=vehicleCamera&&camera!=slotCamera))return;
             portraitEnvironmentRenderer.GetPropertyBlock(portraitEnvironmentTint);
+            portraitEnvironmentTint.SetFloat(BoardCameraId,camera==vehicleCamera?1:0);
+            portraitEnvironmentTint.SetFloat(SlotCameraId,camera==slotCamera?1:0);
+            portraitEnvironmentTint.SetVector(TileScaleId,new Vector4(12,12f/Mathf.Max(.01f,vehicleCamera.aspect)*36f/33f,0,0));
             bool upper=camera==gameCamera;
-            portraitEnvironmentTint.SetColor("_BaseColor",upper?new Color(.72f,.84f,.60f,1):camera==slotCamera?Color.white:new Color(.93f,.97f,.88f,1));
-            portraitEnvironmentTint.SetTexture("_BaseMap",camera!=vehicleCamera&&portraitEnvironmentTexture?portraitEnvironmentTexture:Texture2D.whiteTexture);
+            portraitEnvironmentTint.SetColor("_BaseColor",upper?new Color(.72f,.84f,.60f,1):camera==slotCamera||gameplayBoardTexture?Color.white:new Color(.93f,.97f,.88f,1));
+            var texture=camera==vehicleCamera?(gameplayBoardTexture?(Texture)gameplayBoardTexture:Texture2D.whiteTexture):portraitEnvironmentTexture;
+            portraitEnvironmentTint.SetTexture("_BaseMap",texture?texture:Texture2D.whiteTexture);
             portraitEnvironmentTint.SetVector("_BaseMap_ST",new Vector4(1,1,0,0));
             portraitEnvironmentRenderer.SetPropertyBlock(portraitEnvironmentTint);
             if(portraitEdgeRenderer)portraitEdgeRenderer.SetPropertyBlock(portraitEnvironmentTint);
